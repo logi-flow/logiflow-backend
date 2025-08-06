@@ -18,25 +18,54 @@ public class Customer extends BaseTime {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private CustomerStatus status;
 
+    @Column(name = "businessNumber", nullable = false, unique = true)
     private String businessNumber;
 
+    @Column(name = "representativeName", nullable = false)
     private String representativeName;
 
+    @Column(name = "businessType", nullable = false)
     private String businessType;
 
+    @Column(name = "businessItems", nullable = false)
     private String businessItems;
 
+    @Column(name = "telephone", nullable = false)
     private String telephone;
 
+    @Column(name = "email", nullable = false)
     private String email;
 
+    @Column(name = "fax")
     private String fax;
 
+    @Column(name = "businessZipCode", nullable = false)
     private int businessZipCode;
+
+    @Column(name = "businessAddress", nullable = false)
+    private String businessAddress;
+
+    @Column(name = "businessAddressDetail", nullable = false)
+    private String businessAddressDetail;
+
+    @Column(name = "chargePosition")
+    private String chargePosition;
+
+    @Column(name = "chargeDepartment")
+    private String chargeDepartment;
+
+    @Column(name = "chargeName")
+    private String chargeName;
+
+    @Column(name = "chargePhone")
+    private String chargePhone;
+
+    @Column(name = "chargeEmail")
+    private String chargeEmail;
 }
