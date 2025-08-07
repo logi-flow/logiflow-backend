@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter @Setter
 @Builder
-public class Employee {
+public class Employee extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -29,7 +29,7 @@ public class Employee {
     @Column(name = "identity_number", nullable = false, unique = true)
     private String identityNumber;
 
-    @Column(name = "phone_number ", nullable = false)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
     @Column(name = "zipcode", nullable = false)
@@ -41,9 +41,11 @@ public class Employee {
     @Column(name = "address_detail", nullable = false)
     private String addressDetail;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "department", nullable = false)
     private Department department;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "position", nullable = false)
     private Position position;
 
