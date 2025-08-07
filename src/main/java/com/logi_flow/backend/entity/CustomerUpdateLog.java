@@ -1,16 +1,15 @@
 package com.logi_flow.backend.entity;
 
-import com.logi_flow.backend.common.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "customers_status_logs")
+@Table(name = "customers_update_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Builder
-public class CustomerStatusLogs extends BaseTimeLog {
+public class CustomerUpdateLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -30,11 +29,12 @@ public class CustomerStatusLogs extends BaseTimeLog {
     @Column(name = "change_reason")
     private String changeReason;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "prev_status", nullable = false)
-    private CustomerStatus prevStatus;
+    @Column(name = "type", nullable = false)
+    private String type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "new_status", nullable = false)
-    private CustomerStatus newStatus;
+    @Column(name = "prev_data")
+    private String prevData;
+
+    @Column(name = "new_data")
+    private String newData;
 }

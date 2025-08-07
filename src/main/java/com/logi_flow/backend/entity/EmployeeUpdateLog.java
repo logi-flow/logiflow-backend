@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-public class EmployeeUpdateLogs extends BaseTimeLog {
+public class EmployeeUpdateLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
