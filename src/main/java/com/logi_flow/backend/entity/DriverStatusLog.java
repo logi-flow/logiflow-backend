@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-public class DriverStatusLog {
+public class DriverStatusLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
