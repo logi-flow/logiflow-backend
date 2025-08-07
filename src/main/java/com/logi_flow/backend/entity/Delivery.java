@@ -41,7 +41,7 @@ public class Delivery extends BaseTime {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private DeliveryStatus status;
+    private DeliveryStatus status = DeliveryStatus.REQUEST;
 
     @Column(name = "pickup_name", nullable = false)
     private String pickupName;
