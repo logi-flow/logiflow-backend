@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 @Builder
 public class DeliveryStatusLog extends BaseTimeLog {
     @Id
