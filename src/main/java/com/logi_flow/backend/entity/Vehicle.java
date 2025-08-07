@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Table(name = "vehicles")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
+@Getter @Setter
 @Builder
 public class Vehicle extends BaseTime{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
