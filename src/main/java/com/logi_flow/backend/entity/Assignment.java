@@ -4,8 +4,6 @@ import com.logi_flow.backend.common.enums.AssignmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Driver;
-
 @Entity
 @Table(name = "assignments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

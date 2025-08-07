@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "deliveries")
@@ -25,7 +25,7 @@ public class Delivery extends BaseTime {
     private Customer customer;
 
     @Column(name = "request_date", nullable = false)
-    private Date requestDate;
+    private LocalDateTime requestDate;
 
     @Column(name = "item", nullable = false)
     private String item;
