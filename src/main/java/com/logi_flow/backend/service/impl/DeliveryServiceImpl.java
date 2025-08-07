@@ -1,10 +1,10 @@
 package com.logi_flow.backend.service.impl;
 
-import com.logi_flow.backend.service.UserService;
+import com.logi_flow.backend.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements UserService {
+public class DeliveryServiceImpl implements DeliveryService {
 }
