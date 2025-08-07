@@ -13,32 +13,31 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class DeliveryStatusLog {
+public class DeliveryStatusLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delivery_id", nullable = false)
+    @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "changed_by", nullable = false)
+    @JoinColumn(name = "changed_by")
     private User user;
 
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
 
-    @Column(name = "change_reason", nullable = false)
+    @Column(name = "change_reason")
     private String changeReason;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "prev_status", nullable = false)
     private DeliveryStatus prevStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false)
     private DeliveryStatus newStatus;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 
 }
