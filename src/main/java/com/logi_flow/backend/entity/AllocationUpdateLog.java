@@ -3,8 +3,6 @@ package com.logi_flow.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "allocations_update_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,34 +10,32 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class AllocationUpdateLog {
+public class AllocationUpdateLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "allocation_id", nullable = false)
+    @JoinColumn(name = "allocation_id")
     private Allocation allocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "changed_by", nullable = false)
+    @JoinColumn(name = "changed_by")
     private User user;
 
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
 
-    @Column(name = "change_reason", nullable = false)
+    @Column(name = "change_reason")
     private String changeReason;
 
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "prev_data", nullable = false)
+    @Column(name = "prev_data")
     private String prevData;
 
-    @Column(name = "new_data", nullable = false)
+    @Column(name = "new_data")
     private String newData;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 }
