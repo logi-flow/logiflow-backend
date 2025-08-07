@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -18,8 +20,7 @@ import java.time.LocalDate;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class DriverPayroll extends BaseTime {
     @Id
@@ -52,4 +53,10 @@ public class DriverPayroll extends BaseTime {
 
     @Column(name = "final_amount", nullable = false)
     private int finalAmount;
+
+    @OneToMany(mappedBy = "driverPayroll", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DriverAllowance> driverAllowances = new ArrayList<>();
+
+    @OneToMany(mappedBy = "driverPayroll", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DriverDeduction> driverDeductions = new ArrayList<>();
 }

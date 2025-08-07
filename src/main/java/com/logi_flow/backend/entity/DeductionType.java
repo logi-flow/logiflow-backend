@@ -8,8 +8,7 @@ import lombok.*;
 @Table(name = "deduction_types")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class DeductionType extends BaseTime {
     @Id
