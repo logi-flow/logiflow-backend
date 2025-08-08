@@ -9,11 +9,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class CreateDriverResponseDto {
+public class UpdateDriverResponseDto {
     private Long driverId;
-    private String username;
     private String name;
-    private String initialPassword;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

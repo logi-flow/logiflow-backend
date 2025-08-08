@@ -19,11 +19,11 @@ public class Vehicle extends BaseTime{
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "vehicle_number", nullable = false)
+    @Column(name = "vehicle_number", nullable = false, unique = true)
     private String vehicleNumber;
 
     @Column(name = "capacity", nullable = false)
-    private Integer capacity;
+    private int capacity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fuel", nullable = false)
