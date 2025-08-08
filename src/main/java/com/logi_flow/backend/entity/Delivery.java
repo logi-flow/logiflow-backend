@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "deliveries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class Delivery extends BaseTime {
     @Id
