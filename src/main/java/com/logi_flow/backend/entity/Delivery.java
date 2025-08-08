@@ -49,12 +49,12 @@ public class Delivery extends BaseTime {
     private String pickupPhone;
 
     @Column(name = "pickup_zipcode", nullable = false)
-    private int pickupZipCode;
+    private String pickupZipCode;
 
     @Column(name = "pickup_address", nullable = false)
     private String pickupAddress;
 
-    @Column(name = "pickup_address_detail", nullable = false)
+    @Column(name = "pickup_address_detail")
     private String pickupAddressDetail;
 
     @Column(name = "recipient_name", nullable = false)
@@ -69,7 +69,7 @@ public class Delivery extends BaseTime {
     @Column(name = "recipient_address", nullable = false)
     private String recipientAddress;
 
-    @Column(name = "recipient_address_detail", nullable = false)
+    @Column(name = "recipient_address_detail")
     private String recipientAddressDetail;
 
 }
