@@ -16,11 +16,11 @@ public class DriverLicense extends BaseTime {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
 
-    @Column(name = "driver_number", nullable = false)
+    @Column(name = "driver_number", nullable = false, unique = true)
     private String driverNumber;
 
     @Enumerated(EnumType.STRING)

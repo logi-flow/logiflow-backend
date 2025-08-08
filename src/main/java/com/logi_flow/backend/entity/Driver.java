@@ -37,12 +37,12 @@ public class Driver extends BaseTime {
     private String phoneNumber;
 
     @Column(name = "zipcode", nullable = false)
-    private Integer zipcode;
+    private String zipcode;
 
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "address_detail", nullable = false)
+    @Column(name = "address_detail")
     private String addressDetail;
 
     @Enumerated(EnumType.STRING)
@@ -54,4 +54,7 @@ public class Driver extends BaseTime {
 
     @Column(name = "company_join", nullable = false)
     private LocalDate companyJoin;
+
+    @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DriverLicense driverLicense;
 }

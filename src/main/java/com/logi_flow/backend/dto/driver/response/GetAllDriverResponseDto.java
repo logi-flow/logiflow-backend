@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.driver.response;
 
+import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,11 +10,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class CreateDriverResponseDto {
+public class GetAllDriverResponseDto {
     private Long driverId;
-    private String username;
     private String name;
-    private String initialPassword;
+    private DriverStatus status;
+    private String PhoneNumber;
+    private String vehicleNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
