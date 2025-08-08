@@ -10,8 +10,7 @@ import java.util.Date;
 @Table(name = "schedules")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class Schedule extends BaseTime {
     @Id

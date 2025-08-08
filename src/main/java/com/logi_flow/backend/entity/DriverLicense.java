@@ -10,8 +10,7 @@ import java.time.LocalDate;
 @Table(name = "driver_licenses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class DriverLicense extends BaseTime {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

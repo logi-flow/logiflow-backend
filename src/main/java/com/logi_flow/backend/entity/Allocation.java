@@ -10,8 +10,7 @@ import java.math.BigDecimal;
 @Table(name = "allocations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 public class Allocation extends BaseTime {
     @Id
