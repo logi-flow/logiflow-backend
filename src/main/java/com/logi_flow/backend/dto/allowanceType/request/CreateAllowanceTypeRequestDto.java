@@ -1,0 +1,17 @@
+package com.logi_flow.backend.dto.allowanceType.request;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public class CreateAllowanceTypeRequestDto {
+    @NotBlank(message = "코드는 필수 항목입니다.")
+    private String code;
+
+    @NotBlank(message = "이름은 필수 항목입니다.")
+    private String name;
+
+    private String description;
+}

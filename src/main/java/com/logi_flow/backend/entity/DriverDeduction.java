@@ -34,7 +34,7 @@ public class DriverDeduction extends BaseTime {
     @Column(name = "amount", nullable = false)
     private int amount;
 
-    @Column(name = "memo")
+    @Column(name = "memo", columnDefinition = "TEXT")
     private String memo;
 
     public void calculateAmount() {
