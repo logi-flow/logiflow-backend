@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
-public class CreateDriverRequestDto {
+public class UpdateDriverRequestDto {
     private DriverStatus status;
     private String name;
     private String identityNumber;

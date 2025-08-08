@@ -4,16 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 @Builder
-public class CreateDriverResponseDto {
-    private Long driverId;
-    private String username;
+public class CreateDriverLicenseResponseDto {
+    private Long driverLicenseId;
     private String name;
-    private String initialPassword;
+    private String driverNumber;
+    private LocalDate expiredDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
