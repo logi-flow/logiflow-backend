@@ -46,12 +46,12 @@ public class Customer extends BaseTime {
     private String fax;
 
     @Column(name = "businessZipCode", nullable = false)
-    private int businessZipCode;
+    private String businessZipCode;
 
     @Column(name = "businessAddress", nullable = false)
     private String businessAddress;
 
-    @Column(name = "businessAddressDetail", nullable = false)
+    @Column(name = "businessAddressDetail")
     private String businessAddressDetail;
 
     @Column(name = "chargePosition")
