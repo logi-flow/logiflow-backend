@@ -33,12 +33,12 @@ public class Employee extends BaseTime {
     private String phoneNumber;
 
     @Column(name = "zipcode", nullable = false)
-    private int zipcode;
+    private String zipcode;
 
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "address_detail", nullable = false)
+    @Column(name = "address_detail")
     private String addressDetail;
 
     @Enumerated(EnumType.STRING)

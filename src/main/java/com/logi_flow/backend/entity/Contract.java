@@ -21,7 +21,7 @@ public class Contract extends BaseTime {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Contract contract;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -39,6 +39,6 @@ public class Contract extends BaseTime {
     @Column(name = "volume_limit ", nullable = false)
     private int volumeLimit;
 
-    @Column(name = "special_terms")
-    private int specialTerms;
+    @Column(name = "special_terms", columnDefinition = "TEXT")
+    private String specialTerms;
 }
