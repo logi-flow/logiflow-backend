@@ -21,6 +21,8 @@ public class DriverController {
 
     private final DriverService driverService;
 
+    private static final String DRIVER_ID_API = "/{driverId}";
+
     @PostMapping
     public ResponseEntity<ResponseDto<CreateDriverResponseDto>> createDriver(
             @RequestBody CreateDriverRequestDto dto
@@ -29,7 +31,7 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{driverId}")
+    @PutMapping(DRIVER_ID_API)
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriver(
             @PathVariable Long driverId,
             @RequestBody UpdateDriverRequestDto dto
@@ -44,7 +46,7 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/{driverId}")
+    @GetMapping(DRIVER_ID_API)
     public ResponseEntity<ResponseDto<GetDriverDetailResponseDto>> getDriverDetail(
             @PathVariable Long driverId
     ) {
@@ -52,7 +54,7 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{driverId}")
+    @DeleteMapping(DRIVER_ID_API)
     public ResponseEntity<ResponseDto<?>> deleteDriver(
             @PathVariable Long driverId
     ) {
