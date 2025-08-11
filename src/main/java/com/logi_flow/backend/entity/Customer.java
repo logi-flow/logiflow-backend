@@ -68,4 +68,7 @@ public class Customer extends BaseTime {
 
     @Column(name = "chargeEmail")
     private String chargeEmail;
+
+    @Column(name = "parcel_count")
+    private int parcelCount;
 }

@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
@@ -21,9 +20,11 @@ public class CreateAdminUserRequestDto {
     @Pattern(regexp = Regex.PASSWORD, message = "비밀번호는 영문/숫자/특수문자(~!@#$%^&*()-_=+)를 포함한 8~15자 이내이어야 합니다.")
     private String password;
 
+    @NotNull(message = "사용자 역할 선택은 필수 항목입니다.")
     @NotNull
     private UserRole role;
 
+    @NotNull(message = "사용자 상태 선택은 필수 항목입니다.")
     @NotNull
     private UserStatus status;
 }
