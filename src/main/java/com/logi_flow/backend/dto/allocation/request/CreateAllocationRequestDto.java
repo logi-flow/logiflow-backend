@@ -1,18 +1,23 @@
 package com.logi_flow.backend.dto.allocation.request;
 
 import com.logi_flow.backend.common.enums.AllocationStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.math.BigDecimal;
 
 @AllArgsConstructor
 @Getter
 public class CreateAllocationRequestDto {
+    @NotNull(message = "배송지 선택은 필수입니다.")
     private Long deliveryId;
+
+    @NotNull(message = "배정 선택은 필수입니다.")
     private Long assignmentId;
+
+    @NotBlank(message = "구역 선택은 필수입니다.")
     private String districtName;
-    private BigDecimal startMileage;
-    private BigDecimal endMileage;
+
+    @NotNull(message = "배차 상태 선택은 필수입니다.")
     private AllocationStatus status;
 }

@@ -4,7 +4,7 @@ import com.logi_flow.backend.common.enums.AllocationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "allocations")
@@ -18,9 +18,9 @@ public class Allocation extends BaseTime {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_id", nullable = false)
-    private Delivery delivery;
+    private List<Delivery> delivery;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
@@ -28,12 +28,6 @@ public class Allocation extends BaseTime {
 
     @Column(name = "district_name", nullable = false)
     private String districtName;
-
-    @Column(name = "start_mileage", nullable = false)
-    private BigDecimal startMileage;
-
-    @Column(name = "end_mileage", nullable = false)
-    private BigDecimal endMileage;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
