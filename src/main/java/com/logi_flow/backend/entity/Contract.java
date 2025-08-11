@@ -33,11 +33,20 @@ public class Contract extends BaseTime {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "price", nullable = false)
-    private int price;
+    @Column(name = "base_fee", nullable = false)
+    private int baseFee;
 
-    @Column(name = "volume_limit ", nullable = false)
-    private int volumeLimit;
+    @Column(name = "weight_limit_kg", nullable = false)
+    private int weightLimitKg;
+
+    @Column(name = "parcel_limit", nullable = false)
+    private int parcelLimit;
+
+    @Column(name = "over_weight_fee_per_kg", nullable = false)
+    private int overWeightFeePerKg;
+
+    @Column(name = "over_parcel_fee", nullable = false)
+    private int overParcelFee;
 
     @Column(name = "special_terms", columnDefinition = "TEXT")
     private String specialTerms;
