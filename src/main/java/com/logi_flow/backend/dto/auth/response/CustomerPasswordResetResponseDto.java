@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class CustomerPasswordResetSendEmailResponseDto {
+public class CustomerPasswordResetResponseDto {
     private Long userId;
     private String email;
     private LocalDateTime createdAt;

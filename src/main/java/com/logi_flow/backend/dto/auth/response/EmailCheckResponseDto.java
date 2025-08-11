@@ -4,14 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
-public class UserPasswordResetSendEmailResponseDto {
-    private Long userId;
+public class EmailCheckResponseDto {
     private String email;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
