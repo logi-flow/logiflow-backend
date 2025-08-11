@@ -4,8 +4,6 @@ import com.logi_flow.backend.common.enums.AllocationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "allocations_status_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
