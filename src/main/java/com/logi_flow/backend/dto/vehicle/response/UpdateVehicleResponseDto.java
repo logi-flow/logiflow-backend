@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class PutVehicleResponseDto {
+public class UpdateVehicleResponseDto {
     private Long vehicleId;
     private String vehicleNumber;
     private VehicleStatus status;
