@@ -1,11 +1,64 @@
 package com.logi_flow.backend.controller;
 
+import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.assignment.request.CreateAssignmentRequestDto;
+import com.logi_flow.backend.dto.assignment.request.UpdateAssignmentRequestDto;
+import com.logi_flow.backend.dto.assignment.response.CreateAssignmentResponseDto;
+import com.logi_flow.backend.dto.assignment.response.GetAllAssignmentResponseDto;
+import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponseDto;
+import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
+import com.logi_flow.backend.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping()
+@RequestMapping(ApiMappingPattern.ASSIGNMENT_API)
 public class AssignmentController {
+
+    private final AssignmentService assignmentService;
+
+    private static final String ASSIGNMENT_ID_API = "/{assignmentId}";
+
+    @PostMapping
+    public ResponseEntity<ResponseDto<CreateAssignmentResponseDto>> createAssignment(
+            @RequestBody CreateAssignmentRequestDto dto
+    ) {
+       ResponseDto<CreateAssignmentResponseDto> response = assignmentService.createAssignment(dto);
+       return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping(ASSIGNMENT_ID_API)
+    public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignment(
+            @PathVariable Long assignmentId,
+            @RequestBody UpdateAssignmentRequestDto dto
+    ) {
+        ResponseDto<UpdateAssignmentResponseDto> response = assignmentService.updateAssignment(assignmentId, dto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseDto<GetAllAssignmentResponseDto>> getAllAssignment() {
+        ResponseDto<GetAllAssignmentResponseDto> response = assignmentService.getAllAssignment();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping(ASSIGNMENT_ID_API)
+    public ResponseEntity<ResponseDto<GetAssignmentDetailResponseDto>> getAssignmentDetail(
+            @PathVariable Long assignmentId
+    ) {
+        ResponseDto<GetAssignmentDetailResponseDto> response = assignmentService.getAssignmentDetail(assignmentId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping(ASSIGNMENT_ID_API)
+    public ResponseEntity<ResponseDto<?>> deleteAssignment(
+            @PathVariable Long assignmentId
+    ) {
+       ResponseDto<?> response = assignmentService.deleteAssignment(assignmentId);
+       return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
