@@ -17,7 +17,7 @@ public interface DeliveryService {
 
     ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, UpdateDeliveryRequestDto dto);
 
-    void deleteDelivery(Long deliveryId);
-
     ResponseDto<List<GetAllWaitingDeliveryResponseDto>> getAllWaitingDelivery();
+
+    ResponseDto<?> deleteDelivery(Long deliveryId);
 }

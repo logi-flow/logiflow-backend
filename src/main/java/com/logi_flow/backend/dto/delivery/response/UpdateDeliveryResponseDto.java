@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateDeliveryResponseDto {
     private Long id;
+    private Long contractId;
     private Long customerId;
     private LocalDateTime requestDate;
     private String item;
@@ -32,6 +33,12 @@ public class UpdateDeliveryResponseDto {
     private String recipientZipcode;
     private String recipientAddress;
     private String recipientAddressDetail;
+
+    private int finalFee;
+    private int overWeightFee;
+    private int overParcelFee;
+    private boolean isOverWeight;
+    private boolean isOverParcel;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

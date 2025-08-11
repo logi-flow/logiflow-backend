@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.driver.response.GetAllDriverResponseDto;
 import com.logi_flow.backend.dto.driver.response.GetDriverDetailResponseDto;
 import com.logi_flow.backend.dto.driver.response.UpdateDriverResponseDto;
 import com.logi_flow.backend.service.DriverService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,25 +26,25 @@ public class DriverController {
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateDriverResponseDto>> createDriver(
-            @RequestBody CreateDriverRequestDto dto
+            @Valid @RequestBody CreateDriverRequestDto dto
     ) {
         ResponseDto<CreateDriverResponseDto> response = driverService.createDriver(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(DRIVER_ID_API)
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriver(
             @PathVariable Long driverId,
-            @RequestBody UpdateDriverRequestDto dto
+            @Valid @RequestBody UpdateDriverRequestDto dto
     ) {
         ResponseDto<UpdateDriverResponseDto> response = driverService.updateDriver(driverId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto<GetAllDriverResponseDto>> getAllDriver() {
         ResponseDto<GetAllDriverResponseDto> response = driverService.getAllDriver();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(DRIVER_ID_API)
@@ -51,7 +52,7 @@ public class DriverController {
             @PathVariable Long driverId
     ) {
         ResponseDto<GetDriverDetailResponseDto> response = driverService.getDriverDetail(driverId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(DRIVER_ID_API)
@@ -59,6 +60,6 @@ public class DriverController {
             @PathVariable Long driverId
     ) {
         ResponseDto<?> response = driverService.deleteDriver(driverId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

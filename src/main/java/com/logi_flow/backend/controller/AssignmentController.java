@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.assignment.response.GetAllAssignmentResponseDto
 import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponseDto;
 import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
 import com.logi_flow.backend.service.AssignmentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,25 +26,25 @@ public class AssignmentController {
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateAssignmentResponseDto>> createAssignment(
-            @RequestBody CreateAssignmentRequestDto dto
+            @Valid @RequestBody CreateAssignmentRequestDto dto
     ) {
        ResponseDto<CreateAssignmentResponseDto> response = assignmentService.createAssignment(dto);
-       return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(ASSIGNMENT_ID_API)
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignment(
             @PathVariable Long assignmentId,
-            @RequestBody UpdateAssignmentRequestDto dto
+            @Valid @RequestBody UpdateAssignmentRequestDto dto
     ) {
         ResponseDto<UpdateAssignmentResponseDto> response = assignmentService.updateAssignment(assignmentId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto<GetAllAssignmentResponseDto>> getAllAssignment() {
         ResponseDto<GetAllAssignmentResponseDto> response = assignmentService.getAllAssignment();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(ASSIGNMENT_ID_API)
@@ -51,7 +52,7 @@ public class AssignmentController {
             @PathVariable Long assignmentId
     ) {
         ResponseDto<GetAssignmentDetailResponseDto> response = assignmentService.getAssignmentDetail(assignmentId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(ASSIGNMENT_ID_API)
@@ -59,6 +60,6 @@ public class AssignmentController {
             @PathVariable Long assignmentId
     ) {
        ResponseDto<?> response = assignmentService.deleteAssignment(assignmentId);
-       return ResponseEntity.status(HttpStatus.OK).body(response);
+       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
 import com.logi_flow.backend.service.VehicleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,25 +26,25 @@ public class VehicleController {
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateVehicleResponseDto>> createVehicle(
-            @RequestBody CreateVehicleRequestDto dto
+            @Valid @RequestBody CreateVehicleRequestDto dto
     ) {
         ResponseDto<CreateVehicleResponseDto> response = vehicleService.createVehicle(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(VEHICLE_ID_API)
     public ResponseEntity<ResponseDto<UpdateVehicleResponseDto>> updateVehicle(
             @PathVariable Long vehicleId,
-            @RequestBody UpdateVehicleRequestDto dto
+            @Valid @RequestBody UpdateVehicleRequestDto dto
     ) {
         ResponseDto<UpdateVehicleResponseDto> response = vehicleService.updateVehicle(vehicleId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto<GetAllVehicleResponseDto>> getAllVehicle(){
         ResponseDto<GetAllVehicleResponseDto> response = vehicleService.getAllVehicle();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(VEHICLE_ID_API)
@@ -51,7 +52,7 @@ public class VehicleController {
             @PathVariable Long vehicleId
     ) {
         ResponseDto<GetVehicleDetailResponseDto> response = vehicleService.getVehicleDetail(vehicleId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(VEHICLE_ID_API)
@@ -59,6 +60,6 @@ public class VehicleController {
             @PathVariable Long vehicleId
     ) {
         ResponseDto<?> response = vehicleService.delete(vehicleId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }
