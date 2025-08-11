@@ -17,3 +17,4 @@ public interface ApiMappingPattern {
     String DEDUCTION_API = "/api/v1/deduction-types";
     String PAYROLL_API = "/api/v1/payrolls";
 }
+
