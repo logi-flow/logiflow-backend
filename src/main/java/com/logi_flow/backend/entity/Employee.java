@@ -29,8 +29,8 @@ public class Employee extends BaseTime {
     @Column(name = "identity_number", nullable = false, unique = true)
     private String identityNumber;
 
-    @Column(name = "phone_number", nullable = false)
-    private String phoneNumber;
+    @Column(name = "phone", nullable = false)
+    private String phone;
 
     @Column(name = "zipcode", nullable = false)
     private String zipcode;
