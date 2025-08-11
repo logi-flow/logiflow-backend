@@ -7,6 +7,7 @@ import com.logi_flow.backend.dto.driver.request.UpdateDriverLicenseRequestDto;
 import com.logi_flow.backend.dto.driver.response.CreateDriverLicenseResponseDto;
 import com.logi_flow.backend.dto.driver.response.UpdateDriverLicenseResponseDto;
 import com.logi_flow.backend.service.DriverLicenseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,19 +27,19 @@ public class DriverLicenseController {
     @PostMapping(CREATE_LICENSE_API)
     public ResponseEntity<ResponseDto<CreateDriverLicenseResponseDto>> createDriverLicense(
             @PathVariable Long driverId,
-            @RequestBody CreateDriverLicenseRequestDto dto
+            @Valid @RequestBody CreateDriverLicenseRequestDto dto
     ) {
         ResponseDto<CreateDriverLicenseResponseDto> response = driverLicenseService.createDriverLicense(driverId, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(UPDATE_LICENSE_API)
     public ResponseEntity<ResponseDto<UpdateDriverLicenseResponseDto>> updateDriverLicense(
             @PathVariable Long driverId,
             @PathVariable Long licenseId,
-            @RequestBody UpdateDriverLicenseRequestDto dto
+            @Valid @RequestBody UpdateDriverLicenseRequestDto dto
     ) {
         ResponseDto<UpdateDriverLicenseResponseDto> response = driverLicenseService.updateDriverLicense(driverId, licenseId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

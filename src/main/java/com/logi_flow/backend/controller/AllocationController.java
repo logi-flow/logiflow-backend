@@ -21,15 +21,16 @@ public class AllocationController {
     private final AllocationService allocationService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto<CreateAllocationResponseDto>> createAllocation(@RequestBody CreateAllocationRequestDto dto) {
+    public ResponseEntity<ResponseDto<CreateAllocationResponseDto>> createAllocation(@Valid @RequestBody CreateAllocationRequestDto dto) {
         ResponseDto<CreateAllocationResponseDto> response = allocationService.createAllocation(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+
     @PutMapping("/{allocationId}")
-    public ResponseEntity<ResponseDto<UpdateAllocationResponseDto>> updateAllocation(@PathVariable Long allocationId, @RequestBody UpdateAllocationRequestDto dto) {
+    public ResponseEntity<ResponseDto<UpdateAllocationResponseDto>> updateAllocation(@PathVariable Long allocationId, @Valid @RequestBody UpdateAllocationRequestDto dto) {
         ResponseDto<UpdateAllocationResponseDto> response = allocationService.updateAllocation(allocationId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
 }

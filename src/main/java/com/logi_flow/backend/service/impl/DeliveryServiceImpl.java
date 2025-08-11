@@ -40,8 +40,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public void deleteDelivery(Long deliveryId) {
-
+    public ResponseDto<?> deleteDelivery(Long deliveryId) {
+        return null;
     }
 
     @Override
