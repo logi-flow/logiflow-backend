@@ -31,5 +31,4 @@ public class Assignment extends BaseTime {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AssignmentStatus status = AssignmentStatus.ACTIVE;
-
 }
