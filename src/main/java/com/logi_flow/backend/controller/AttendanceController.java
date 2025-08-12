@@ -45,7 +45,7 @@ public class AttendanceController {
     }
 
     @GetMapping(GET_DETAILS_API)
-    public ResponseEntity<ResponseDto<GetAllAttendanceResponseDto>> getAttendanceDetails(
+    public ResponseEntity<ResponseDto<GetAllAttendanceResponseDto>> getAttendanceDetail(
             @PathVariable Long attendanceId
     ) {
         ResponseDto<GetAllAttendanceResponseDto> response = attendanceService.getAttendanceDetails(attendanceId);
