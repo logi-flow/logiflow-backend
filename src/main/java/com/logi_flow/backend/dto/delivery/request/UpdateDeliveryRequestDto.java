@@ -22,9 +22,6 @@ public class UpdateDeliveryRequestDto {
     private String message;
     private boolean isHidden;
 
-    @NotNull(message = "배송 상태 선택은 필수입니다.")
-    private DeliveryStatus status;
-
     @NotBlank(message = "수거지 이름은 필수 항목입니다.")
     private String pickupName;
     @NotBlank(message = "수거지 번호는 필수 항목입니다.")

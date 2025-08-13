@@ -1,5 +1,6 @@
 package com.logi_flow.backend.controller;
 
+import com.logi_flow.backend.common.constants.ApiMappingPattern;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.schedule.request.UpdateScheduleRequestDto;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/schedules")
+@RequestMapping(ApiMappingPattern.SCHEDULE_API)
 public class ScheduleController {
     private final ScheduleService scheduleService;
 

@@ -1,5 +1,6 @@
 package com.logi_flow.backend.controller;
 
+import com.logi_flow.backend.common.constants.ApiMappingPattern;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.allocation.request.CreateAllocationRequestDto;
 import com.logi_flow.backend.dto.allocation.request.UpdateAllocationRequestDto;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/allocations")
+@RequestMapping(ApiMappingPattern.ALLOCATION_API)
 public class AllocationController {
     private final AllocationService allocationService;
 
