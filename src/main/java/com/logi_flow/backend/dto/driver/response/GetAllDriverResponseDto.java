@@ -14,8 +14,7 @@ public class GetAllDriverResponseDto {
     private Long driverId;
     private String name;
     private DriverStatus status;
-    private String PhoneNumber;
-    private String vehicleNumber;
+    private String phoneNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

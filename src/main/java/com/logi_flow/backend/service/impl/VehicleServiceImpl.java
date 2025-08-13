@@ -59,20 +59,27 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber()))
+        if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber())) {
             vehicle.setVehicleNumber(dto.getVehicleNumber());
-        if (dto.getCapacity() != null && !dto.getCapacity().equals(vehicle.getCapacity()))
+        }
+        if (dto.getCapacity() != null && !dto.getCapacity().equals(vehicle.getCapacity())) {
             vehicle.setCapacity(dto.getCapacity());
-        if (dto.getFuel() != null && !vehicle.getFuel().equals(dto.getFuel()))
+        }
+        if (dto.getFuel() != null && !vehicle.getFuel().equals(dto.getFuel())) {
             vehicle.setFuel(dto.getFuel());
-        if (dto.getMileage() != null && !vehicle.getMileage().equals(dto.getMileage()))
+        }
+        if (dto.getMileage() != null && !vehicle.getMileage().equals(dto.getMileage())) {
             vehicle.setMileage(dto.getMileage());
-        if (dto.getStatus() != null && !vehicle.getStatus().equals(dto.getStatus()))
+        }
+        if (dto.getStatus() != null && !vehicle.getStatus().equals(dto.getStatus())) {
             vehicle.setStatus(dto.getStatus());
-        if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName()))
+        }
+        if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName())) {
             vehicle.setModelName(dto.getModelName());
-        if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear()))
+        }
+        if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear())) {
             vehicle.setModelYear(dto.getModelYear());
+        }
 
         Vehicle updateVehicle = vehicleRepository.save(vehicle);
 

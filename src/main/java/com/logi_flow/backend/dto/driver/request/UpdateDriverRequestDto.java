@@ -30,5 +30,5 @@ public class UpdateDriverRequestDto {
     private DriverDistrict district;
 
     @NotNull (message = "급여는 필수 항목입니다.")
-    private int pay;
+    private Integer pay;
 }
