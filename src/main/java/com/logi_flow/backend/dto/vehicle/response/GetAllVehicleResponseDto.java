@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class GetAllVehicleResponseDto {
-    private Long id;
+    private Long vehicleId;
     private String vehicleNumber;
     private VehicleStatus status;
     private String modelName;

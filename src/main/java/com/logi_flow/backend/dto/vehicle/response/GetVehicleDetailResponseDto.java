@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class GetVehicleDetailResponseDto {
-    private Long id;
+    private Long vehicleId;
     private String vehicleNumber;
     private int capacity;
     private Fuel fuel;
-    private BigDecimal meileage;
+    private BigDecimal mileage;
     private VehicleStatus status;
     private String modelName;
     private LocalDate modelYear;
