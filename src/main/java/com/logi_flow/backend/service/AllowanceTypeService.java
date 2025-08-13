@@ -8,10 +8,11 @@ import com.logi_flow.backend.dto.allowanceType.response.CreateAllowanceTypeRespo
 import com.logi_flow.backend.dto.allowanceType.response.GetAllAllowanceTypeResponseDto;
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface AllowanceTypeService {
     ResponseDto<CreateAllowanceTypeResponseDto> createAllowanceType(@Valid CreateAllowanceTypeRequestDto dto);
-    ResponseDto<GetAllAllowanceTypeResponseDto> getAllAllowanceType();
+    Page<GetAllAllowanceTypeResponseDto> getAllAllowanceType(int page, int size, String sort);
     ResponseDto<GetAllAllowanceTypeResponseDto> getAllowanceTypeDetail(Long allowanceTypeId);
     ResponseDto<UpdateAllowanceTypeResponseDto> updateAllowanceType(UserPrincipal userPrincipal, Long allowanceTypeId, @Valid UpdateAllowanceTypeRequestDto dto);
     ResponseDto<Void> deleteAllowanceType(UserPrincipal userPrincipal, Long allowanceTypeId);
