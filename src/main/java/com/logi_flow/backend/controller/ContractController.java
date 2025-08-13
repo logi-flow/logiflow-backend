@@ -6,9 +6,7 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.contract.request.CreateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractStatusRequestDto;
-import com.logi_flow.backend.dto.contract.response.CreateContractResponseDto;
-import com.logi_flow.backend.dto.contract.response.UpdateContractResponseDto;
-import com.logi_flow.backend.dto.contract.response.UpdateContractStatusResponseDto;
+import com.logi_flow.backend.dto.contract.response.*;
 import com.logi_flow.backend.service.ContractService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +58,25 @@ public class ContractController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @GetMapping
+    public ResponseEntity<ResponseDto<GetAllContractResponseDto>> getAllContract(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetAllContractResponseDto> response = contractService.getAllContract(id);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping(CONTRACT_API)
+    public ResponseEntity<ResponseDto<GetContractDetailResponseDto>> getContractDetail(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long customerId
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(id, customerId);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
     @DeleteMapping(CONTRACT_API)
     public ResponseEntity<ResponseDto<?>> deleteContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -70,3 +87,4 @@ public class ContractController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
+

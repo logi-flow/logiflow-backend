@@ -1,16 +1,25 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
+import com.logi_flow.backend.dto.customer.response.UpdateCustomerStatusResponseDto;
+import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
+import com.logi_flow.backend.dto.employee.response.GetEmployeeDetailResponseDto;
+import com.logi_flow.backend.dto.user.request.UpdateUserRoleRequestDto;
+import com.logi_flow.backend.dto.user.request.UpdateUserStatusRequestDto;
+import com.logi_flow.backend.dto.user.response.GetAllUserResponseDto;
 import com.logi_flow.backend.dto.user.response.GetUserDetailResponseDto;
+import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
+import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,16 +27,48 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
 
-    private static final String MY_INFO_API = "/me";
     private static final String USER_ID_API = "/{userId}";
-    private static final String PROFILE_IMAGE_API = MY_INFO_API + "/profile-image";
+    private static final String USER_STATUS_API = "/{userId}/status";
+    private static final String PROFILE_IMAGE_API = "/profile-image";
 
-//    @GetMapping(MY_INFO_API)
-//    public ResponseEntity<ResponseDto<GetUserDetailResponseDto>> getMyInfo() {
-//        ResponseDto<GetUserDetailResponseDto> response = userService.getMyInfo();
-//        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-//    }
+    @GetMapping
+    public ResponseEntity<ResponseDto<GetAllUserResponseDto>> getAllUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetAllUserResponseDto> response = userService.getAllUser(id);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
 
-//    @PutMapping(MY_INFO_API)
-//    public ResponseEntity<ResponseDto<UpdateUser>>
+    @GetMapping(USER_ID_API)
+    public ResponseEntity<ResponseDto<GetUserDetailResponseDto>> getUserDetail(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long userId
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetUserDetailResponseDto> response = userService.getUserDetail(id, userId);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping(USER_STATUS_API)
+    public ResponseEntity<ResponseDto<UpdateUserStatusResponseDto>> updateUserStatus(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserStatusRequestDto dto
+    ){
+        Long id = userPrincipal.getId();
+        ResponseDto<UpdateUserStatusResponseDto> response = userService.updateUserStatus(id, userId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping(USER_STATUS_API)
+    public ResponseEntity<ResponseDto<UpdateUserRoleResponseDto>> updateUserRole(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRoleRequestDto dto
+    ){
+        Long id = userPrincipal.getId();
+        ResponseDto<UpdateUserRoleResponseDto> response = userService.updateUserRole(id, userId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
 }

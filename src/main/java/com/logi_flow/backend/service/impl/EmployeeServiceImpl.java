@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
+import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.response.CreateEmployeeResponseDto;
 import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
@@ -15,12 +16,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     @Override
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(Long id, UpdateEmployeeRequestDto dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(Long id) {
+        return null;
+    }
+
+    @Override
     public ResponseDto<CreateEmployeeResponseDto> createEmployee(Long id, Long employeeId, CreateEmployeeRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(Long id, Long employeeId, UpdateEmployeeRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(Long id, Long employeeId, UpdateEmployeeAdminRequestDto dto) {
         return null;
     }
 
@@ -30,7 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(Long id, Long employeeId) {
+    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetailAdmin(Long id, Long employeeId) {
         return null;
     }
 
