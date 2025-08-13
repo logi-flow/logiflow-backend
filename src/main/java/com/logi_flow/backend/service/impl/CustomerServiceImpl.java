@@ -1,12 +1,10 @@
 package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.customer.request.UpdateCustomerAdminRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
-import com.logi_flow.backend.dto.customer.response.GetAllCustomerResponseDto;
-import com.logi_flow.backend.dto.customer.response.GetCustomerDetailResponseDto;
-import com.logi_flow.backend.dto.customer.response.UpdateCustomerResponseDto;
-import com.logi_flow.backend.dto.customer.response.UpdateCustomerStatusResponseDto;
+import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerServiceImpl implements CustomerService {
     @Override
-    public ResponseDto<UpdateCustomerResponseDto> updateCustomer(Long id, Long customerId, UpdateCustomerRequestDto dto) {
+    public ResponseDto<UpdateCustomerResponseDto> updateCustomer(Long id, UpdateCustomerRequestDto dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<UpdateCustomerResponseDto> updateCustomerAdmin(Long id, Long customerId, UpdateCustomerAdminRequestDto dto) {
         return null;
     }
 
@@ -30,7 +38,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(Long id, Long customerId) {
+    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetailAdmin(Long id, Long customerId) {
         return null;
     }
 

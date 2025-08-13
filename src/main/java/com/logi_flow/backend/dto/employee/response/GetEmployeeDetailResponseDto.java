@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -23,4 +24,6 @@ public class GetEmployeeDetailResponseDto {
     private Department department;
     private Position position;
     private LocalDate companyJoin;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

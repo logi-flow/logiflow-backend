@@ -30,6 +30,5 @@ public class CreateContractRequestDto {
     @NotNull(message = "건수 한도 초과분 건당 초과요금(원)은 필수 항목입니다.")
     private int overParcelFee;
 
-    @NotNull(message = "특별사항은 필수 항목입니다.")
     private String specialTerms;
 }

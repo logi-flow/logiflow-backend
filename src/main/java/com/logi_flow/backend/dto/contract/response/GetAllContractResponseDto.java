@@ -1,8 +1,6 @@
 package com.logi_flow.backend.dto.contract.response;
 
 import com.logi_flow.backend.common.enums.ContractStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,18 +11,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class CreateContractResponseDto {
+public class GetAllContractResponseDto {
     private Long id;
     private Long customerId;
+    private String customerName;
     private ContractStatus status;
     private LocalDate stratDate;
     private LocalDate endDate;
-    private int baseFee;
-    private int weightLimitKg;
-    private int parcelLimit;
-    private int overWeightFeePerKg;
-    private int overParcelFee;
-    private String specialTerms;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
