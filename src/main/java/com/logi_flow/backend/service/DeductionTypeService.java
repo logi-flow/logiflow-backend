@@ -8,10 +8,11 @@ import com.logi_flow.backend.dto.deductionType.response.CreateDeductionTypeRespo
 import com.logi_flow.backend.dto.deductionType.response.GetAllDeductionTypeResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeResponseDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface DeductionTypeService {
     ResponseDto<CreateDeductionTypeResponseDto> createDeductionType(@Valid CreateDeductionTypeRequestDto dto);
-    ResponseDto<GetAllDeductionTypeResponseDto> getAllDeductionType();
+    Page<GetAllDeductionTypeResponseDto> getAllDeductionType(int page, int size, String sort);
     ResponseDto<GetAllDeductionTypeResponseDto> getDeductionTypeDetail(Long deductionTypeId);
     ResponseDto<UpdateDeductionTypeResponseDto> updateDeductionType(UserPrincipal userPrincipal, Long deductionTypeId, @Valid UpdateDeductionTypeRequestDto dto);
     ResponseDto<Void> deleteDeductionType(UserPrincipal userPrincipal, Long deductionTypeId);

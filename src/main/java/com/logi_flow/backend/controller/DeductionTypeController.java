@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.deductionType.request.CreateDeductionTypeRequestDto;
 import com.logi_flow.backend.dto.deductionType.request.UpdateDeductionTypeRequestDto;
@@ -11,6 +13,7 @@ import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeRespo
 import com.logi_flow.backend.service.DeductionTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,8 +36,13 @@ public class DeductionTypeController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllDeductionTypeResponseDto>> getAllDeductionType() {
-        ResponseDto<GetAllDeductionTypeResponseDto> response = deductionTypeService.getAllDeductionType();
+    public ResponseEntity<ResponseDto<PageDto<GetAllDeductionTypeResponseDto>>> getAllDeductionType(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllDeductionTypeResponseDto> result = deductionTypeService.getAllDeductionType(page, size, sort);
+        PageDto<GetAllDeductionTypeResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

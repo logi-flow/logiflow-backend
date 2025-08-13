@@ -8,6 +8,7 @@ import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollStatus
 import com.logi_flow.backend.dto.driverPayroll.response.*;
 import com.logi_flow.backend.service.DriverPayrollService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    public ResponseDto<GetAllDriverPayrollResponseDto> getAllDriverPayroll() {
+    public Page<GetAllDriverPayrollResponseDto> getAllDriverPayroll(int page, int size, String sort) {
         return null;
     }
 
@@ -29,7 +30,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    public ResponseDto<GetAllDriverPayrollResponseDto> getMyPayrolls(UserPrincipal userPrincipal) {
+    public Page<GetAllDriverPayrollResponseDto> getMyPayrolls(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 

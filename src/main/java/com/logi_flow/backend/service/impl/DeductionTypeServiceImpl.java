@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.deductionType.response.GetAllDeductionTypeRespo
 import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeResponseDto;
 import com.logi_flow.backend.service.DeductionTypeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     }
 
     @Override
-    public ResponseDto<GetAllDeductionTypeResponseDto> getAllDeductionType() {
+    public Page<GetAllDeductionTypeResponseDto> getAllDeductionType(int page, int size, String sort) {
         return null;
     }
 

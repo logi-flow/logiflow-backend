@@ -6,12 +6,13 @@ import com.logi_flow.backend.dto.attendance.response.CreateAttendanceResponseDto
 import com.logi_flow.backend.dto.attendance.response.GetAllAttendanceResponseDto;
 import com.logi_flow.backend.dto.attendance.response.GetMyAttendancesResponseDto;
 import com.logi_flow.backend.dto.attendance.response.UpdateAttendanceResponseDto;
+import org.springframework.data.domain.Page;
 
 public interface AttendanceService {
     ResponseDto<CreateAttendanceResponseDto> checkInAttendance(UserPrincipal userPrincipal);
     ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal);
-    ResponseDto<GetAllAttendanceResponseDto> getAllAttendance();
+    Page<GetAllAttendanceResponseDto> getAllAttendance(int page, int size, String sort);
     ResponseDto<GetAllAttendanceResponseDto> getAttendanceDetails(Long attendanceId);
-    ResponseDto<GetMyAttendancesResponseDto> getMyAttendances(UserPrincipal userPrincipal);
+    Page<GetMyAttendancesResponseDto> getMyAttendances(UserPrincipal userPrincipal, int page, int size, String sort);
 
 }

@@ -1,11 +1,14 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.attendance.response.*;
 import com.logi_flow.backend.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,8 +42,13 @@ public class AttendanceController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllAttendanceResponseDto>> getAllAttendance() {
-        ResponseDto<GetAllAttendanceResponseDto> response = attendanceService.getAllAttendance();
+    public ResponseEntity<ResponseDto<PageDto<GetAllAttendanceResponseDto>>> getAllAttendance(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllAttendanceResponseDto> result = attendanceService.getAllAttendance(page, size, sort);
+        PageDto<GetAllAttendanceResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -53,10 +61,14 @@ public class AttendanceController {
     }
 
     @GetMapping(MY_ATTENDANCE_API)
-    public ResponseEntity<ResponseDto<GetMyAttendancesResponseDto>> getMyAttendances(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    public ResponseEntity<ResponseDto<PageDto<GetMyAttendancesResponseDto>>> getMyAttendances(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
     ) {
-        ResponseDto<GetMyAttendancesResponseDto> response = attendanceService.getMyAttendances(userPrincipal);
+        Page<GetMyAttendancesResponseDto> result = attendanceService.getMyAttendances(userPrincipal, page, size, sort);
+        PageDto<GetMyAttendancesResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
