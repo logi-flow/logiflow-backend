@@ -9,9 +9,10 @@ import com.logi_flow.backend.dto.user.response.GetUserDetailResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
-    ResponseDto<GetAllUserResponseDto> getAllUser(UserPrincipal userPrincipal);
+    Page<GetAllUserResponseDto> getAllUser(UserPrincipal userPrincipal, int page, int size, String sort);
 
     ResponseDto<GetUserDetailResponseDto> getUserDetail(UserPrincipal userPrincipal, Long userId);
 

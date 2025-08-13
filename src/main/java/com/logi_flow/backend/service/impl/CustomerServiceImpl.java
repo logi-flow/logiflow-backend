@@ -8,6 +8,7 @@ import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto
 import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseDto<GetAllCustomerResponseDto> getAllCustomer(UserPrincipal userPrincipal) {
+    public Page<GetAllCustomerResponseDto> getAllCustomer(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 

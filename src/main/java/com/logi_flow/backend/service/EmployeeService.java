@@ -10,6 +10,7 @@ import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
 import com.logi_flow.backend.dto.employee.response.GetEmployeeDetailResponseDto;
 import com.logi_flow.backend.dto.employee.response.UpdateEmployeeResponseDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface EmployeeService {
     ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, @Valid UpdateEmployeeRequestDto dto);
@@ -20,7 +21,7 @@ public interface EmployeeService {
 
     ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(UserPrincipal userPrincipal, Long employeeId, @Valid UpdateEmployeeAdminRequestDto dto);
 
-    ResponseDto<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal);
+    Page<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal, int page, int size, String sort);
 
     ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetailAdmin(UserPrincipal userPrincipal, Long employeeId);
 
