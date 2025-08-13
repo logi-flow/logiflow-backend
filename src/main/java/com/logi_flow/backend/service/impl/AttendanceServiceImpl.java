@@ -8,6 +8,7 @@ import com.logi_flow.backend.dto.attendance.response.GetMyAttendancesResponseDto
 import com.logi_flow.backend.dto.attendance.response.UpdateAttendanceResponseDto;
 import com.logi_flow.backend.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public ResponseDto<GetAllAttendanceResponseDto> getAllAttendance() {
+    public Page<GetAllAttendanceResponseDto> getAllAttendance(int page, int size, String sort) {
         return null;
     }
 
@@ -34,7 +35,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public ResponseDto<GetMyAttendancesResponseDto> getMyAttendances(UserPrincipal userPrincipal) {
+    public Page<GetMyAttendancesResponseDto> getMyAttendances(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 }
