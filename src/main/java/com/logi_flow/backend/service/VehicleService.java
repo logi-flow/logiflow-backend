@@ -7,13 +7,16 @@ import com.logi_flow.backend.dto.vehicle.response.CreateVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
+import jakarta.validation.Valid;
+
+import java.util.List;
 
 public interface VehicleService {
-    ResponseDto<CreateVehicleResponseDto> createVehicle(CreateVehicleRequestDto dto);
+    ResponseDto<CreateVehicleResponseDto> createVehicle(@Valid CreateVehicleRequestDto dto);
 
-    ResponseDto<UpdateVehicleResponseDto> updateVehicle(Long vehicleId, UpdateVehicleRequestDto dto);
+    ResponseDto<UpdateVehicleResponseDto> updateVehicle(Long vehicleId, @Valid UpdateVehicleRequestDto dto);
 
-    ResponseDto<GetAllVehicleResponseDto> getAllVehicle();
+    ResponseDto<List<GetAllVehicleResponseDto>> getAllVehicle();
 
     ResponseDto<GetVehicleDetailResponseDto> getVehicleDetail(Long vehicleId);
 
