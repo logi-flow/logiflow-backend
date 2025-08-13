@@ -1,5 +1,12 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.user.request.UpdateUserRoleRequestDto;
+import com.logi_flow.backend.dto.user.request.UpdateUserStatusRequestDto;
+import com.logi_flow.backend.dto.user.response.GetAllUserResponseDto;
+import com.logi_flow.backend.dto.user.response.GetUserDetailResponseDto;
+import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
+import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,4 +14,23 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
+    @Override
+    public ResponseDto<GetAllUserResponseDto> getAllUser(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<GetUserDetailResponseDto> getUserDetail(Long id, Long userId) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<UpdateUserStatusResponseDto> updateUserStatus(Long id, Long userId, UpdateUserStatusRequestDto dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<UpdateUserRoleResponseDto> updateUserRole(Long id, Long userId, UpdateUserRoleRequestDto dto) {
+        return null;
+    }
 }

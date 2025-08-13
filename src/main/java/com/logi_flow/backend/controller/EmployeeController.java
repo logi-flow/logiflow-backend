@@ -4,6 +4,7 @@ import com.logi_flow.backend.common.constants.ApiMappingPattern;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
+import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.response.CreateEmployeeResponseDto;
 import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
@@ -24,7 +25,27 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
+    private static final String EMPLOYEE_MY_INFO_API = "/me";
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
+
+    @PutMapping(EMPLOYEE_MY_INFO_API)
+    public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @Valid @RequestBody UpdateEmployeeRequestDto dto
+    ){
+        Long id = userPrincipal.getId();
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(id, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping(EMPLOYEE_MY_INFO_API)
+    public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetail(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetail(id);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
 
     @PostMapping(EMPLOYEE_ID_API)
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
@@ -38,13 +59,13 @@ public class EmployeeController {
     }
 
     @PutMapping(EMPLOYEE_ID_API)
-    public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
+    public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployeeAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId,
-            @Valid @RequestBody UpdateEmployeeRequestDto dto
+            @Valid @RequestBody UpdateEmployeeAdminRequestDto dto
     ){
         Long id = userPrincipal.getId();
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(id, employeeId, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(id, employeeId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -54,17 +75,17 @@ public class EmployeeController {
     ) {
         Long id = userPrincipal.getId();
         ResponseDto<GetAllEmployeeResponseDto> response = employeeService.getAllEmployee(id);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(EMPLOYEE_ID_API)
-    public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetail(
+    public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetailAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId
     ) {
         Long id = userPrincipal.getId();
-        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetail(id, employeeId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetailAdmin(id, employeeId);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(EMPLOYEE_ID_API)

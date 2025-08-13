@@ -27,6 +27,9 @@ public class Customer extends BaseTime {
     @Column(name = "businessNumber", nullable = false, unique = true)
     private String businessNumber;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Column(name = "representativeName", nullable = false)
     private String representativeName;
 

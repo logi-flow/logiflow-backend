@@ -15,6 +15,7 @@ public class GetCustomerDetailResponseDto {
     private Long userId;
     private CustomerStatus status;
 
+    private String name;
     private String businessNumber;
     private String representativeName;
     private String businessType;

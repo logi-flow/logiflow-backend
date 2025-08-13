@@ -1,9 +1,12 @@
 package com.logi_flow.backend.dto.employee.response;
 
+import com.logi_flow.backend.common.enums.employee.Department;
+import com.logi_flow.backend.common.enums.employee.Position;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -11,8 +14,17 @@ import java.time.LocalDateTime;
 @Builder
 public class CreateEmployeeResponseDto {
     private Long id;
+    private Long userId;
     private String username;
     private String name;
+    private String identityNumberMasked;
+    private String phone;
+    private String zipcode;
+    private String address;
+    private String addressDetail;
+    private Department department;
+    private Position position;
+    private LocalDate companyJoin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

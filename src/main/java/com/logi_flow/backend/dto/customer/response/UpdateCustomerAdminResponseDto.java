@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
-public class UpdateCustomerResponseDto {
+public class UpdateCustomerAdminResponseDto {
     private Long id;
+    private Long userId;
     private CustomerStatus status;
 
     private String name;

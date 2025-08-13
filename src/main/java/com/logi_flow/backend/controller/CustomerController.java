@@ -4,12 +4,10 @@ import com.logi_flow.backend.common.constants.ApiMappingPattern;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 
+import com.logi_flow.backend.dto.customer.request.UpdateCustomerAdminRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
-import com.logi_flow.backend.dto.customer.response.GetAllCustomerResponseDto;
-import com.logi_flow.backend.dto.customer.response.GetCustomerDetailResponseDto;
-import com.logi_flow.backend.dto.customer.response.UpdateCustomerResponseDto;
-import com.logi_flow.backend.dto.customer.response.UpdateCustomerStatusResponseDto;
+import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,17 +23,37 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+    private static final String CUSTOMER_MY_INFO_API = "/me";
     private static final String CUSTOMER_ID_API = "/{customerId}";
     private static final String CUSTOMER_STATUS_API = "/{customerId}/status";
 
-    @PutMapping(CUSTOMER_ID_API)
+    @PutMapping(CUSTOMER_MY_INFO_API)
     public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomer(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId,
             @Valid @RequestBody UpdateCustomerRequestDto dto
     ){
         Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(id, customerId, dto);
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(id, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping(CUSTOMER_MY_INFO_API)
+    public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Long id = userPrincipal.getId();
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(id);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping(CUSTOMER_ID_API)
+    public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomerAdmin(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long customerId,
+            @Valid @RequestBody UpdateCustomerAdminRequestDto dto
+    ){
+        Long id = userPrincipal.getId();
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomerAdmin(id, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -56,17 +74,17 @@ public class CustomerController {
     ) {
         Long id = userPrincipal.getId();
         ResponseDto<GetAllCustomerResponseDto> response = customerService.getAllCustomer(id);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(CUSTOMER_ID_API)
-    public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
+    public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetailAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
         Long id = userPrincipal.getId();
-        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(id, customerId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(id, customerId);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(CUSTOMER_ID_API)

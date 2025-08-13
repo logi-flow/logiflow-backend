@@ -17,7 +17,7 @@ public class UpdateVehicleRequestDto {
     private String vehicleNumber;
 
     @NotNull(message = "적제량은 필수 항목입니다.")
-    private int capacity;
+    private Integer capacity;
 
     @NotNull(message = "연료종류는 필수 항목입니다.")
     private Fuel fuel;

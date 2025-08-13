@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.VEHICLE_API)
@@ -42,8 +44,8 @@ public class VehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllVehicleResponseDto>> getAllVehicle(){
-        ResponseDto<GetAllVehicleResponseDto> response = vehicleService.getAllVehicle();
+    public ResponseEntity<ResponseDto<List<GetAllVehicleResponseDto>>> getAllVehicle(){
+        ResponseDto<List<GetAllVehicleResponseDto>> response = vehicleService.getAllVehicle();
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

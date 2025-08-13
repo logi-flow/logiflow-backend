@@ -20,8 +20,8 @@ public class Contract extends BaseTime {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
