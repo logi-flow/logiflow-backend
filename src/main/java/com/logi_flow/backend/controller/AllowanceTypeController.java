@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.allowanceType.request.CreateAllowanceTypeRequestDto;
 import com.logi_flow.backend.dto.allowanceType.request.UpdateAllowanceTypeRequestDto;
@@ -11,6 +13,7 @@ import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeRespo
 import com.logi_flow.backend.service.AllowanceTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,8 +36,13 @@ public class AllowanceTypeController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllAllowanceTypeResponseDto>> getAllAllowanceType() {
-        ResponseDto<GetAllAllowanceTypeResponseDto> response = allowanceTypeService.getAllAllowanceType();
+    public ResponseEntity<ResponseDto<PageDto<GetAllAllowanceTypeResponseDto>>> getAllAllowanceType(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllAllowanceTypeResponseDto> result = allowanceTypeService.getAllAllowanceType(page, size, sort);
+        PageDto<GetAllAllowanceTypeResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

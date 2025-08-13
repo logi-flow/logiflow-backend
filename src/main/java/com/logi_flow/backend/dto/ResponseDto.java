@@ -1,5 +1,7 @@
 package com.logi_flow.backend.dto;
 
+import com.logi_flow.backend.common.constants.ResponseCode;
+import com.logi_flow.backend.common.constants.ResponseMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -31,5 +33,9 @@ public class ResponseDto<T> {
 
     public static <T> ResponseEntity<ResponseDto<T>> toResponseEntity(HttpStatus status, ResponseDto<T> body) {
         return ResponseEntity.status(status).body(body);
+    }
+
+    public static <T> ResponseEntity<ResponseDto<T>> toResponseEntity(HttpStatus status, T data) {
+        return ResponseEntity.status(status).body(ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data));
     }
 }

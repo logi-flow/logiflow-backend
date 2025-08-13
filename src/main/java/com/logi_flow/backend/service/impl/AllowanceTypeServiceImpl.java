@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.allowanceType.response.GetAllAllowanceTypeRespo
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import com.logi_flow.backend.service.AllowanceTypeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     }
 
     @Override
-    public ResponseDto<GetAllAllowanceTypeResponseDto> getAllAllowanceType() {
+    public Page<GetAllAllowanceTypeResponseDto> getAllAllowanceType(int page, int size, String sort) {
         return null;
     }
 
