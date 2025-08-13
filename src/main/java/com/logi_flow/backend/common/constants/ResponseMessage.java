@@ -8,6 +8,7 @@ public interface ResponseMessage {
 
     String USER_ALREADY_EXISTS = "이미 존재하는 유저";
     String USER_NOT_FOUND = "유저를 찾을 수 없음";
+    String ALREADY_EXISTS = "이미 존재합니다. 중복 불가";
     String FILE_NOT_FOUND = "파일을 찾을 수 없음";
     String RESOURCE_NOT_FOUND = "리소스를 찾을 수 없음";
 

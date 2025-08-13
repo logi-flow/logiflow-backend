@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.DRIVER_API)
@@ -42,8 +44,8 @@ public class DriverController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllDriverResponseDto>> getAllDriver() {
-        ResponseDto<GetAllDriverResponseDto> response = driverService.getAllDriver();
+    public ResponseEntity<ResponseDto<List<GetAllDriverResponseDto>>> getAllDriver() {
+        ResponseDto<List<GetAllDriverResponseDto>> response = driverService.getAllDriver();
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
