@@ -10,4 +10,8 @@ public interface ResponseMessage {
     String USER_NOT_FOUND = "유저를 찾을 수 없음";
     String FILE_NOT_FOUND = "파일을 찾을 수 없음";
     String RESOURCE_NOT_FOUND = "리소스를 찾을 수 없음";
+
+    String TOKEN_EXPIRED = "토큰이 만료되었습니다.";
+    String INVALID_TOKEN = "유효하지 않은 토큰입니다.";
+    String MISSING_TOKEN = "토큰이 누락되었습니다.";
 }

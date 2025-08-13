@@ -1,5 +1,6 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
@@ -16,37 +17,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(Long id, UpdateEmployeeRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, UpdateEmployeeRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(Long id) {
+    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(UserPrincipal userPrincipal) {
         return null;
     }
 
     @Override
-    public ResponseDto<CreateEmployeeResponseDto> createEmployee(Long id, Long employeeId, CreateEmployeeRequestDto dto) {
+    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, Long employeeId, CreateEmployeeRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(Long id, Long employeeId, UpdateEmployeeAdminRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeAdminRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetAllEmployeeResponseDto> getAllEmployee(Long id) {
+    public ResponseDto<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetailAdmin(Long id, Long employeeId) {
+    public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetailAdmin(UserPrincipal userPrincipal, Long employeeId) {
         return null;
     }
 
     @Override
-    public ResponseDto<?> deleteEmployee(Long id, Long employeeId) {
+    public ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long employeeId) {
         return null;
     }
 }

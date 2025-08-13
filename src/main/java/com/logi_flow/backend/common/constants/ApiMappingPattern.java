@@ -5,6 +5,7 @@ public interface ApiMappingPattern {
     String USER_API = "/api/v1/users";
     String CUSTOMER_API = "/api/v1/customers";
     String EMPLOYEE_API = "/api/v1/employees";
+    String CONTRACT_API = "/api/v1/contracts";
 
     String DRIVER_API = "/api/v1/drivers";
     String VEHICLE_API = "/api/v1/vehicles";

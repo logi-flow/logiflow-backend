@@ -32,8 +32,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateCustomerRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(id, dto);
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -41,8 +40,7 @@ public class CustomerController {
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(id);
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -52,8 +50,7 @@ public class CustomerController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateCustomerAdminRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomerAdmin(id, customerId, dto);
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomerAdmin(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -63,8 +60,7 @@ public class CustomerController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateCustomerStatusRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerStatusResponseDto> response = customerService.updateCustomerStatus(id, customerId, dto);
+        ResponseDto<UpdateCustomerStatusResponseDto> response = customerService.updateCustomerStatus(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -72,8 +68,7 @@ public class CustomerController {
     public ResponseEntity<ResponseDto<GetAllCustomerResponseDto>> getAllCustomer(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetAllCustomerResponseDto> response = customerService.getAllCustomer(id);
+        ResponseDto<GetAllCustomerResponseDto> response = customerService.getAllCustomer(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -82,8 +77,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(id, customerId);
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(userPrincipal, customerId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -92,8 +86,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<?> response = customerService.deleteCustomer(id, customerId);
+        ResponseDto<?> response = customerService.deleteCustomer(userPrincipal, customerId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
