@@ -1,5 +1,6 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerAdminRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerRequestDto;
@@ -13,37 +14,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerServiceImpl implements CustomerService {
     @Override
-    public ResponseDto<UpdateCustomerResponseDto> updateCustomer(Long id, UpdateCustomerRequestDto dto) {
+    public ResponseDto<UpdateCustomerResponseDto> updateCustomer(UserPrincipal userPrincipal, UpdateCustomerRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(Long id) {
+    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(UserPrincipal userPrincipal) {
         return null;
     }
 
     @Override
-    public ResponseDto<UpdateCustomerResponseDto> updateCustomerAdmin(Long id, Long customerId, UpdateCustomerAdminRequestDto dto) {
+    public ResponseDto<UpdateCustomerResponseDto> updateCustomerAdmin(UserPrincipal userPrincipal, Long customerId, UpdateCustomerAdminRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<UpdateCustomerStatusResponseDto> updateCustomerStatus(Long id, Long customerId, UpdateCustomerStatusRequestDto dto) {
+    public ResponseDto<UpdateCustomerStatusResponseDto> updateCustomerStatus(UserPrincipal userPrincipal, Long customerId, UpdateCustomerStatusRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetAllCustomerResponseDto> getAllCustomer(Long id) {
+    public ResponseDto<GetAllCustomerResponseDto> getAllCustomer(UserPrincipal userPrincipal) {
         return null;
     }
 
     @Override
-    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetailAdmin(Long id, Long customerId) {
+    public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetailAdmin(UserPrincipal userPrincipal, Long customerId) {
         return null;
     }
 
     @Override
-    public ResponseDto<?> deleteCustomer(Long id, Long customerId) {
+    public ResponseDto<?> deleteCustomer(UserPrincipal userPrincipal, Long customerId) {
         return null;
     }
 }

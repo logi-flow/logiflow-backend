@@ -29,14 +29,14 @@ public class UserController {
 
     private static final String USER_ID_API = "/{userId}";
     private static final String USER_STATUS_API = "/{userId}/status";
+    private static final String USER_ROLE_API = "/{userId}/roles";
     private static final String PROFILE_IMAGE_API = "/profile-image";
 
     @GetMapping
     public ResponseEntity<ResponseDto<GetAllUserResponseDto>> getAllUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetAllUserResponseDto> response = userService.getAllUser(id);
+        ResponseDto<GetAllUserResponseDto> response = userService.getAllUser(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -45,8 +45,7 @@ public class UserController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetUserDetailResponseDto> response = userService.getUserDetail(id, userId);
+        ResponseDto<GetUserDetailResponseDto> response = userService.getUserDetail(userPrincipal, userId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -56,19 +55,17 @@ public class UserController {
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserStatusRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateUserStatusResponseDto> response = userService.updateUserStatus(id, userId, dto);
+        ResponseDto<UpdateUserStatusResponseDto> response = userService.updateUserStatus(userPrincipal, userId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping(USER_STATUS_API)
+    @PutMapping(USER_ROLE_API)
     public ResponseEntity<ResponseDto<UpdateUserRoleResponseDto>> updateUserRole(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRoleRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateUserRoleResponseDto> response = userService.updateUserRole(id, userId, dto);
+        ResponseDto<UpdateUserRoleResponseDto> response = userService.updateUserRole(userPrincipal, userId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

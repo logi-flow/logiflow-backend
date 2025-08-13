@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiMappingPattern.CUSTOMER_API)
+@RequestMapping(ApiMappingPattern.CONTRACT_API)
 public class ContractController {
 
     private final ContractService contractService;
 
-    private static final String CONTRACT_API = "/{customerId}/contracts";
-    private static final String CONTRACT_STATUS_API = "/{customerId}/contracts/status";
+    private static final String CONTRACT_API = "/{customerId}";
+    private static final String CONTRACT_STATUS_API = "/{customerId}/status";
 
     @PostMapping(CONTRACT_API)
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
@@ -31,8 +31,7 @@ public class ContractController {
             @PathVariable Long customerId,
             @Valid @RequestBody CreateContractRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<CreateContractResponseDto> response = contractService.createContract(id, customerId, dto);
+        ResponseDto<CreateContractResponseDto> response = contractService.createContract(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
@@ -42,8 +41,7 @@ public class ContractController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateContractRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateContractResponseDto> response = contractService.updateContract(id, customerId, dto);
+        ResponseDto<UpdateContractResponseDto> response = contractService.updateContract(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -53,8 +51,7 @@ public class ContractController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateContractStatusRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateContractStatusResponseDto> response = contractService.updateContractStatus(id, customerId, dto);
+        ResponseDto<UpdateContractStatusResponseDto> response = contractService.updateContractStatus(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -62,8 +59,7 @@ public class ContractController {
     public ResponseEntity<ResponseDto<GetAllContractResponseDto>> getAllContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetAllContractResponseDto> response = contractService.getAllContract(id);
+        ResponseDto<GetAllContractResponseDto> response = contractService.getAllContract(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -72,8 +68,7 @@ public class ContractController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(id, customerId);
+        ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(userPrincipal, customerId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -82,8 +77,7 @@ public class ContractController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<?> response = contractService.deleteContract(id, customerId);
+        ResponseDto<?> response = contractService.deleteContract(userPrincipal, customerId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
