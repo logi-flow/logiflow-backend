@@ -14,7 +14,6 @@ import java.util.Collections;
 @Getter
 @ToString(exclude = "password")
 public class UserPrincipal implements UserDetails {
-    private final Long id;
     private final String role;
     private final String username;
 
@@ -22,7 +21,6 @@ public class UserPrincipal implements UserDetails {
     private final String password;
 
     public UserPrincipal(User user) {
-        this.id = user.getId();
         this.role = user.getRole().getName().name();
         this.username = user.getUsername();
         this.password = user.getPassword();

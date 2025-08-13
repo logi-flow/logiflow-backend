@@ -1,8 +1,11 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.attendance.response.GetMyAttendancesResponseDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
 import com.logi_flow.backend.dto.customer.response.UpdateCustomerStatusResponseDto;
 import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
@@ -16,6 +19,7 @@ import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,10 +37,14 @@ public class UserController {
     private static final String PROFILE_IMAGE_API = "/profile-image";
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllUserResponseDto>> getAllUser(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    public ResponseEntity<ResponseDto<PageDto<GetAllUserResponseDto>>> getAllUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
     ) {
-        ResponseDto<GetAllUserResponseDto> response = userService.getAllUser(userPrincipal);
+        Page<GetAllUserResponseDto> result = userService.getAllUser(userPrincipal, page, size, sort);
+        PageDto<GetAllUserResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

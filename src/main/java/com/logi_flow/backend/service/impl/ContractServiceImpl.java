@@ -1,6 +1,7 @@
 package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.contract.request.CreateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractRequestDto;
@@ -8,6 +9,7 @@ import com.logi_flow.backend.dto.contract.request.UpdateContractStatusRequestDto
 import com.logi_flow.backend.dto.contract.response.*;
 import com.logi_flow.backend.service.ContractService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public ResponseDto<GetAllContractResponseDto> getAllContract(UserPrincipal userPrincipal) {
+    public Page<GetAllContractResponseDto> getAllContract(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 

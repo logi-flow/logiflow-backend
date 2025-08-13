@@ -10,13 +10,14 @@ import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     @Override
-    public ResponseDto<GetAllUserResponseDto> getAllUser(UserPrincipal userPrincipal) {
+    public Page<GetAllUserResponseDto> getAllUser(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 

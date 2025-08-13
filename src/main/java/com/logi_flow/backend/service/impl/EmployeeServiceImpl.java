@@ -11,6 +11,7 @@ import com.logi_flow.backend.dto.employee.response.GetEmployeeDetailResponseDto;
 import com.logi_flow.backend.dto.employee.response.UpdateEmployeeResponseDto;
 import com.logi_flow.backend.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseDto<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal) {
+    public Page<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 
