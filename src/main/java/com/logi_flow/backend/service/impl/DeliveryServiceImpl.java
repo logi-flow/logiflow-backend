@@ -1,11 +1,12 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.delivery.request.CreateDeliveryRequestDto;
 import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryRequestDto;
+import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryStatusRequestDto;
+import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
-import com.logi_flow.backend.entity.Customer;
-import com.logi_flow.backend.entity.Delivery;
 import com.logi_flow.backend.repository.DeliveryRepository;
 import com.logi_flow.backend.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository deliveryRepository;
 
     @Override
-    public ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto) {
+    public ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
+
+
         return null;
     }
 
@@ -35,12 +38,22 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, UpdateDeliveryRequestDto dto) {
+    public ResponseDto<UpdateDeliveryResponseDto> updateDeliveryIsHidden(Long deliveryId, UpdateIsHiddenRequestDto dto, UserPrincipal userPrincipal) {
         return null;
     }
 
     @Override
-    public ResponseDto<?> deleteDelivery(Long deliveryId) {
+    public ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, UpdateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<UpdateDeliveryResponseDto> updateDeliveryStatus(Long deliveryId, UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal) {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<Void> deleteDelivery(Long deliveryId) {
         return null;
     }
 
