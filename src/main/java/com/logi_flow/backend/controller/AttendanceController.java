@@ -24,6 +24,7 @@ public class AttendanceController {
     private static final String CHECK_OUT_API = "/check-out";
     private static final String GET_DETAILS_API = "/{attendanceId}";
     private static final String MY_ATTENDANCE_API = "/me";
+    private static final String MY_ATTENDANCE_LIST_API = "/me/list";
 
     @PostMapping(CHECK_IN_API)
     public ResponseEntity<ResponseDto<CreateAttendanceResponseDto>> checkInAttendance(
@@ -45,7 +46,7 @@ public class AttendanceController {
     public ResponseEntity<ResponseDto<PageDto<GetAllAttendanceResponseDto>>> getAllAttendance(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllAttendanceResponseDto> result = attendanceService.getAllAttendance(page, size, sort);
         PageDto<GetAllAttendanceResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -53,22 +54,30 @@ public class AttendanceController {
     }
 
     @GetMapping(GET_DETAILS_API)
-    public ResponseEntity<ResponseDto<GetAllAttendanceResponseDto>> getAttendanceDetail(
+    public ResponseEntity<ResponseDto<GetAttendanceDetailResponseDto>> getAttendanceDetail(
             @PathVariable Long attendanceId
     ) {
-        ResponseDto<GetAllAttendanceResponseDto> response = attendanceService.getAttendanceDetails(attendanceId);
+        ResponseDto<GetAttendanceDetailResponseDto> response = attendanceService.getAttendanceDetails(attendanceId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping(MY_ATTENDANCE_API)
-    public ResponseEntity<ResponseDto<PageDto<GetMyAttendancesResponseDto>>> getMyAttendances(
+    public ResponseEntity<ResponseDto<GetMyAttendanceDetailResponseDto>> getMyAttendance(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        ResponseDto<GetMyAttendanceDetailResponseDto> response = attendanceService.getMyAttendance(userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping(MY_ATTENDANCE_LIST_API)
+    public ResponseEntity<ResponseDto<PageDto<GetAllMyAttendanceResponseDto>>> getAllMyAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
-        Page<GetMyAttendancesResponseDto> result = attendanceService.getMyAttendances(userPrincipal, page, size, sort);
-        PageDto<GetMyAttendancesResponseDto> response = PageMapper.toPageDto(result, sort);
+        Page<GetAllMyAttendanceResponseDto> result = attendanceService.getAllMyAttendance(userPrincipal, page, size, sort);
+        PageDto<GetAllMyAttendanceResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
