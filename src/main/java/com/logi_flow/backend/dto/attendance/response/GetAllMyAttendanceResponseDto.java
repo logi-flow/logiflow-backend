@@ -4,20 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-
 @AllArgsConstructor
 @Getter
 @Builder
-public class GetAttendanceDetailResponseDto {
-    private Long id;
-    private Long driverId;
-    private String driverName;
-    private String driverPhone;
-    private LocalDate driverCompanyJoin;
+public class GetAllMyAttendanceResponseDto {
     private String workStart;
     private String workEnd;
-    private Integer openFlag;
 
     private String createdAt;
     private String updatedAt;

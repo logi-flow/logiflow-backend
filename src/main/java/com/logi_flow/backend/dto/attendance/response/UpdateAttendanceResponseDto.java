@@ -4,18 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
 public class UpdateAttendanceResponseDto {
     private Long id;
     private Long driverId;
-    private Long employeeId;
-    private LocalDateTime workStart;
-    private LocalDateTime workEnd;
+    private String workStart;
+    private String workEnd;
+    private Integer openFlag;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
