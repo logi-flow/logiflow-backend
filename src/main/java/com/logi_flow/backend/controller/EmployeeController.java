@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
@@ -13,6 +15,7 @@ import com.logi_flow.backend.dto.employee.response.UpdateEmployeeResponseDto;
 import com.logi_flow.backend.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,8 +36,7 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateEmployeeRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(id, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -42,8 +44,7 @@ public class EmployeeController {
     public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetail(id);
+        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetail(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -53,8 +54,7 @@ public class EmployeeController {
             @PathVariable Long employeeId,
             @Valid @RequestBody CreateEmployeeRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(id, employeeId, dto);
+        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, employeeId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
@@ -64,17 +64,19 @@ public class EmployeeController {
             @PathVariable Long employeeId,
             @Valid @RequestBody UpdateEmployeeAdminRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(id, employeeId, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(userPrincipal, employeeId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllEmployeeResponseDto>> getAllEmployee(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    public ResponseEntity<ResponseDto<PageDto<GetAllEmployeeResponseDto>>> getAllEmployee(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetAllEmployeeResponseDto> response = employeeService.getAllEmployee(id);
+        Page<GetAllEmployeeResponseDto> result = employeeService.getAllEmployee(userPrincipal, page, size, sort);
+        PageDto<GetAllEmployeeResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -83,8 +85,7 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetailAdmin(id, employeeId);
+        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetailAdmin(userPrincipal, employeeId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -93,8 +94,7 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<?> response = employeeService.deleteEmployee(id, employeeId);
+        ResponseDto<?> response = employeeService.deleteEmployee(userPrincipal, employeeId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

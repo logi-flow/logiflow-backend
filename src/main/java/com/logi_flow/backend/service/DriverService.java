@@ -7,13 +7,16 @@ import com.logi_flow.backend.dto.driver.response.CreateDriverResponseDto;
 import com.logi_flow.backend.dto.driver.response.GetAllDriverResponseDto;
 import com.logi_flow.backend.dto.driver.response.GetDriverDetailResponseDto;
 import com.logi_flow.backend.dto.driver.response.UpdateDriverResponseDto;
+import jakarta.validation.Valid;
+
+import java.util.List;
 
 public interface DriverService {
-    ResponseDto<CreateDriverResponseDto> createDriver(CreateDriverRequestDto dto);
+    ResponseDto<CreateDriverResponseDto> createDriver(@Valid CreateDriverRequestDto dto);
 
-    ResponseDto<UpdateDriverResponseDto> updateDriver(Long driverId, UpdateDriverRequestDto dto);
+    ResponseDto<UpdateDriverResponseDto> updateDriver(Long driverId, @Valid UpdateDriverRequestDto dto);
 
-    ResponseDto<GetAllDriverResponseDto> getAllDriver();
+    ResponseDto<List<GetAllDriverResponseDto>> getAllDriver();
 
     ResponseDto<GetDriverDetailResponseDto> getDriverDetail(Long driverId);
 

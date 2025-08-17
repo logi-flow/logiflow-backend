@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
 public class GetAllAttendanceResponseDto {
+    private Long driverId;
     private String driverName;
-    private String employeeName;
-    private LocalDateTime workStart;
-    private LocalDateTime workEnd;
+    private String workStart;
+    private String workEnd;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

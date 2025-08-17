@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerAdminRequestDto;
@@ -11,6 +13,7 @@ import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,8 +35,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateCustomerRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(id, dto);
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomer(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -41,8 +43,7 @@ public class CustomerController {
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(id);
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetail(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -52,8 +53,7 @@ public class CustomerController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateCustomerAdminRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomerAdmin(id, customerId, dto);
+        ResponseDto<UpdateCustomerResponseDto> response = customerService.updateCustomerAdmin(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -63,17 +63,19 @@ public class CustomerController {
             @PathVariable Long customerId,
             @Valid @RequestBody UpdateCustomerStatusRequestDto dto
     ){
-        Long id = userPrincipal.getId();
-        ResponseDto<UpdateCustomerStatusResponseDto> response = customerService.updateCustomerStatus(id, customerId, dto);
+        ResponseDto<UpdateCustomerStatusResponseDto> response = customerService.updateCustomerStatus(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllCustomerResponseDto>> getAllCustomer(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    public ResponseEntity<ResponseDto<PageDto<GetAllCustomerResponseDto>>> getAllCustomer(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetAllCustomerResponseDto> response = customerService.getAllCustomer(id);
+        Page<GetAllCustomerResponseDto> result = customerService.getAllCustomer(userPrincipal, page, size, sort);
+        PageDto<GetAllCustomerResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -82,8 +84,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(id, customerId);
+        ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(userPrincipal, customerId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -92,8 +93,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
-        Long id = userPrincipal.getId();
-        ResponseDto<?> response = customerService.deleteCustomer(id, customerId);
+        ResponseDto<?> response = customerService.deleteCustomer(userPrincipal, customerId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
