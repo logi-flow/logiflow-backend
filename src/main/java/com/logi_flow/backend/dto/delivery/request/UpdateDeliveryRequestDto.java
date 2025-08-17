@@ -20,7 +20,6 @@ public class UpdateDeliveryRequestDto {
     private BigDecimal weight;
 
     private String message;
-    private boolean isHidden;
 
     @NotBlank(message = "수거지 이름은 필수 항목입니다.")
     private String pickupName;
