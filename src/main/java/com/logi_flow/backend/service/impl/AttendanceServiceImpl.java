@@ -15,8 +15,6 @@ import com.logi_flow.backend.repository.DriverRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +26,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
@@ -50,22 +47,17 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .workStart(LocalDateTime.now())
                 .build();
 
-        try {
-            Attendance savedAttendance = attendanceRepository.saveAndFlush(newAttendance);
+        attendanceRepository.save(newAttendance);
 
-            data = CreateAttendanceResponseDto.builder()
-                    .id(savedAttendance.getId())
-                    .driverId(savedAttendance.getDriver().getId())
-                    .workStart(DateUtils.format(savedAttendance.getWorkStart()))
-                    .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
-                    .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
-                    .build();
+        data = CreateAttendanceResponseDto.builder()
+                .id(newAttendance.getId())
+                .driverId(newAttendance.getDriver().getId())
+                .workStart(DateUtils.format(newAttendance.getWorkStart()))
+                .createdAt(DateUtils.format(newAttendance.getCreatedAt()))
+                .updatedAt(DateUtils.format(newAttendance.getUpdatedAt()))
+                .build();
 
-            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
-        } catch (DataIntegrityViolationException e) {
-            log.warn("check-in-attendance fail: driverId = {}", driver.getId(), e);
-            return ResponseDto.fail(ResponseCode.ALREADY_OPEN_ATTENDANCE, ResponseMessage.ALREADY_OPEN_ATTENDANCE);
-        }
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override

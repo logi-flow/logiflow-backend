@@ -1,10 +1,9 @@
 package com.logi_flow.backend.dto.allowanceType.response;
 
+import com.logi_flow.backend.common.enums.AllowanceTypeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -15,8 +14,8 @@ public class UpdateAllowanceTypeResponseDto {
     private String name;
     private String description;
     private boolean isActive;
-    private String status;
+    private AllowanceTypeStatus status;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

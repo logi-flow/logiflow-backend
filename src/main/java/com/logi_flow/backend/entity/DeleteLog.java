@@ -7,7 +7,16 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "delete_logs")
+@Table(
+        name = "delete_logs",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_delete_logs",
+                        columnNames = { "table_name", "record_id", "delete_type" }
+                )
+        }
+
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter

@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.deductionType.request.CreateDeductionTypeReques
 import com.logi_flow.backend.dto.deductionType.request.UpdateDeductionTypeRequestDto;
 import com.logi_flow.backend.dto.deductionType.response.CreateDeductionTypeResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.GetAllDeductionTypeResponseDto;
+import com.logi_flow.backend.dto.deductionType.response.GetDeductionTypeDetailResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeResponseDto;
 import com.logi_flow.backend.service.DeductionTypeService;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class DeductionTypeController {
     public ResponseEntity<ResponseDto<PageDto<GetAllDeductionTypeResponseDto>>> getAllDeductionType(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDeductionTypeResponseDto> result = deductionTypeService.getAllDeductionType(page, size, sort);
         PageDto<GetAllDeductionTypeResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -47,10 +48,10 @@ public class DeductionTypeController {
     }
 
     @GetMapping(DEDUCTION_TYPE_ID_API)
-    public ResponseEntity<ResponseDto<GetAllDeductionTypeResponseDto>> getDeductionTypeDetail(
+    public ResponseEntity<ResponseDto<GetDeductionTypeDetailResponseDto>> getDeductionTypeDetail(
             @PathVariable Long deductionTypeId
     ) {
-        ResponseDto<GetAllDeductionTypeResponseDto> response = deductionTypeService.getDeductionTypeDetail(deductionTypeId);
+        ResponseDto<GetDeductionTypeDetailResponseDto> response = deductionTypeService.getDeductionTypeDetail(deductionTypeId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

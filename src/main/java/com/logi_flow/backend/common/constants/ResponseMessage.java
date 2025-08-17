@@ -18,4 +18,6 @@ public interface ResponseMessage {
 
     String ALREADY_OPEN_ATTENDANCE = "미퇴근 기록 또는 중복된 출근 기록이 존재합니다.";
     String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
+
+    String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
 }
