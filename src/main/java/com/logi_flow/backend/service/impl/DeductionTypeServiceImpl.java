@@ -32,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class DeductionTypeServiceImpl implements DeductionTypeService {
 
     private final DeductionTypeRepository deductionTypeRepository;

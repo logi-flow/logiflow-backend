@@ -15,7 +15,6 @@ import java.time.LocalDate;
                         columnNames = { "table_name", "record_id", "delete_type" }
                 )
         }
-
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
