@@ -8,4 +8,6 @@ public interface ResponseCode {
     String MISSING_TOKEN = "MT";
 
     String ALREADY_OPEN_ATTENDANCE = "AOA";
+
+    String EXISTS_TYPE_CODE = "ETC";
 }

@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
@@ -17,6 +15,6 @@ public class CreateAllowanceTypeResponseDto {
     private boolean isActive;
     private String status;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
