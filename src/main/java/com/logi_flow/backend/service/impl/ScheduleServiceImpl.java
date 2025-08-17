@@ -8,6 +8,7 @@ import com.logi_flow.backend.dto.schedule.response.GetScheduleDetailResponseDto;
 import com.logi_flow.backend.dto.schedule.response.UpdateScheduleResponseDto;
 import com.logi_flow.backend.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,13 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
+
     @Override
     public ResponseDto<UpdateScheduleResponseDto> updateSchedule(Long scheduleId, UpdateScheduleRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseDto<List<GetAllScheduleResponseDto>> getAllSchedule() {
+    public Page<GetAllScheduleResponseDto> getAllSchedule(int page, int size, String sort) {
         return null;
     }
 
@@ -31,12 +33,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ResponseDto<List<GetAllScheduleResponseDto>> getScheduleByDriverId(Long driverId) {
+    public Page<GetAllScheduleResponseDto> getScheduleByDriverId(Long driverId, int page, int size, String sort) {
         return null;
     }
 
     @Override
-    public ResponseDto<List<GetAllScheduleResponseDto>> getMySchedules(UserPrincipal userPrincipal) {
+    public Page<GetAllScheduleResponseDto> getMySchedules(UserPrincipal userPrincipal, int page, int size, String sort) {
         return null;
     }
 }

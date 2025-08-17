@@ -6,17 +6,18 @@ import com.logi_flow.backend.dto.schedule.request.UpdateScheduleRequestDto;
 import com.logi_flow.backend.dto.schedule.response.GetAllScheduleResponseDto;
 import com.logi_flow.backend.dto.schedule.response.GetScheduleDetailResponseDto;
 import com.logi_flow.backend.dto.schedule.response.UpdateScheduleResponseDto;
-
-import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface ScheduleService {
-    ResponseDto<UpdateScheduleResponseDto> updateSchedule(Long scheduleId, UpdateScheduleRequestDto dto);
 
-    ResponseDto<List<GetAllScheduleResponseDto>> getAllSchedule();
+    ResponseDto<UpdateScheduleResponseDto> updateSchedule(Long scheduleId, @Valid UpdateScheduleRequestDto dto);
+
+    Page<GetAllScheduleResponseDto> getAllSchedule(int page, int size, String sort);
 
     ResponseDto<GetScheduleDetailResponseDto> getSchedule(Long scheduleId);
 
-    ResponseDto<List<GetAllScheduleResponseDto>> getScheduleByDriverId(Long driverId);
+    Page<GetAllScheduleResponseDto> getScheduleByDriverId(Long driverId, int page, int size, String sort);
 
-    ResponseDto<List<GetAllScheduleResponseDto>> getMySchedules(UserPrincipal userPrincipal);
+    Page<GetAllScheduleResponseDto> getMySchedules(UserPrincipal userPrincipal, int page, int size, String sort);
 }
