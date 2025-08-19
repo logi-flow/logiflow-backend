@@ -24,19 +24,19 @@ public class Customer extends BaseTime {
     @Column(name = "status", nullable = false)
     private CustomerStatus status;
 
-    @Column(name = "businessNumber", nullable = false, unique = true)
+    @Column(name = "business_number", nullable = false, unique = true)
     private String businessNumber;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "representativeName", nullable = false)
+    @Column(name = "representative_name", nullable = false)
     private String representativeName;
 
-    @Column(name = "businessType", nullable = false)
+    @Column(name = "business_type", nullable = false)
     private String businessType;
 
-    @Column(name = "businessItems", nullable = false)
+    @Column(name = "business_items", nullable = false)
     private String businessItems;
 
     @Column(name = "telephone", nullable = false)
@@ -48,28 +48,28 @@ public class Customer extends BaseTime {
     @Column(name = "fax")
     private String fax;
 
-    @Column(name = "businessZipCode", nullable = false)
+    @Column(name = "business_zipcode", nullable = false)
     private String businessZipCode;
 
-    @Column(name = "businessAddress", nullable = false)
+    @Column(name = "business_address", nullable = false)
     private String businessAddress;
 
-    @Column(name = "businessAddressDetail")
+    @Column(name = "business_address_detail")
     private String businessAddressDetail;
 
-    @Column(name = "chargePosition")
+    @Column(name = "charge_position")
     private String chargePosition;
 
-    @Column(name = "chargeDepartment")
+    @Column(name = "charge_department")
     private String chargeDepartment;
 
-    @Column(name = "chargeName")
+    @Column(name = "charge_name")
     private String chargeName;
 
-    @Column(name = "chargePhone")
+    @Column(name = "charge_phone")
     private String chargePhone;
 
-    @Column(name = "chargeEmail")
+    @Column(name = "charge_email")
     private String chargeEmail;
 
     @Column(name = "parcel_count")
