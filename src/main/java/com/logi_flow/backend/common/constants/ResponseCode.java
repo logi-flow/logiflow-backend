@@ -16,4 +16,8 @@ public interface ResponseCode {
     String NOT_MATCH = "NM";
     String NOT_MATCH_INFORMATION = "NMI";
     String INTERNAL_SERVER_ERROR = "ISE";
+  
+    String ALREADY_OPEN_ATTENDANCE = "AOA";
+
+    String EXISTS_TYPE_CODE = "ETC";
 }

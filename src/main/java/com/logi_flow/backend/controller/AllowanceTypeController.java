@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.allowanceType.request.CreateAllowanceTypeReques
 import com.logi_flow.backend.dto.allowanceType.request.UpdateAllowanceTypeRequestDto;
 import com.logi_flow.backend.dto.allowanceType.response.CreateAllowanceTypeResponseDto;
 import com.logi_flow.backend.dto.allowanceType.response.GetAllAllowanceTypeResponseDto;
+import com.logi_flow.backend.dto.allowanceType.response.GetAllowanceTypeDetailResponseDto;
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import com.logi_flow.backend.service.AllowanceTypeService;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class AllowanceTypeController {
     public ResponseEntity<ResponseDto<PageDto<GetAllAllowanceTypeResponseDto>>> getAllAllowanceType(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllAllowanceTypeResponseDto> result = allowanceTypeService.getAllAllowanceType(page, size, sort);
         PageDto<GetAllAllowanceTypeResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -47,10 +48,10 @@ public class AllowanceTypeController {
     }
 
     @GetMapping(ALLOWANCE_TYPE_ID_API)
-    public ResponseEntity<ResponseDto<GetAllAllowanceTypeResponseDto>> getAllowanceTypeDetail(
+    public ResponseEntity<ResponseDto<GetAllowanceTypeDetailResponseDto>> getAllowanceTypeDetail(
             @PathVariable Long allowanceTypeId
     ) {
-        ResponseDto<GetAllAllowanceTypeResponseDto> response = allowanceTypeService.getAllowanceTypeDetail(allowanceTypeId);
+        ResponseDto<GetAllowanceTypeDetailResponseDto> response = allowanceTypeService.getAllowanceTypeDetail(allowanceTypeId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

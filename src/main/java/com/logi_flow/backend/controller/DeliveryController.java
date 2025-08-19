@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.delivery.request.CreateDeliveryRequestDto;
 import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryRequestDto;
@@ -11,12 +13,11 @@ import com.logi_flow.backend.dto.delivery.response.*;
 import com.logi_flow.backend.service.DeliveryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,8 +32,13 @@ public class DeliveryController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<GetAllDeliveryResponseDto>>> getAllDelivery() {
-        ResponseDto<List<GetAllDeliveryResponseDto>> response = deliveryService.getAllDelivery();
+    public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllDeliveryResponseDto> result = deliveryService.getAllDelivery(page, size, sort);
+        PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -41,6 +47,19 @@ public class DeliveryController {
         ResponseDto<GetDeliveryDetailResponseDto> response = deliveryService.getDelivery(deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getMyDeliveries(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllDeliveryResponseDto> result = deliveryService.getMyDeliveries(userPrincipal, page, size, sort);
+        PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
 
     @PutMapping("/{deliveryId}/is-hidden")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -69,8 +88,13 @@ public class DeliveryController {
 
     // 배차 대기 목록 조회
     @GetMapping("/waiting")
-    public ResponseEntity<ResponseDto<List<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery() {
-        ResponseDto<List<GetAllWaitingDeliveryResponseDto>> response = deliveryService.getAllWaitingDelivery();
+    public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllWaitingDeliveryResponseDto> result = deliveryService.getAllWaitingDelivery(page, size, sort);
+        PageDto<GetAllWaitingDeliveryResponseDto> response =  PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

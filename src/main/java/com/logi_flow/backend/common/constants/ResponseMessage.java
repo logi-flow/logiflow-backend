@@ -21,4 +21,9 @@ public interface ResponseMessage {
     String NOT_MATCH = "아이디 또는 비밀번호가 일치하지 않습니다.";
     String NOT_MATCH_INFORMATION = "찾을려는 아이디의 정보가 일치하지 않습니다.";
     String INTERNAL_SERVER_ERROR = "서버 오류가 발생했습니다.";
+  
+    String ALREADY_OPEN_ATTENDANCE = "미퇴근 기록 또는 중복된 출근 기록이 존재합니다.";
+    String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
+
+    String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
 }

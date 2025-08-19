@@ -6,7 +6,19 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attendances")
+@Table(
+        name = "attendances",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_attendances_driver_id_work_start",
+                        columnNames = { "driver_id", "work_start" }
+                ),
+                @UniqueConstraint(
+                        name = "uq_attendances_driver_id_open_flag",
+                        columnNames = { "driver_id", "open_flag" }
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter @Setter
@@ -21,13 +33,12 @@ public class Attendance extends BaseTime {
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
-
-    @Column(name = "work_start")
+    @Column(name = "work_start", nullable = false)
     private LocalDateTime workStart;
 
     @Column(name = "work_end")
     private LocalDateTime workEnd;
+
+    @Column(name = "open_flag", insertable = false, updatable = false)
+    private Integer openFlag;
 }
