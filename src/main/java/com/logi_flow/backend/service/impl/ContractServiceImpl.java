@@ -1,5 +1,10 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.common.constants.ResponseCode;
+import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.ContractStatus;
+import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -7,41 +12,297 @@ import com.logi_flow.backend.dto.contract.request.CreateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractStatusRequestDto;
 import com.logi_flow.backend.dto.contract.response.*;
+import com.logi_flow.backend.entity.*;
+import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.ContractService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class ContractServiceImpl implements ContractService {
+
+    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
+    private final ContractRepository contractRepository;
+    private final ContractUpdateLogRepository contractUpdateLogRepository;
+    private final ContractStatusLogRepository contractStatusLogRepository;
+
     @Override
-    public ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, Long customerId, CreateContractRequestDto dto) {
-        return null;
+    @Transactional
+    public ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, CreateContractRequestDto dto) {
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Contract newContract = Contract.builder()
+                .customer(customer)
+                .status(ContractStatus.PENDING)
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .baseFee(dto.getBaseFee())
+                .weightLimitKg(dto.getWeightLimitKg())
+                .parcelLimit(dto.getParcelLimit())
+                .overWeightFeePerKg(dto.getOverWeightFeePerKg())
+                .overParcelFee(dto.getOverParcelFee())
+                .specialTerms(dto.getSpecialTerms())
+                .build();
+
+        contractRepository.save(newContract);
+
+        CreateContractResponseDto data = CreateContractResponseDto.builder()
+                .id(newContract.getId())
+                .customerId(newContract.getCustomer().getId())
+                .status(newContract.getStatus())
+                .startDate(newContract.getStartDate())
+                .endDate(newContract.getEndDate())
+                .baseFee(newContract.getBaseFee())
+                .weightLimitKg(newContract.getWeightLimitKg())
+                .parcelLimit(newContract.getParcelLimit())
+                .overWeightFeePerKg(newContract.getOverWeightFeePerKg())
+                .overParcelFee(newContract.getOverParcelFee())
+                .specialTerms(newContract.getSpecialTerms())
+                .createdAt(newContract.getCreatedAt())
+                .updatedAt(newContract.getUpdatedAt())
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long customerId, UpdateContractRequestDto dto) {
-        return null;
+    @Transactional
+    public ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long contractId, UpdateContractRequestDto dto) {
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        List<ContractUpdateLog> logs = new ArrayList<>();
+
+        if(!dto.getStartDate().equals(contract.getStartDate())) {
+            logs.add(buildLog(contract, user, username, "start_date", contract.getStartDate().toString(), dto.getStartDate().toString()));
+            contract.setStartDate(dto.getStartDate());
+        }
+
+        if(!dto.getEndDate().equals(contract.getEndDate())) {
+            logs.add(buildLog(contract, user, username, "end_date", contract.getEndDate().toString(), dto.getEndDate().toString()));
+            contract.setEndDate(dto.getEndDate());
+        }
+
+        if(dto.getBaseFee() != contract.getBaseFee()) {
+            logs.add(buildLog(contract, user, username, "base_fee", String.valueOf(contract.getBaseFee()), String.valueOf(dto.getBaseFee())));
+            contract.setBaseFee(dto.getBaseFee());
+        }
+
+        if(dto.getWeightLimitKg() != contract.getWeightLimitKg()) {
+            logs.add(buildLog(contract, user, username, "weight_limit_kg", String.valueOf(contract.getWeightLimitKg()), String.valueOf(dto.getWeightLimitKg())));
+            contract.setWeightLimitKg(dto.getWeightLimitKg());
+        }
+
+        if(dto.getParcelLimit() != contract.getParcelLimit()) {
+            logs.add(buildLog(contract, user, username, "parcel_limit", String.valueOf(contract.getParcelLimit()), String.valueOf(dto.getParcelLimit())));
+            contract.setParcelLimit(dto.getParcelLimit());
+        }
+
+        if(dto.getOverWeightFeePerKg() != contract.getOverWeightFeePerKg()) {
+            logs.add(buildLog(contract, user, username, "over_weight_fee_per_kg", String.valueOf(contract.getOverWeightFeePerKg()), String.valueOf(dto.getOverWeightFeePerKg())));
+            contract.setOverWeightFeePerKg(dto.getOverWeightFeePerKg());
+        }
+
+        if(dto.getOverParcelFee() != contract.getOverParcelFee()) {
+            logs.add(buildLog(contract, user, username, "over_parcel_fee", String.valueOf(contract.getOverParcelFee()), String.valueOf(dto.getOverParcelFee())));
+            contract.setOverParcelFee(dto.getOverParcelFee());
+        }
+
+        if(dto.getSpecialTerms() != null && !dto.getSpecialTerms().equals(contract.getSpecialTerms())) {
+            logs.add(buildLog(contract, user, username, "special_terms", contract.getSpecialTerms() != null ? contract.getSpecialTerms() : null, dto.getSpecialTerms()));
+            contract.setSpecialTerms(dto.getSpecialTerms());
+        }
+
+        Contract updatedContract = contractRepository.save(contract);
+        contractUpdateLogRepository.saveAll(logs);
+
+        UpdateContractResponseDto data = UpdateContractResponseDto.builder()
+                .id(updatedContract.getId())
+                .customerId(updatedContract.getCustomer().getId())
+                .status(updatedContract.getStatus())
+                .startDate(updatedContract.getStartDate())
+                .endDate(updatedContract.getEndDate())
+                .baseFee(updatedContract.getBaseFee())
+                .weightLimitKg(updatedContract.getWeightLimitKg())
+                .parcelLimit(updatedContract.getParcelLimit())
+                .overWeightFeePerKg(updatedContract.getOverWeightFeePerKg())
+                .overParcelFee(updatedContract.getOverParcelFee())
+                .specialTerms(updatedContract.getSpecialTerms())
+                .createdAt(updatedContract.getCreatedAt())
+                .updatedAt(updatedContract.getUpdatedAt())
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<UpdateContractStatusResponseDto> updateContractStatus(UserPrincipal userPrincipal, Long customerId, UpdateContractStatusRequestDto dto) {
-        return null;
+    @Transactional
+    public ResponseDto<UpdateContractStatusResponseDto> updateContractStatus(UserPrincipal userPrincipal, Long contractId, UpdateContractStatusRequestDto dto) {
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        ContractStatus prevStatus = contract.getStatus();
+
+        if(dto.getStatus() != prevStatus) {
+            contract.setStatus(dto.getStatus());
+        }
+
+        Contract updatedContract = contractRepository.save(contract);
+
+        ContractStatusLog contractStatusLog = ContractStatusLog.builder()
+                .contract(contract)
+                .changedBy(user)
+                .changedByUsername(username)
+                .changeReason(dto.getChangedReason())
+                .prevStatus(prevStatus)
+                .newStatus(updatedContract.getStatus())
+                .build();
+
+        contractStatusLogRepository.save(contractStatusLog);
+
+        UpdateContractStatusResponseDto data = UpdateContractStatusResponseDto.builder()
+                .id(updatedContract.getId())
+                .customerId(updatedContract.getCustomer().getId())
+                .status(updatedContract.getStatus())
+                .changedBy(user.getId())
+                .changedByUsername(username)
+                .changedReason(contractStatusLog.getChangeReason())
+                .prevStatus(prevStatus)
+                .newStatus(updatedContract.getStatus())
+                .createdAt(updatedContract.getCreatedAt())
+                .updatedAt(updatedContract.getUpdatedAt())
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
     public Page<GetAllContractResponseDto> getAllContract(UserPrincipal userPrincipal, int page, int size, String sort) {
-        return null;
+        Page<GetAllContractResponseDto> data = null;
+
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Contract> contracts = contractRepository.findAll(pageable);
+
+        data = contracts.map(this::toGetAllContractResponseDto);
+
+        return data;
     }
 
     @Override
-    public ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long customerId) {
-        return null;
+    public ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId) {
+        String username = userPrincipal.getUsername();
+        User user =  userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        boolean isAdmin = user.getRole().getName().equals(UserRole.ADMIN);
+        boolean isOwner = contract.getCustomer().getUser().getId().equals(user.getId());
+
+        if(!isAdmin && !isOwner) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        GetContractDetailResponseDto data = GetContractDetailResponseDto.builder()
+                .id(contract.getId())
+                .customerId(contract.getCustomer().getId())
+                .customerName(contract.getCustomer().getName())
+                .status(contract.getStatus())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .baseFee(contract.getBaseFee())
+                .weightLimitKg(contract.getWeightLimitKg())
+                .parcelLimit(contract.getParcelLimit())
+                .overWeightFeePerKg(contract.getOverWeightFeePerKg())
+                .overParcelFee(contract.getOverParcelFee())
+                .specialTerms(contract.getSpecialTerms())
+                .createdAt(contract.getCreatedAt())
+                .updatedAt(contract.getUpdatedAt())
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long customerId) {
-        return null;
+    @Transactional
+    public ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long contractId, UpdateContractStatusRequestDto dto) {
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        ContractStatus prevStatus = contract.getStatus();
+
+        if(dto.getStatus() == ContractStatus.DELETED) {
+            contract.setStatus(ContractStatus.DELETED);
+            contractRepository.save(contract);
+
+            ContractStatusLog log = ContractStatusLog.builder()
+                    .contract(contract)
+                    .changedBy(user)
+                    .changedByUsername(username)
+                    .changeReason(dto.getChangedReason())
+                    .prevStatus(prevStatus)
+                    .newStatus(contract.getStatus())
+                    .build();
+
+            contractStatusLogRepository.save(log);
+        } else {
+            return ResponseDto.fail("BAD_REQUEST", "ONLY DELETED status is allowed");
+        }
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
+
+    // 로그 생성
+    private ContractUpdateLog buildLog(Contract contract, User user, String username, String type, String prevData, String newData) {
+        return ContractUpdateLog.builder()
+                .contract(contract)
+                .user(user)
+                .changedByUsername(username)
+                .type(type)
+                .prevData(String.valueOf(prevData))
+                .newData(String.valueOf(newData))
+                .build();
+    }
+
+    private GetAllContractResponseDto toGetAllContractResponseDto(Contract contract) {
+        return GetAllContractResponseDto.builder()
+                .id(contract.getId())
+                .customerId(contract.getCustomer().getId())
+                .customerName(contract.getCustomer().getName())
+                .status(contract.getStatus())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .createdAt(contract.getCreatedAt())
+                .updatedAt(contract.getUpdatedAt())
+                .build();
+    }
+
 }

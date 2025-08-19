@@ -16,8 +16,6 @@ public class CreateAllocationResponseDto {
     private Long deliveryId;
     private Long assignmentId;
     private String districtName;
-    private BigDecimal startMileage;
-    private BigDecimal endMileage;
     private AllocationStatus status;
 
     private LocalDateTime createdAt;
