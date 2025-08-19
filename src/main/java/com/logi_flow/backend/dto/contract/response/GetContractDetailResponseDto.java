@@ -16,7 +16,7 @@ public class GetContractDetailResponseDto {
     private Long customerId;
     private String customerName;
     private ContractStatus status;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
     private int baseFee;
     private int weightLimitKg;

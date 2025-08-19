@@ -11,14 +11,8 @@ import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryRequestDto;
 import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryStatusRequestDto;
 import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
-import com.logi_flow.backend.entity.Contract;
-import com.logi_flow.backend.entity.Customer;
-import com.logi_flow.backend.entity.Delivery;
-import com.logi_flow.backend.entity.User;
-import com.logi_flow.backend.repository.ContractRepository;
-import com.logi_flow.backend.repository.CustomerRepository;
-import com.logi_flow.backend.repository.DeliveryRepository;
-import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.entity.*;
+import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.DeliveryService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
@@ -36,7 +33,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final CustomerRepository customerRepository;
     private final ContractRepository contractRepository;
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
 
+    // 상태 > 승인되면 finalFee ~ isOverParcel 까지 계산해서 자동으로 넣기
     @Override
     public ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
@@ -65,7 +64,6 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .recipientZipcode(dto.getRecipientZipcode())
                 .recipientAddress(dto.getRecipientAddress())
                 .recipientAddressDetail(dto.getRecipientAddressDetail())
-                // 계약 되면 계산
                 .finalFee(0)
                 .overWeightFee(0)
                 .overParcelFee(0)
@@ -237,63 +235,83 @@ public class DeliveryServiceImpl implements DeliveryService {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
+        List<DeliveryUpdateLog> logs = new ArrayList<>();
+
         if(!dto.getRequestDate().equals(delivery.getRequestDate())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "request_date", delivery.getRequestDate().toString(), dto.getRequestDate().toString()));
             delivery.setRequestDate(dto.getRequestDate());
         }
 
         if(!dto.getItem().equals(delivery.getItem())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "item", delivery.getItem(), dto.getItem()));
             delivery.setItem(dto.getItem());
         }
 
         if(dto.getWeight().compareTo(delivery.getWeight()) != 0) {
+            logs.add(buildDeliveryLog(delivery, user, username, "weight", delivery.getWeight().toString(), dto.getWeight().toString()));
             delivery.setWeight(dto.getWeight());
         }
 
         if(!dto.getMessage().equals(delivery.getMessage())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "message", delivery.getMessage(), dto.getMessage()));
             delivery.setMessage(dto.getMessage());
         }
 
         if(!dto.getPickupName().equals(delivery.getPickupName())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_name", delivery.getPickupName(), dto.getPickupName()));
             delivery.setPickupName(dto.getPickupName());
         }
 
         if(!dto.getPickupPhone().equals(delivery.getPickupPhone())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_phone", dto.getPickupPhone(), dto.getPickupPhone()));
             delivery.setPickupPhone(dto.getPickupPhone());
         }
 
         if(!dto.getPickupZipcode().equals(delivery.getPickupZipCode())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_zipcode", dto.getPickupZipcode(), dto.getPickupZipcode()));
             delivery.setPickupZipCode(dto.getPickupZipcode());
         }
 
         if(!dto.getPickupAddress().equals(delivery.getPickupAddress())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address", dto.getPickupAddress(), dto.getPickupAddress()));
             delivery.setPickupAddress(dto.getPickupAddress());
         }
 
         if(dto.getPickupAddressDetail() != null && !dto.getPickupAddressDetail().equals(delivery.getPickupAddressDetail())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address_detail", dto.getPickupAddressDetail(), dto.getPickupAddressDetail()));
             delivery.setPickupAddressDetail(dto.getPickupAddressDetail());
         }
 
         if(!dto.getRecipientName().equals(delivery.getRecipientName())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_name", delivery.getRecipientName(), dto.getRecipientName()));
             delivery.setRecipientName(dto.getRecipientName());
         }
 
         if(!dto.getRecipientPhone().equals(delivery.getRecipientPhone())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_phone", delivery.getRecipientPhone(), dto.getRecipientPhone()));
             delivery.setRecipientPhone(dto.getRecipientPhone());
         }
 
         if(!dto.getRecipientZipcode().equals(delivery.getRecipientZipcode())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_zipcode", dto.getRecipientZipcode(), dto.getRecipientZipcode()));
             delivery.setRecipientZipcode(dto.getRecipientZipcode());
         }
 
         if(!dto.getRecipientAddress().equals(delivery.getRecipientAddress())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_address", dto.getRecipientAddress(), dto.getRecipientAddress()));
             delivery.setRecipientAddress(dto.getRecipientAddress());
         }
 
         if(dto.getRecipientAddressDetail() != null && !dto.getRecipientAddressDetail().equals(delivery.getRecipientAddressDetail())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_address_detail", dto.getRecipientAddressDetail(), dto.getRecipientAddressDetail()));
             delivery.setRecipientAddressDetail(dto.getRecipientAddressDetail());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
+
+        if(!logs.isEmpty()) {
+            deliveryUpdateLogRepository.saveAll(logs);
+        }
 
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
@@ -327,16 +345,14 @@ public class DeliveryServiceImpl implements DeliveryService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
+    // 여기해야함
     @Override
     public ResponseDto<UpdateDeliveryResponseDto> updateDeliveryStatus(Long deliveryId, UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!delivery.getCustomer().getId().equals(customer.getId())) {
+        if(!user.getRole().getName().equals("ADMIN")) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
@@ -431,6 +447,18 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .recipientName(delivery.getRecipientName())
                 .createdAt(delivery.getCreatedAt())
                 .updatedAt(delivery.getUpdatedAt())
+                .build();
+    }
+
+    // 로그 생성
+    private DeliveryUpdateLog buildDeliveryLog(Delivery delivery, User user, String username, String type, String prevData, String newData) {
+        return DeliveryUpdateLog.builder()
+                .delivery(delivery)
+                .user(user)
+                .changedByUsername(username)
+                .type(type)
+                .prevData(String.valueOf(prevData))
+                .newData(String.valueOf(newData))
                 .build();
     }
 }

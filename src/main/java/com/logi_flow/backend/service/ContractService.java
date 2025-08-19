@@ -11,15 +11,15 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 public interface ContractService {
-    ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, Long customerId, @Valid CreateContractRequestDto dto);
+    ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, @Valid CreateContractRequestDto dto);
 
-    ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long customerId, @Valid UpdateContractRequestDto dto);
+    ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long contractId, @Valid UpdateContractRequestDto dto);
 
-    ResponseDto<UpdateContractStatusResponseDto> updateContractStatus(UserPrincipal userPrincipal, Long customerId, @Valid UpdateContractStatusRequestDto dto);
+    ResponseDto<UpdateContractStatusResponseDto> updateContractStatus(UserPrincipal userPrincipal, Long contractId, @Valid UpdateContractStatusRequestDto dto);
 
     Page<GetAllContractResponseDto> getAllContract(UserPrincipal userPrincipal, int page, int size, String sort);
 
-    ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long customerId);
+    ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId);
 
-    ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long customerId);
+    ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long contractId, @Valid UpdateContractStatusRequestDto dto);
 }
