@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -14,7 +13,8 @@ import java.util.List;
 public class CreateAssignmentResponseDto {
     private Long id;
     private Long driverId;
-    private List<Long> vehicleIds;
+    private String driverName;
+    private Long vehicleIds;
     private Boolean isPrimary;
     private AssignmentStatus status;
     private LocalDateTime createdAt;

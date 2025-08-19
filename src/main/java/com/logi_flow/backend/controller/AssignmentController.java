@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.ASSIGNMENT_API)
@@ -42,8 +44,8 @@ public class AssignmentController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<GetAllAssignmentResponseDto>> getAllAssignment() {
-        ResponseDto<GetAllAssignmentResponseDto> response = assignmentService.getAllAssignment();
+    public ResponseEntity<ResponseDto<List<GetAllAssignmentResponseDto>>> getAllAssignment() {
+        ResponseDto<List<GetAllAssignmentResponseDto>> response = assignmentService.getAllAssignment();
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
