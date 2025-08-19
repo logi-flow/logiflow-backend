@@ -31,10 +31,10 @@ public class JwtProvider {
         this.jwtResetPasswordExpirationMs = jwtResetPasswordExpirationMs;
     }
 
-    public String generateJwtToken(Long userId, UserRole role) {
+    public String generateJwtToken(String username, UserRole role) {
         return Jwts.builder()
-                .setSubject(userId.toString())
-                .claim("userId", userId)
+                .setSubject(username)
+                .claim("username", role.name())
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))

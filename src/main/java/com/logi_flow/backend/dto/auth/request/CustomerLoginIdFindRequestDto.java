@@ -17,7 +17,7 @@ public class CustomerLoginIdFindRequestDto {
     @Pattern(regexp = Regex.NAME_KOREAN, message = "이름은 총 2~10자 이내의 한글이어야 합니다.")
     private String representativeName;
 
-    @NotBlank(message = "전화번호는 필수 항목입니다.")
-    @Pattern(regexp = Regex.TELEPHONE, message = "전화번호는 000-000-0000 형식이거나 010-0000-0000 형식입니다.")
-    private String telephone;
+    @NotBlank(message = "이메일은 필수 항목입니다.")
+    @Pattern(regexp = Regex.EMAIL, message = "example@mail.com 형식이어야 합니다.")
+    private String email;
 }
