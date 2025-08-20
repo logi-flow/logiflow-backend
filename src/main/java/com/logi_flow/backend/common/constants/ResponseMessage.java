@@ -24,4 +24,9 @@ public interface ResponseMessage {
     String INTERNAL_SERVER_ERROR = "서버 오류가 발생했습니다.";
     String MAIL_SEND_FAIL = "메일 발송에 실패하였습니다.";
     String MAIL_NOT_FOUND = "이메일을 찾을 수 없습니다.";
+
+    String ALREADY_OPEN_ATTENDANCE = "미퇴근 기록 또는 중복된 출근 기록이 존재합니다.";
+    String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
+
+    String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
 }

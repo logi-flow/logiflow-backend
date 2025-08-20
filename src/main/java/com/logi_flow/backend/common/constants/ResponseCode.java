@@ -19,4 +19,8 @@ public interface ResponseCode {
     String INTERNAL_SERVER_ERROR = "ISE";
     String MAIL_SEND_FAIL = "MSF";
     String MAIL_NOT_FOUND = "MNF";
+
+    String ALREADY_OPEN_ATTENDANCE = "AOA";
+
+    String EXISTS_TYPE_CODE = "ETC";
 }

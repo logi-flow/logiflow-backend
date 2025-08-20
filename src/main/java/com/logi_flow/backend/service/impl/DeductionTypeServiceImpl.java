@@ -1,42 +1,223 @@
 package com.logi_flow.backend.service.impl;
 
+import com.logi_flow.backend.common.constants.ResponseCode;
+import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.DeductionTypeStatus;
+import com.logi_flow.backend.common.enums.TableRef;
+import com.logi_flow.backend.common.util.DateUtils;
+import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.deductionType.request.CreateDeductionTypeRequestDto;
 import com.logi_flow.backend.dto.deductionType.request.UpdateDeductionTypeRequestDto;
 import com.logi_flow.backend.dto.deductionType.response.CreateDeductionTypeResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.GetAllDeductionTypeResponseDto;
+import com.logi_flow.backend.dto.deductionType.response.GetDeductionTypeDetailResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeResponseDto;
+import com.logi_flow.backend.entity.DeductionType;
+import com.logi_flow.backend.entity.DeductionTypeUpdateLog;
+import com.logi_flow.backend.entity.User;
+import com.logi_flow.backend.repository.DeductionTypeRepository;
+import com.logi_flow.backend.repository.DeductionTypeUpdateLogRepository;
+import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.DeductionTypeService;
+import com.logi_flow.backend.service.DeleteLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
+import java.util.Objects;
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class DeductionTypeServiceImpl implements DeductionTypeService {
+
+    private final DeductionTypeRepository deductionTypeRepository;
+    private final UserRepository userRepository;
+    private final DeductionTypeUpdateLogRepository deductionTypeUpdateLogRepository;
+    private final DeleteLogService deleteLogService;
+
     @Override
+    @Transactional
     public ResponseDto<CreateDeductionTypeResponseDto> createDeductionType(CreateDeductionTypeRequestDto dto) {
-        return null;
+        CreateDeductionTypeResponseDto data = null;
+
+        String code = dto.getCode().trim().toUpperCase();
+
+        if (deductionTypeRepository.findByCodeAndStatus(code, DeductionTypeStatus.ACTIVE).isPresent()) {
+            return ResponseDto.fail(ResponseCode.EXISTS_TYPE_CODE, ResponseMessage.EXISTS_TYPE_CODE);
+        }
+
+        Optional<DeductionType> deletedDeductionType = deductionTypeRepository.findByCodeAndStatus(code, DeductionTypeStatus.DELETED);
+
+        if (deletedDeductionType.isPresent()) {
+            DeductionType restoreDeductionType = deletedDeductionType.get();
+            restoreDeductionType.setName(dto.getName());
+            restoreDeductionType.setDescription(dto.getDescription());
+            restoreDeductionType.setActive(true);
+            restoreDeductionType.setStatus(DeductionTypeStatus.ACTIVE);
+            deductionTypeRepository.save(restoreDeductionType);
+
+            deleteLogService.removeIfExists(TableRef.DEDUCTION_TYPE, restoreDeductionType.getId());
+
+            data = toCreateDeductionTypeResponseDto(restoreDeductionType);
+
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+        }
+
+        DeductionType newDeductionType = DeductionType.builder()
+                .code(code)
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .isActive(true)
+                .status(DeductionTypeStatus.ACTIVE)
+                .build();
+
+        deductionTypeRepository.save(newDeductionType);
+
+        data = toCreateDeductionTypeResponseDto(newDeductionType);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllDeductionTypeResponseDto> getAllDeductionType(int page, int size, String sort) {
-        return null;
+        Page<GetAllDeductionTypeResponseDto> data = null;
+
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<DeductionType> deductionTypes = deductionTypeRepository.findByStatus(DeductionTypeStatus.ACTIVE, pageable);
+
+        data = deductionTypes.map(this::toGetAllDeductionTypeResponseDto);
+
+        return data;
     }
 
     @Override
-    public ResponseDto<GetAllDeductionTypeResponseDto> getDeductionTypeDetail(Long deductionTypeId) {
-        return null;
+    @Transactional(readOnly = true)
+    public ResponseDto<GetDeductionTypeDetailResponseDto> getDeductionTypeDetail(Long deductionTypeId) {
+        GetDeductionTypeDetailResponseDto data = null;
+        DeductionType deductionType = getDeductionType(deductionTypeId);
+
+        data = GetDeductionTypeDetailResponseDto.builder()
+                .code(deductionType.getCode())
+                .name(deductionType.getName())
+                .description(deductionType.getDescription())
+                .isActive(deductionType.isActive())
+                .createdAt(DateUtils.format(deductionType.getCreatedAt()))
+                .updatedAt(DateUtils.format(deductionType.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateDeductionTypeResponseDto> updateDeductionType(UserPrincipal userPrincipal, Long deductionTypeId, UpdateDeductionTypeRequestDto dto) {
-        return null;
+        UpdateDeductionTypeResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+
+        DeductionType savedDeductionType = getDeductionType(deductionTypeId);
+
+        if (!dto.getName().equals(savedDeductionType.getName())) {
+            String prev_data = savedDeductionType.getName();
+            savedDeductionType.setName(dto.getName());
+            createUpdateLog(user, savedDeductionType, "name", prev_data, savedDeductionType.getName());
+        }
+
+        if (!Objects.equals(dto.getDescription(), savedDeductionType.getDescription())) {
+            String prev_data = savedDeductionType.getDescription();
+            savedDeductionType.setDescription(dto.getDescription());
+            createUpdateLog(user, savedDeductionType, "description", prev_data, savedDeductionType.getDescription());
+        }
+
+        if (dto.isActive() != savedDeductionType.isActive()) {
+            String prev_data = String.valueOf(savedDeductionType.isActive());
+            savedDeductionType.setActive(dto.isActive());
+            createUpdateLog(user, savedDeductionType, "is_active", prev_data, String.valueOf(savedDeductionType.isActive()));
+        }
+
+        deductionTypeRepository.save(savedDeductionType);
+
+        data = UpdateDeductionTypeResponseDto.builder()
+                .id(savedDeductionType.getId())
+                .code(savedDeductionType.getCode())
+                .name(savedDeductionType.getName())
+                .description(savedDeductionType.getDescription())
+                .isActive(savedDeductionType.isActive())
+                .status(savedDeductionType.getStatus())
+                .createdAt(DateUtils.format(savedDeductionType.getCreatedAt()))
+                .updatedAt(DateUtils.format(savedDeductionType.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
+    @Transactional
     public ResponseDto<Void> deleteDeductionType(UserPrincipal userPrincipal, Long deductionTypeId) {
-        return null;
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+
+        DeductionType deductionType = getDeductionType(deductionTypeId);
+
+        if (deductionType.getStatus() == DeductionTypeStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        deductionType.setActive(false);
+        deductionType.setStatus(DeductionTypeStatus.DELETED);
+        deductionTypeRepository.save(deductionType);
+
+        deleteLogService.createLog(TableRef.DEDUCTION_TYPE, deductionTypeId, user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+    }
+
+    private DeductionType getDeductionType(Long deductionTypeId) {
+        return deductionTypeRepository.findById(deductionTypeId)
+                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+    }
+
+    private CreateDeductionTypeResponseDto toCreateDeductionTypeResponseDto(DeductionType deductionType) {
+        return CreateDeductionTypeResponseDto.builder()
+                .id(deductionType.getId())
+                .code(deductionType.getCode())
+                .name(deductionType.getName())
+                .description(deductionType.getDescription())
+                .isActive(deductionType.isActive())
+                .status(deductionType.getStatus().name())
+                .createdAt(DateUtils.format(deductionType.getCreatedAt()))
+                .updatedAt(DateUtils.format(deductionType.getUpdatedAt()))
+                .build();
+    }
+
+    private GetAllDeductionTypeResponseDto toGetAllDeductionTypeResponseDto(DeductionType deductionType) {
+        return GetAllDeductionTypeResponseDto.builder()
+                .code(deductionType.getCode())
+                .name(deductionType.getName())
+                .isActive(deductionType.isActive())
+                .createdAt(DateUtils.format(deductionType.getCreatedAt()))
+                .updatedAt(DateUtils.format(deductionType.getUpdatedAt()))
+                .build();
+    }
+
+    private void createUpdateLog(User user, DeductionType savedDeductionType, String type, String prevData, String newData) {
+        DeductionTypeUpdateLog deductionTypeUpdateLog = DeductionTypeUpdateLog.builder()
+                .deductionType(savedDeductionType)
+                .user(user)
+                .changedByUsername(user.getUsername())
+                .type(type)
+                .prevData(prevData)
+                .newData(newData)
+                .build();
+
+        deductionTypeUpdateLogRepository.save(deductionTypeUpdateLog);
     }
 }

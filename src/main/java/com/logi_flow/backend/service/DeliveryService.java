@@ -8,15 +8,16 @@ import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryStatusRequestDto
 import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import jakarta.validation.Valid;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface DeliveryService {
     ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal);
 
-    ResponseDto<List<GetAllDeliveryResponseDto>> getAllDelivery();
+    Page<GetAllDeliveryResponseDto> getAllDelivery(int page, int size, String sort);
 
     ResponseDto<GetDeliveryDetailResponseDto> getDelivery(Long deliveryId);
+
+    Page<GetAllDeliveryResponseDto> getMyDeliveries(UserPrincipal userPrincipal, int page, int size, String sort);
 
     ResponseDto<UpdateDeliveryResponseDto> updateDeliveryIsHidden(Long deliveryId, UpdateIsHiddenRequestDto dto, UserPrincipal userPrincipal);
 
@@ -24,7 +25,7 @@ public interface DeliveryService {
 
     ResponseDto<UpdateDeliveryResponseDto> updateDeliveryStatus(Long deliveryId, @Valid UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal);
 
-    ResponseDto<List<GetAllWaitingDeliveryResponseDto>> getAllWaitingDelivery();
+    Page<GetAllWaitingDeliveryResponseDto> getAllWaitingDelivery(int page, int size, String sort);
 
     ResponseDto<Void> deleteDelivery(Long deliveryId);
 }
