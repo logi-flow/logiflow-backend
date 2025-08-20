@@ -18,6 +18,9 @@ public class CreateDriverRequestDto {
     @NotBlank(message = "이름은 필수 항목입니다.")
     private String name;
 
+    @NotBlank(message = "이메일은 필수 항목입니다.")
+    private String email;
+
     @NotBlank(message = "주민등록번호는 필수 항목입니다.")
     private String identityNumber;
 
