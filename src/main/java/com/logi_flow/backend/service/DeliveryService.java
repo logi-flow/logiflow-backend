@@ -9,6 +9,7 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -32,5 +33,5 @@ public interface DeliveryService {
 
     ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId);
 
-    ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file);
+    ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal);
 }

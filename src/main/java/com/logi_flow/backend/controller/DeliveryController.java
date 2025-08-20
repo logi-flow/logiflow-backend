@@ -103,8 +103,8 @@ public class DeliveryController {
 
 
     @PostMapping("/upload")
-    public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file) {
-        ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file);
+    public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

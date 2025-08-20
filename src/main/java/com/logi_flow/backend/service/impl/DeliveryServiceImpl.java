@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.util.DateUtils;
@@ -23,6 +24,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -517,8 +519,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file) {
-        List<Delivery> deliveries = parseAndSaveExcel(file);
+    public ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal) {
+        List<Delivery> deliveries = parseAndSaveExcel(file, userPrincipal);
 
         List<CreateDeliveryResponseDto> responseDtos = null;
 
@@ -556,7 +558,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDtos);
     }
 
-    private List<Delivery> parseAndSaveExcel(MultipartFile file) {
+    private List<Delivery> parseAndSaveExcel(MultipartFile file, UserPrincipal userPrincipal) {
         List<Delivery> savedDeliveries = new ArrayList<>();
 
         try (InputStream is = file.getInputStream()) {
@@ -567,38 +569,35 @@ public class DeliveryServiceImpl implements DeliveryService {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                Long contractId = (long) row.getCell(0).getNumericCellValue();
-                Contract contract = contractRepository.findById(contractId)
-                    .orElseThrow(() -> new RuntimeException("Contract not found: " + contractId));
-
-                Long customerId = (long) row.getCell(1).getNumericCellValue();
-                Customer customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new RuntimeException("Customer not found: " + customerId));
+                String username = userPrincipal.getUsername();
+                User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+                Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+                Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
                 Delivery delivery = Delivery.builder()
                     .contract(contract)
                     .customer(customer)
-                    .requestDate(getDateTimeCellValue(row.getCell(2)))
-                    .item(getStringCellValue(row.getCell(3)))
-                    .weight(BigDecimal.valueOf(getNumericCellValue(row.getCell(4))))
-                    .message(getStringCellValue(row.getCell(5)))
-                    .isHidden(getBooleanCellValue(row, 6))
+                    .requestDate(getDateTimeCellValue(row.getCell(0)))
+                    .item(getStringCellValue(row.getCell(1)))
+                    .weight(BigDecimal.valueOf(getNumericCellValue(row.getCell(2))))
+                    .message(getStringCellValue(row.getCell(3)))
+                    .isHidden(getBooleanCellValue(row, 4))
                     .status(DeliveryStatus.REQUESTED)
-                    .pickupName(getStringCellValue(row.getCell(7)))
-                    .pickupPhone(getStringCellValue(row.getCell(8)))
-                    .pickupZipCode(getStringCellValue(row.getCell(9)))
-                    .pickupAddress(getStringCellValue(row.getCell(10)))
-                    .pickupAddressDetail(getStringCellValue(row.getCell(11)))
-                    .recipientName(getStringCellValue(row.getCell(12)))
-                    .recipientPhone(getStringCellValue(row.getCell(13)))
-                    .recipientZipcode(getStringCellValue(row.getCell(14)))
-                    .recipientAddress(getStringCellValue(row.getCell(15)))
-                    .recipientAddressDetail(getStringCellValue(row.getCell(16)))
-                    .finalFee((int) getNumericCellValue(row.getCell(17)))
-                    .overWeightFee((int) getNumericCellValue(row.getCell(18)))
-                    .overParcelFee((int) getNumericCellValue(row.getCell(19)))
-                    .isOverWeight(getBooleanCellValue(row, 20))
-                    .isOverParcel(getBooleanCellValue(row, 21))
+                    .pickupName(getStringCellValue(row.getCell(5)))
+                    .pickupPhone(getStringCellValue(row.getCell(6)))
+                    .pickupZipCode(getStringCellValue(row.getCell(7)))
+                    .pickupAddress(getStringCellValue(row.getCell(8)))
+                    .pickupAddressDetail(getStringCellValue(row.getCell(9)))
+                    .recipientName(getStringCellValue(row.getCell(10)))
+                    .recipientPhone(getStringCellValue(row.getCell(11)))
+                    .recipientZipcode(getStringCellValue(row.getCell(12)))
+                    .recipientAddress(getStringCellValue(row.getCell(13)))
+                    .recipientAddressDetail(getStringCellValue(row.getCell(14)))
+                    .finalFee(0)
+                    .overWeightFee(0)
+                    .overParcelFee(0)
+                    .isOverWeight(false)
+                    .isOverParcel(false)
                     .build();
 
                 deliveryRepository.save(delivery);
@@ -635,12 +634,12 @@ public class DeliveryServiceImpl implements DeliveryService {
     private boolean getBooleanCellValue(Row row, int index) {
         Cell cell = row.getCell(index);
         if (cell == null) return false;
-        switch (cell.getCellType()) {
-            case BOOLEAN: return cell.getBooleanCellValue();
-            case STRING: return Boolean.parseBoolean(cell.getStringCellValue());
-            case NUMERIC: return cell.getNumericCellValue() != 0;
-            default: return false;
-        }
+        return switch (cell.getCellType()) {
+            case BOOLEAN -> cell.getBooleanCellValue();
+            case STRING -> Boolean.parseBoolean(cell.getStringCellValue());
+            case NUMERIC -> cell.getNumericCellValue() != 0;
+            default -> false;
+        };
     }
 
     public LocalDateTime getDateTimeCellValue(Cell cell) {
