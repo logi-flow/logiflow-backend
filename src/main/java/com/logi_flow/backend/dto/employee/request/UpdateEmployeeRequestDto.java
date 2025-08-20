@@ -11,7 +11,7 @@ import lombok.Getter;
 public class UpdateEmployeeRequestDto {
     @NotBlank(message = "휴대폰 번호는 필수 항목입니다.")
     @Pattern(regexp = Regex.PHONE_NUMBER, message = "휴대폰 번호는 000-0000-0000 형식이어야 합니다.")
-    private String phone;
+    private String phoneNumber;
 
     @NotBlank(message = "우편 번호는 필수 항목입니다.")
     @Pattern(regexp = Regex.ZIPCODE, message = "우편 번호는 5자리 숫자여야 합니다.")

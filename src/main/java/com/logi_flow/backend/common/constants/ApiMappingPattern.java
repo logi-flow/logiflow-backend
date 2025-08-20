@@ -3,6 +3,7 @@ package com.logi_flow.backend.common.constants;
 public interface ApiMappingPattern {
     String AUTH_API = "/api/v1/auth";
     String USER_API = "/api/v1/users";
+    String ADMIN_API = "/api/v1/admin";
     String CUSTOMER_API = "/api/v1/customers";
     String EMPLOYEE_API = "/api/v1/employees";
     String CONTRACT_API = "/api/v1/contracts";

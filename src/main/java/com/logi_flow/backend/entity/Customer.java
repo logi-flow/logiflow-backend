@@ -39,11 +39,8 @@ public class Customer extends BaseTime {
     @Column(name = "business_items", nullable = false)
     private String businessItems;
 
-    @Column(name = "telephone", nullable = false)
+    @Column(name = "telephone", nullable = false, unique = true)
     private String telephone;
-
-    @Column(name = "email", nullable = false)
-    private String email;
 
     @Column(name = "fax")
     private String fax;

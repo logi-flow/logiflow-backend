@@ -20,6 +20,10 @@ public class CustomerSignUpRequestDto {
     @NotBlank(message = "비밀번호 확인은 필수 항목입니다.")
     private String confirmPassword;
 
+    @NotBlank(message = "이메일은 필수 항목입니다.")
+    @Pattern(regexp = Regex.EMAIL, message = "example@mail.com 형식이어야 합니다.")
+    private String email;
+
     @NotBlank(message = "사업자 번호는 필수 항목입니다.")
     @Pattern(regexp = Regex.BUSINESS_NUMBER, message = "사업자 번호는 000-00-00000 형식입니다.")
     private String businessNumber;
@@ -43,10 +47,6 @@ public class CustomerSignUpRequestDto {
     @NotBlank(message = "전화번호는 필수 항목입니다.")
     @Pattern(regexp = Regex.TELEPHONE, message = "전화번호는 000-000-0000 형식이거나 010-0000-0000 형식입니다.")
     private String telephone;
-
-    @NotBlank(message = "이메일은 필수 항목입니다.")
-    @Pattern(regexp = Regex.EMAIL, message = "example@mail.com 형식이어야 합니다.")
-    private String email;
 
     @Pattern(regexp = Regex.FAX, message = "팩스번호 형식이 올바르지 않습니다. 예: 02-123-4567")
     private String fax;

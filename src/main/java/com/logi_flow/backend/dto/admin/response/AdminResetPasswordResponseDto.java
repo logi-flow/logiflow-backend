@@ -1,16 +1,15 @@
-package com.logi_flow.backend.dto.auth.response;
+package com.logi_flow.backend.dto.admin.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
-public class UserLoginIdFindResponseDto {
-    private String username;
+public class AdminResetPasswordResponseDto {
+    private Long userId;
+    private String email;
     private String createdAt;
     private String updatedAt;
 }

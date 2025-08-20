@@ -11,4 +11,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CustomerLoginIdFindResponseDto {
     private String username;
+    private String createdAt;
+    private String updatedAt;
 }
