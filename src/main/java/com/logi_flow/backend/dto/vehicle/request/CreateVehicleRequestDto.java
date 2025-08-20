@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
@@ -32,5 +31,5 @@ public class CreateVehicleRequestDto {
     private String modelName;
 
     @NotNull(message = "차량 연식은 필수 항목입니다.")
-    private LocalDate modelYear;
+    private Integer modelYear;
 }

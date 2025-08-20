@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "vehicles")
@@ -40,5 +39,5 @@ public class Vehicle extends BaseTime{
     private String modelName;
 
     @Column(name = "model_year", nullable = false)
-    private LocalDate modelYear;
+    private Integer modelYear;
 }

@@ -46,7 +46,12 @@ public class DriverServiceImpl implements DriverService {
         String username = String.format("driver%03d", driverCount + 1);
 
         Role role = roleRepository.findByName(UserRole.DRIVER)
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+                .orElseGet(() -> {
+                    Role newRole = Role.builder()
+                            .name(UserRole.DRIVER)
+                            .build();
+                    return roleRepository.save(newRole);
+                });
 
         String phoneNumber = dto.getPhoneNumber();
         if (phoneNumber == null || phoneNumber.length() < 4)
@@ -73,6 +78,7 @@ public class DriverServiceImpl implements DriverService {
                 .zipcode(dto.getZipcode())
                 .address(dto.getAddress())
                 .addressDetail(dto.getAddressDetail())
+                .district(dto.getDistrict())
                 .pay(dto.getPay())
                 .companyJoin(dto.getCompanyJoin())
                 .build();
