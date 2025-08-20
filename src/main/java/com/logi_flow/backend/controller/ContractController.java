@@ -28,7 +28,7 @@ public class ContractController {
     private static final String CONTRACT_API = "/{contractId}";
     private static final String CONTRACT_STATUS_API = "/{contractId}/status";
 
-    @PostMapping(CONTRACT_API)
+    @PostMapping(ApiMappingPattern.CONTRACT_API)
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody CreateContractRequestDto dto
@@ -40,10 +40,10 @@ public class ContractController {
     @PutMapping(CONTRACT_API)
     public ResponseEntity<ResponseDto<UpdateContractResponseDto>> updateContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId,
+            @PathVariable Long contractId,
             @Valid @RequestBody UpdateContractRequestDto dto
     ){
-        ResponseDto<UpdateContractResponseDto> response = contractService.updateContract(userPrincipal, customerId, dto);
+        ResponseDto<UpdateContractResponseDto> response = contractService.updateContract(userPrincipal, contractId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

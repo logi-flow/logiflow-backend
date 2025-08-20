@@ -65,7 +65,7 @@ public class DeliveryController {
 
 
     @PutMapping("/{deliveryId}/is-hidden")
-    public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryIsHidden(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
@@ -84,8 +84,8 @@ public class DeliveryController {
     }
 
     @DeleteMapping("/{deliveryId}")
-    public ResponseEntity<ResponseDto<Void>> deleteDelivery(@PathVariable Long deliveryId) {
-         ResponseDto<Void> response = deliveryService.deleteDelivery(deliveryId);
+    public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
+         ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 

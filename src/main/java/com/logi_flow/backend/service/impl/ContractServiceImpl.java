@@ -268,32 +268,6 @@ public class ContractServiceImpl implements ContractService {
         deleteLogService.createLog(TableRef.CONTRACT, contractId, user);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-
-//        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-//            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-//        }
-//
-//        ContractStatus prevStatus = contract.getStatus();
-//
-//        if(dto.getStatus() == ContractStatus.DELETED) {
-//            contract.setStatus(ContractStatus.DELETED);
-//            contractRepository.save(contract);
-//
-//            ContractStatusLog log = ContractStatusLog.builder()
-//                    .contract(contract)
-//                    .changedBy(user)
-//                    .changedByUsername(username)
-//                    .changeReason(dto.getChangedReason())
-//                    .prevStatus(prevStatus)
-//                    .newStatus(contract.getStatus())
-//                    .build();
-//
-//            contractStatusLogRepository.save(log);
-//        } else {
-//            return ResponseDto.fail("BAD_REQUEST", "ONLY DELETED status is allowed");
-//        }
-//
-//        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private ContractUpdateLog buildLog(Contract contract, User user, String username, String type, String prevData, String newData) {

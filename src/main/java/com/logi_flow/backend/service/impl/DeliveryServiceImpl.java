@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
@@ -14,6 +15,7 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DeliveryService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
@@ -44,7 +43,12 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final CustomerRepository customerRepository;
     private final ContractRepository contractRepository;
     private final DeliveryRepository deliveryRepository;
+
     private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
+    private final DeliveryStatusLogRepository deliveryStatusLogRepository;
+    private final DeleteLogService deleteLogService;
+
+
 
     // 상태 > 승인되면 finalFee ~ isOverParcel 까지 계산해서 자동으로 넣기
     @Override
@@ -195,11 +199,25 @@ public class DeliveryServiceImpl implements DeliveryService {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
+        boolean prevIsHidden = delivery.isHidden();
+
         if(dto.isHidden() != delivery.isHidden()) {
             delivery.setHidden(dto.isHidden());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
+
+        DeliveryUpdateLog deliveryUpdateLog = DeliveryUpdateLog.builder()
+                .delivery(delivery)
+                .user(user)
+                .changedByUsername(username)
+                .type("is_hidden")
+                .prevData(String.valueOf(prevIsHidden))
+                .newData(String.valueOf(updatedDelivery.isHidden()))
+                .build();
+
+        deliveryUpdateLogRepository.save(deliveryUpdateLog);
+
 
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
@@ -367,11 +385,24 @@ public class DeliveryServiceImpl implements DeliveryService {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
+        DeliveryStatus prevStatus = delivery.getStatus();
+
         if(dto.getStatus() != delivery.getStatus()) {
             delivery.setStatus(dto.getStatus());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
+
+        DeliveryStatusLog deliveryStatusLog = DeliveryStatusLog.builder()
+                .delivery(delivery)
+                .user(user)
+                .changedByUsername(username)
+                .changeReason(dto.getChangeReason())
+                .prevStatus(prevStatus)
+                .newStatus(updatedDelivery.getStatus())
+                .build();
+
+        deliveryStatusLogRepository.save(deliveryStatusLog);
 
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
@@ -417,12 +448,24 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public ResponseDto<Void> deleteDelivery(Long deliveryId) {
+    public ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId) {
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals("ADMIN")) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        delivery.setStatus(DeliveryStatus.DELETED);
+        if(delivery.getStatus() == DeliveryStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
 
+        delivery.setStatus(DeliveryStatus.DELETED);
         deliveryRepository.save(delivery);
+
+        deleteLogService.createLog(TableRef.DELIVERY, deliveryId, user);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
