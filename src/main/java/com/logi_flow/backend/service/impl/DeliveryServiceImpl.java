@@ -5,6 +5,7 @@ import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import com.logi_flow.backend.common.enums.TableRef;
+import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +52,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryStatusLogRepository deliveryStatusLogRepository;
     private final DeleteLogService deleteLogService;
 
-
-
-    // 상태 > 승인되면 finalFee ~ isOverParcel 까지 계산해서 자동으로 넣기
     @Override
+    @Transactional
     public ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
@@ -61,6 +61,13 @@ public class DeliveryServiceImpl implements DeliveryService {
         Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Contract contract = contractRepository.findById(dto.getContractId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        LocalDate contractEndDate = contract.getEndDate();
+        LocalDate today = LocalDate.now();
+
+        if(contractEndDate.isBefore(today)) {
+            throw new IllegalArgumentException("계약 종료일이 지남");
+        }
 
         Delivery newDelivery = Delivery.builder()
                 .contract(contract)
@@ -189,6 +196,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateDeliveryResponseDto> updateDeliveryIsHidden(Long deliveryId, UpdateIsHiddenRequestDto dto, UserPrincipal userPrincipal) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -254,6 +262,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, UpdateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -376,14 +385,16 @@ public class DeliveryServiceImpl implements DeliveryService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
-    // 여기해야함
     @Override
+    @Transactional
     public ResponseDto<UpdateDeliveryResponseDto> updateDeliveryStatus(Long deliveryId, UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        Contract contract = delivery.getContract();
+
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals("ADMIN")) {
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
@@ -392,6 +403,109 @@ public class DeliveryServiceImpl implements DeliveryService {
         if(dto.getStatus() != delivery.getStatus()) {
             delivery.setStatus(dto.getStatus());
         }
+
+        // 승인되면 요금 들어감
+        if(delivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
+
+            int prevOverWeightFee = delivery.getOverWeightFee();
+            boolean prevIsOverWeight = delivery.isOverWeight();
+
+            int prevOverParcelFee = delivery.getOverParcelFee();
+            boolean prevIsOverParcel = delivery.isOverParcel();
+
+            int prevFinalFee = delivery.getFinalFee();
+
+            // 무게 요금 계산
+            // limitKg < delivery.weight 이면 (weight - limitKg) * overWeightFeePerKg 해서 delivery.OverWeightFee에 추가
+            int intWeight = delivery.getWeight().intValue(); // 소숫점 버림
+            int limitKg = contract.getWeightLimitKg();
+            if(limitKg < intWeight) {
+                int overWeight = intWeight - limitKg;
+                int overWeightFee = overWeight * contract.getOverWeightFeePerKg();
+                delivery.setOverWeightFee(overWeightFee);
+
+                // overWeightFee 0 아니면 isOverWeight - true로 / 0이면 false
+                // 무게 초과 true 설정
+                if (overWeight > 0) {
+                    delivery.setOverWeight(true);
+                }
+            }
+            // 건수 요금 계산
+            // contract.parcelLimit 건수 제한 가져옴
+            int parcelLimit = contract.getParcelLimit();
+
+            // (contract 계약기간동안 누적)에 delivery 에서 해당 contractId로 배송신청 건수 count 해서 건수 계산
+            long longParcelCount = deliveryRepository.countByContractAndCreatedAtBetween(contract, contract.getStartDate(), contract.getEndDate());
+            int parcelCount = (int) longParcelCount;
+
+            // limit < count 이면 (count - limit) * overParcelFee
+            // overParcelFee 0 아니면 isOverParcel - true / 0 이면 false
+            if(parcelCount > parcelLimit) {
+                delivery.setOverParcelFee(contract.getOverParcelFee());
+                delivery.setOverParcel(true);
+            } else {
+                delivery.setOverParcelFee(0);
+                delivery.setOverParcel(false);
+            }
+
+            // 무게 추가 요금 + 건수 추가 요금 + contract.baseFee => delivery.finalFee
+            int finalFee = contract.getBaseFee() + delivery.getOverWeightFee() + delivery.getOverParcelFee();
+            delivery.setFinalFee(finalFee);
+
+            // 위에 두개 전부 deliveryUpdateLog에 저장되야 함.
+
+            List<DeliveryUpdateLog> logs = new ArrayList<>();
+
+            if(prevOverWeightFee != delivery.getOverWeightFee()) {
+                logs.add(DeliveryUpdateLog.builder()
+                                .delivery(delivery)
+                                .user(user)
+                                .changedByUsername(username)
+                                .type("over_weight_fee")
+                                .prevData(String.valueOf(prevOverWeightFee))
+                                .newData(String.valueOf(delivery.getOverWeightFee()))
+                                .build());
+            }
+
+            if(prevIsOverWeight != delivery.isOverWeight()) {
+                logs.add(DeliveryUpdateLog.builder()
+                                .delivery(delivery)
+                                .user(user)
+                                .changedByUsername(username)
+                                .type("is_over_weight")
+                                .prevData(String.valueOf(prevIsOverWeight))
+                                .newData(String.valueOf(delivery.getOverWeightFee()))
+                        .build());
+            }
+
+            if(prevOverParcelFee != delivery.getOverParcelFee()) {
+                logs.add(DeliveryUpdateLog.builder()
+                                .delivery(delivery)
+                                .user(user)
+                                .changedByUsername(username)
+                                .type("over_parcel_fee")
+                                .prevData(String.valueOf(prevOverParcelFee))
+                                .newData(String.valueOf(delivery.getOverParcelFee()))
+                        .build());
+            }
+
+            if(prevIsOverParcel != delivery.isOverParcel()) {
+                logs.add(DeliveryUpdateLog.builder()
+                                .delivery(delivery)
+                                .user(user)
+                                .changedByUsername(username)
+                                .type("is_over_parcel")
+                                .prevData(String.valueOf(prevIsOverParcel))
+                                .newData(String.valueOf(delivery.getOverParcelFee()))
+                        .build());
+            }
+
+            if(!logs.isEmpty()) {
+                deliveryUpdateLogRepository.saveAll(logs);
+            }
+        }
+
+
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
 
@@ -450,11 +564,12 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals("ADMIN")) {
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
