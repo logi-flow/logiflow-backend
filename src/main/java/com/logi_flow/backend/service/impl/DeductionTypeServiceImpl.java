@@ -60,11 +60,11 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
             restoreDeductionType.setDescription(dto.getDescription());
             restoreDeductionType.setActive(true);
             restoreDeductionType.setStatus(DeductionTypeStatus.ACTIVE);
-            deductionTypeRepository.save(restoreDeductionType);
+            DeductionType savedDeductionType = deductionTypeRepository.save(restoreDeductionType);
 
             deleteLogService.removeIfExists(TableRef.DEDUCTION_TYPE, restoreDeductionType.getId());
 
-            data = toCreateDeductionTypeResponseDto(restoreDeductionType);
+            data = toCreateDeductionTypeResponseDto(savedDeductionType);
 
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
         }
@@ -77,9 +77,9 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
                 .status(DeductionTypeStatus.ACTIVE)
                 .build();
 
-        deductionTypeRepository.save(newDeductionType);
+        DeductionType savedDeductionType = deductionTypeRepository.save(newDeductionType);
 
-        data = toCreateDeductionTypeResponseDto(newDeductionType);
+        data = toCreateDeductionTypeResponseDto(savedDeductionType);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -126,34 +126,34 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
         DeductionType savedDeductionType = getDeductionType(deductionTypeId);
 
         if (!dto.getName().equals(savedDeductionType.getName())) {
-            String prev_data = savedDeductionType.getName();
+            String prevData = savedDeductionType.getName();
             savedDeductionType.setName(dto.getName());
-            createUpdateLog(user, savedDeductionType, "name", prev_data, savedDeductionType.getName());
+            createUpdateLog(user, savedDeductionType, "name", prevData, savedDeductionType.getName());
         }
 
         if (!Objects.equals(dto.getDescription(), savedDeductionType.getDescription())) {
-            String prev_data = savedDeductionType.getDescription();
+            String prevData = savedDeductionType.getDescription();
             savedDeductionType.setDescription(dto.getDescription());
-            createUpdateLog(user, savedDeductionType, "description", prev_data, savedDeductionType.getDescription());
+            createUpdateLog(user, savedDeductionType, "description", prevData, savedDeductionType.getDescription());
         }
 
         if (dto.isActive() != savedDeductionType.isActive()) {
-            String prev_data = String.valueOf(savedDeductionType.isActive());
+            String prevData = String.valueOf(savedDeductionType.isActive());
             savedDeductionType.setActive(dto.isActive());
-            createUpdateLog(user, savedDeductionType, "is_active", prev_data, String.valueOf(savedDeductionType.isActive()));
+            createUpdateLog(user, savedDeductionType, "is_active", prevData, String.valueOf(savedDeductionType.isActive()));
         }
 
-        deductionTypeRepository.save(savedDeductionType);
+        DeductionType updatedDeductionType = deductionTypeRepository.save(savedDeductionType);
 
         data = UpdateDeductionTypeResponseDto.builder()
-                .id(savedDeductionType.getId())
-                .code(savedDeductionType.getCode())
-                .name(savedDeductionType.getName())
-                .description(savedDeductionType.getDescription())
-                .isActive(savedDeductionType.isActive())
-                .status(savedDeductionType.getStatus())
-                .createdAt(DateUtils.format(savedDeductionType.getCreatedAt()))
-                .updatedAt(DateUtils.format(savedDeductionType.getUpdatedAt()))
+                .id(updatedDeductionType.getId())
+                .code(updatedDeductionType.getCode())
+                .name(updatedDeductionType.getName())
+                .description(updatedDeductionType.getDescription())
+                .isActive(updatedDeductionType.isActive())
+                .status(updatedDeductionType.getStatus())
+                .createdAt(DateUtils.format(updatedDeductionType.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedDeductionType.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
