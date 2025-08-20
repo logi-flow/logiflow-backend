@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -98,5 +101,11 @@ public class DeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+
+    @PostMapping("/upload")
+    public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file) {
+        ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
+    }
 
 }
