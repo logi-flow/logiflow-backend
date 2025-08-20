@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.driver.VehicleStatus;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.vehicle.request.CreateVehicleRequestDto;
 import com.logi_flow.backend.dto.vehicle.request.UpdateVehicleRequestDto;
@@ -11,6 +12,7 @@ import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
 import com.logi_flow.backend.entity.Vehicle;
 import com.logi_flow.backend.repository.VehicleRepository;
+import com.logi_flow.backend.service.AssignmentService;
 import com.logi_flow.backend.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final AssignmentService assignmentService;
 
     @Override
     public ResponseDto<CreateVehicleResponseDto> createVehicle(CreateVehicleRequestDto dto) {
@@ -59,6 +62,8 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        VehicleStatus oldStatus = vehicle.getStatus();
+
         if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber())) {
             vehicle.setVehicleNumber(dto.getVehicleNumber());
         }
@@ -79,6 +84,16 @@ public class VehicleServiceImpl implements VehicleService {
         }
         if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear())) {
             vehicle.setModelYear(dto.getModelYear());
+        }
+        VehicleStatus newStatus = vehicle.getStatus();
+
+        if (oldStatus != newStatus) {
+            if (newStatus == VehicleStatus.UNDER_MAINTENANCE) {
+                assignmentService.pauseAssignment(vehicle);
+            }
+            else if (newStatus == VehicleStatus.DELETED) {
+                assignmentService.removeAssignmentByVehicle(vehicle);
+            }
         }
 
         Vehicle updateVehicle = vehicleRepository.save(vehicle);

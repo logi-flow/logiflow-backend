@@ -33,7 +33,7 @@ public class Driver extends BaseTime {
     @Column(name = "identity_number", nullable = false)
     private String identityNumber;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(name = "zipcode", nullable = false)
