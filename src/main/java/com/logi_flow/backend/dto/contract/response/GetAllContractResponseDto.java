@@ -18,6 +18,6 @@ public class GetAllContractResponseDto {
     private ContractStatus status;
     private LocalDate startDate;
     private LocalDate endDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
