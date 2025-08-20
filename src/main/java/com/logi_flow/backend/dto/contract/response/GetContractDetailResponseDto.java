@@ -24,6 +24,6 @@ public class GetContractDetailResponseDto {
     private int overWeightFeePerKg;
     private int overParcelFee;
     private String specialTerms;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

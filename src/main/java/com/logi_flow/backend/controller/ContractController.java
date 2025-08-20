@@ -80,12 +80,11 @@ public class ContractController {
     }
 
     @DeleteMapping(CONTRACT_API)
-    public ResponseEntity<ResponseDto<?>> deleteContract(
+    public ResponseEntity<ResponseDto<Void>> deleteContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long contractId,
-            @Valid @RequestBody UpdateContractStatusRequestDto dto
+            @PathVariable Long contractId
     ) {
-        ResponseDto<?> response = contractService.deleteContract(userPrincipal, contractId, dto);
+        ResponseDto<Void> response = contractService.deleteContract(userPrincipal, contractId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

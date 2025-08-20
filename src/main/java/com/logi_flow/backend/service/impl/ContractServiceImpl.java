@@ -3,7 +3,9 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.ContractStatus;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
@@ -15,6 +17,7 @@ import com.logi_flow.backend.dto.contract.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.ContractService;
+import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,8 @@ public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final ContractUpdateLogRepository contractUpdateLogRepository;
     private final ContractStatusLogRepository contractStatusLogRepository;
+
+    private final DeleteLogService  deleteLogService;
 
     @Override
     @Transactional
@@ -71,8 +76,8 @@ public class ContractServiceImpl implements ContractService {
                 .overWeightFeePerKg(newContract.getOverWeightFeePerKg())
                 .overParcelFee(newContract.getOverParcelFee())
                 .specialTerms(newContract.getSpecialTerms())
-                .createdAt(newContract.getCreatedAt())
-                .updatedAt(newContract.getUpdatedAt())
+                .createdAt(DateUtils.format(newContract.getCreatedAt()))
+                .updatedAt(DateUtils.format(newContract.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -147,8 +152,8 @@ public class ContractServiceImpl implements ContractService {
                 .overWeightFeePerKg(updatedContract.getOverWeightFeePerKg())
                 .overParcelFee(updatedContract.getOverParcelFee())
                 .specialTerms(updatedContract.getSpecialTerms())
-                .createdAt(updatedContract.getCreatedAt())
-                .updatedAt(updatedContract.getUpdatedAt())
+                .createdAt(DateUtils.format(updatedContract.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedContract.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -193,8 +198,8 @@ public class ContractServiceImpl implements ContractService {
                 .changedReason(contractStatusLog.getChangeReason())
                 .prevStatus(prevStatus)
                 .newStatus(updatedContract.getStatus())
-                .createdAt(updatedContract.getCreatedAt())
-                .updatedAt(updatedContract.getUpdatedAt())
+                .createdAt(DateUtils.format(updatedContract.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedContract.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -239,8 +244,8 @@ public class ContractServiceImpl implements ContractService {
                 .overWeightFeePerKg(contract.getOverWeightFeePerKg())
                 .overParcelFee(contract.getOverParcelFee())
                 .specialTerms(contract.getSpecialTerms())
-                .createdAt(contract.getCreatedAt())
-                .updatedAt(contract.getUpdatedAt())
+                .createdAt(DateUtils.format(contract.getCreatedAt()))
+                .updatedAt(DateUtils.format(contract.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -248,39 +253,49 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long contractId, UpdateContractStatusRequestDto dto) {
-        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+    public ResponseDto<Void> deleteContract(UserPrincipal userPrincipal, Long contractId) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        if(contract.getStatus() == ContractStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         }
 
-        ContractStatus prevStatus = contract.getStatus();
+        contract.setStatus(ContractStatus.DELETED);
+        contractRepository.save(contract);
 
-        if(dto.getStatus() == ContractStatus.DELETED) {
-            contract.setStatus(ContractStatus.DELETED);
-            contractRepository.save(contract);
-
-            ContractStatusLog log = ContractStatusLog.builder()
-                    .contract(contract)
-                    .changedBy(user)
-                    .changedByUsername(username)
-                    .changeReason(dto.getChangedReason())
-                    .prevStatus(prevStatus)
-                    .newStatus(contract.getStatus())
-                    .build();
-
-            contractStatusLogRepository.save(log);
-        } else {
-            return ResponseDto.fail("BAD_REQUEST", "ONLY DELETED status is allowed");
-        }
+        deleteLogService.createLog(TableRef.CONTRACT, contractId, user);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+
+//        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+//            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+//        }
+//
+//        ContractStatus prevStatus = contract.getStatus();
+//
+//        if(dto.getStatus() == ContractStatus.DELETED) {
+//            contract.setStatus(ContractStatus.DELETED);
+//            contractRepository.save(contract);
+//
+//            ContractStatusLog log = ContractStatusLog.builder()
+//                    .contract(contract)
+//                    .changedBy(user)
+//                    .changedByUsername(username)
+//                    .changeReason(dto.getChangedReason())
+//                    .prevStatus(prevStatus)
+//                    .newStatus(contract.getStatus())
+//                    .build();
+//
+//            contractStatusLogRepository.save(log);
+//        } else {
+//            return ResponseDto.fail("BAD_REQUEST", "ONLY DELETED status is allowed");
+//        }
+//
+//        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
-    // 로그 생성
     private ContractUpdateLog buildLog(Contract contract, User user, String username, String type, String prevData, String newData) {
         return ContractUpdateLog.builder()
                 .contract(contract)
@@ -300,8 +315,8 @@ public class ContractServiceImpl implements ContractService {
                 .status(contract.getStatus())
                 .startDate(contract.getStartDate())
                 .endDate(contract.getEndDate())
-                .createdAt(contract.getCreatedAt())
-                .updatedAt(contract.getUpdatedAt())
+                .createdAt(DateUtils.format(contract.getCreatedAt()))
+                .updatedAt(DateUtils.format(contract.getUpdatedAt()))
                 .build();
     }
 

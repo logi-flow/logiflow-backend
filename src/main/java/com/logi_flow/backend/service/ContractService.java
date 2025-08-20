@@ -21,5 +21,5 @@ public interface ContractService {
 
     ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId);
 
-    ResponseDto<?> deleteContract(UserPrincipal userPrincipal, Long contractId, @Valid UpdateContractStatusRequestDto dto);
+    ResponseDto<Void> deleteContract(UserPrincipal userPrincipal, Long contractId);
 }
