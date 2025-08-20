@@ -9,6 +9,9 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface DeliveryService {
     ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal);
@@ -28,4 +31,6 @@ public interface DeliveryService {
     Page<GetAllWaitingDeliveryResponseDto> getAllWaitingDelivery(int page, int size, String sort);
 
     ResponseDto<Void> deleteDelivery(Long deliveryId);
+
+    ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file);
 }
