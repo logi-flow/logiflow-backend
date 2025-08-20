@@ -77,7 +77,7 @@ public class JwtProvider {
 
     public String getUsernameFromJwtToken(String token) {
         Claims claims = getClaims(token);
-        return claims.get("username", String.class);
+        return claims.getSubject();
     }
 
     public String getEmailFromJwtToken(String token) {

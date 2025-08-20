@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         String username = dto.getUsername().trim();
         String password = dto.getPassword();
         String confirmPassword = dto.getConfirmPassword();
-        String businessNumber = dto.getBusinessNumber().replaceAll("[^0-9]", "");
+        String businessNumber = dto.getBusinessNumber();
         String email = dto.getEmail().trim().toLowerCase();
 
         if (!password.equals(confirmPassword)) {
@@ -284,12 +284,7 @@ public class AuthServiceImpl implements AuthService {
     public ResponseDto<CustomerPasswordResetResponseDto> requestPasswordResetCustomer(CustomerPasswordResetRequestDto dto) {
         CustomerPasswordResetResponseDto data = null;
 
-        String username = dto.getUsername().trim();
-        String businessNumber = dto.getBusinessNumber().replaceAll("\\D", "");
-        String representativeName = dto.getRepresentativeName().trim();
-        String email = dto.getEmail().trim();
-
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(dto.getUsername())
                 .orElse(null);
 
         if (user == null) {
@@ -303,10 +298,10 @@ public class AuthServiceImpl implements AuthService {
             return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
         }
 
-        if (!customer.getUser().getUsername().equals(username)
-                || !customer.getBusinessNumber().equals(businessNumber)
-                || !customer.getRepresentativeName().equals(representativeName)
-                || !customer.getUser().getEmail().equals(email)
+        if (!customer.getUser().getUsername().equals(dto.getUsername())
+                || !customer.getBusinessNumber().equals(dto.getBusinessNumber())
+                || !customer.getRepresentativeName().equals(dto.getRepresentativeName())
+                || !customer.getUser().getEmail().equals(dto.getEmail())
         ) {
             return ResponseDto.fail(ResponseCode.NOT_MATCH_INFORMATION, ResponseMessage.NOT_MATCH_INFORMATION);
         }
