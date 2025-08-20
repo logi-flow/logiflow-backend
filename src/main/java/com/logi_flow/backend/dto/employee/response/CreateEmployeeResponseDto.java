@@ -18,7 +18,8 @@ public class CreateEmployeeResponseDto {
     private String username;
     private String name;
     private String identityNumberMasked;
-    private String phone;
+    private String phoneNumber;
+    private String email;
     private String zipcode;
     private String address;
     private String addressDetail;

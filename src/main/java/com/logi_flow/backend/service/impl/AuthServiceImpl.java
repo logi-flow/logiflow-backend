@@ -5,6 +5,7 @@ import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.CustomerStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.auth.request.*;
@@ -13,6 +14,7 @@ import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.provider.JwtProvider;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.AuthService;
+import com.logi_flow.backend.service.MailService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +45,8 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
     @Override
     @Transactional
@@ -62,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
             return ResponseDto.fail(ResponseCode.USER_ALREADY_EXISTS, ResponseMessage.USER_ALREADY_EXISTS);
         }
 
-        if (customerRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(email)) {
             return ResponseDto.fail(ResponseCode.USER_ALREADY_EXISTS, ResponseMessage.USER_ALREADY_EXISTS);
         }
 
@@ -83,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .username(username)
                 .password(encodePassword)
+                .email(email)
                 .status(UserStatus.ACTIVE)
                 .build();
 
@@ -97,7 +103,6 @@ public class AuthServiceImpl implements AuthService {
                 .businessType(dto.getBusinessType())
                 .businessItems(dto.getBusinessItems())
                 .telephone(dto.getTelephone())
-                .email(dto.getEmail())
                 .fax(dto.getFax())
                 .businessZipCode(dto.getBusinessZipCode())
                 .businessAddress(dto.getBusinessAddress())
@@ -124,11 +129,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseDto<LoginResponseDto> login(LoginRequestDto dto) {
+        LoginResponseDto data = null;
+
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElse(null);
 
         if (user == null) {
             return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        if (!checkPassword(user, dto.getPassword())) {
+            return ResponseDto.fail(ResponseCode.NOT_CORRECT_PASSWORD, ResponseMessage.NOT_CORRECT_PASSWORD);
         }
 
         try {
@@ -147,13 +158,15 @@ public class AuthServiceImpl implements AuthService {
 
             long exprTime = jwtProvider.getExpirationMs();
 
-            LoginResponseDto data = LoginResponseDto.builder()
+            data = LoginResponseDto.builder()
                     .token(token)
                     .exprTime(exprTime)
                     .id(user.getId())
                     .role(user.getRole().getName())
                     .username(user.getUsername())
                     .name(user.getUsername())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
                     .build();
 
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -176,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseDto<EmailCheckResponseDto> checkEmailDuplicate(String email) {
-        if (customerRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(email)) {
             return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
         }
         return ResponseDto.success(ResponseCode.SUCCESS, "사용 가능한 이메일입니다.");
@@ -197,7 +210,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseDto<CustomerLoginIdFindResponseDto> findCustomerLoginId(CustomerLoginIdFindRequestDto dto) {
-        Customer customer = customerRepository.findByEmail(dto.getEmail())
+        CustomerLoginIdFindResponseDto data = null;
+
+        String email = dto.getEmail().trim();
+
+        User user = userRepository.findByEmail(email)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        Customer customer = customerRepository.findByUser(user)
                 .orElse(null);
 
         if (customer == null) {
@@ -206,23 +230,29 @@ public class AuthServiceImpl implements AuthService {
 
         if (!customer.getBusinessNumber().equals(dto.getBusinessNumber())
                 || !customer.getRepresentativeName().equals(dto.getRepresentativeName())
-                || !customer.getEmail().equals(dto.getEmail())
+                || !user.getEmail().equals(dto.getEmail())
         ) {
             return ResponseDto.fail(ResponseCode.NOT_MATCH_INFORMATION, ResponseMessage.NOT_MATCH_INFORMATION);
         }
 
-        CustomerLoginIdFindResponseDto data = new CustomerLoginIdFindResponseDto(customer.getUser().getUsername());
+        data = CustomerLoginIdFindResponseDto.builder()
+                .username(customer.getUser().getUsername())
+                .createdAt(DateUtils.format(customer.getCreatedAt()))
+                .updatedAt(DateUtils.format(customer.getUpdatedAt()))
+                .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
     public ResponseDto<UserLoginIdFindResponseDto> findUserLoginId(UserLoginIdFindRequestDto dto) {
+        UserLoginIdFindResponseDto data = null;
+
         String name = dto.getName().trim();
-        String phone = dto.getPhone().replaceAll("\\D", "");
+        String phone = dto.getPhoneNumber().replaceAll("\\D", "");
 
         Optional<Driver> driver = driverRepository.findByNameAndPhoneNumber(name, phone);
-        Optional<Employee> employee = employeeRepository.findByNameAndPhone(name, phone);
+        Optional<Employee> employee = employeeRepository.findByNameAndPhoneNumber(name, phone);
 
         List<User> matchedUsers = new ArrayList<>();
         driver.map(Driver::getUser).ifPresent(matchedUsers::add);
@@ -239,24 +269,156 @@ public class AuthServiceImpl implements AuthService {
 
         String username = usernames.iterator().next();
 
-        UserLoginIdFindResponseDto data = new UserLoginIdFindResponseDto(username);
+        User user = matchedUsers.get(0);
+
+        data = UserLoginIdFindResponseDto.builder()
+                .username(username)
+                .createdAt(DateUtils.format(user.getCreatedAt()))
+                .updatedAt(DateUtils.format(user.getUpdatedAt()))
+                .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<CustomerPasswordResetResponseDto> getPasswordResetCustomer(CustomerPasswordResetRequestDto dto) {
-        return null;
+    public ResponseDto<CustomerPasswordResetResponseDto> requestPasswordResetCustomer(CustomerPasswordResetRequestDto dto) {
+        CustomerPasswordResetResponseDto data = null;
+
+        String username = dto.getUsername().trim();
+        String businessNumber = dto.getBusinessNumber().replaceAll("\\D", "");
+        String representativeName = dto.getRepresentativeName().trim();
+        String email = dto.getEmail().trim();
+
+        User user = userRepository.findByUsername(username)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        Customer customer = customerRepository.findByUser(user)
+                .orElse(null);
+
+        if (customer == null) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        if (!customer.getUser().getUsername().equals(username)
+                || !customer.getBusinessNumber().equals(businessNumber)
+                || !customer.getRepresentativeName().equals(representativeName)
+                || !customer.getUser().getEmail().equals(email)
+        ) {
+            return ResponseDto.fail(ResponseCode.NOT_MATCH_INFORMATION, ResponseMessage.NOT_MATCH_INFORMATION);
+        }
+
+        String token = jwtProvider.generateResetPasswordJwtToken(dto.getEmail());
+
+        try {
+            mailService.sendResetPasswordEmail(
+                    user.getEmail(),
+                    user.getUsername(),
+                    token
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.fail(ResponseCode.MAIL_SEND_FAIL, ResponseMessage.MAIL_SEND_FAIL);
+        }
+
+        data = CustomerPasswordResetResponseDto.builder()
+                .userId(customer.getUser().getId())
+                .email(customer.getUser().getEmail())
+                .createdAt(DateUtils.format(customer.getCreatedAt()))
+                .updatedAt(DateUtils.format(customer.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<UserPasswordResetResponseDto> getPasswordResetUser(UserPasswordResetRequestDto dto) {
-        return null;
+    public ResponseDto<UserPasswordResetResponseDto> requestPasswordResetUser(UserPasswordResetRequestDto dto) {
+        UserPasswordResetResponseDto data = null;
+
+        String username = dto.getUsername().trim();
+        String name = dto.getName().trim();
+        String phoneNumber = dto.getPhoneNumber().replaceAll("\\D", "");
+        String email = dto.getEmail().trim();
+
+        User user = userRepository.findByUsername(username)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        Optional<Driver> driverOpt = driverRepository.findByUser(user);
+        Optional<Employee> employeeOpt = employeeRepository.findByUser(user);
+
+        boolean valid = false;
+
+        if (employeeOpt.isPresent()) {
+            Employee employee = employeeOpt.get();
+            valid = employee.getName().equals(name)
+                    && employee.getPhoneNumber().equals(phoneNumber)
+                    && user.getEmail().equals(email);
+        }
+
+        if (driverOpt.isPresent()) {
+            Driver driver = driverOpt.get();
+            valid = driver.getName().equals(name)
+                    && driver.getPhoneNumber().equals(phoneNumber)
+                    && user.getEmail().equals(email);
+        }
+
+        if (!valid) {
+            return ResponseDto.fail(ResponseCode.NOT_MATCH_INFORMATION, ResponseMessage.NOT_MATCH_INFORMATION);
+        }
+
+        String token = jwtProvider.generateResetPasswordJwtToken(dto.getEmail());
+
+        try {
+            mailService.sendResetPasswordEmail(
+                    user.getEmail(),
+                    user.getUsername(),
+                    token
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.fail(ResponseCode.MAIL_SEND_FAIL, ResponseMessage.MAIL_SEND_FAIL);
+        }
+
+        data = UserPasswordResetResponseDto.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .createdAt(DateUtils.format(user.getCreatedAt()))
+                .updatedAt(DateUtils.format(user.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<PasswordResetSendEmailResponseDto> resetPassword(PasswordResetRequestDto dto) {
-        return null;
+    public ResponseDto<PasswordResetSendEmailResponseDto> resetPassword(String token, PasswordResetRequestDto dto) {
+        String email = jwtProvider.getEmailFromJwtToken(token);
+
+        if (email == null) {
+            return ResponseDto.fail(ResponseCode.INVALID_TOKEN, ResponseMessage.INVALID_TOKEN);
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            return ResponseDto.fail(ResponseCode.NOT_MATCH_PASSWORD, ResponseMessage.NOT_MATCH_PASSWORD);
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     @Override
@@ -266,6 +428,41 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseDto<PasswordResetSendEmailResponseDto> verifyEmail(String token) {
-        return null;
+        if (token == null) {
+            return ResponseDto.fail(ResponseCode.MISSING_TOKEN, ResponseMessage.MISSING_TOKEN);
+        }
+
+        String email = jwtProvider.getEmailFromJwtToken(token);
+        boolean isEmailVerified = checkEmail(email);
+
+        if (!isEmailVerified) {
+            return ResponseDto.fail(ResponseCode.MAIL_NOT_FOUND, ResponseMessage.MAIL_NOT_FOUND);
+        }
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+    }
+
+    @Override
+    public boolean checkPassword(User user, String password) {
+        return bCryptPasswordEncoder.matches(password, user.getPassword());
+    }
+
+    @Override
+    public boolean checkEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+
+    public class PasswordUtils {
+        public static String generateTempPassword() {
+            int length = 10;
+            String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            StringBuilder sb = new StringBuilder();
+            SecureRandom random = new SecureRandom();
+            for (int i = 0; i < length; i++) {
+                sb.append(chars.charAt(random.nextInt(chars.length())));
+            }
+            return sb.toString();
+        }
     }
 }

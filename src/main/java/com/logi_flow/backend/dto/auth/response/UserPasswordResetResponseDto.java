@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 public class UserPasswordResetResponseDto {
     private Long userId;
     private String email;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

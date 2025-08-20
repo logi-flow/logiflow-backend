@@ -17,7 +17,8 @@ public class GetEmployeeDetailResponseDto {
     private Long userId;
     private String name;
     private String identityNumber;
-    private String phone;
+    private String phoneNumber;
+    private String email;
     private String zipcode;
     private String address;
     private String addressDetail;
