@@ -19,7 +19,7 @@ public class UpdateDriverRequestDto {
     @NotBlank(message = "휴대폰 번호는 필수 항목입니다.")
     private String phoneNumber;
 
-    @NotBlank(message = "주소는 필수 항목입니다.")
+    @NotBlank(message = "우편번호는 필수 항목입니다.")
     private String zipcode;
 
     @NotBlank(message = "상세주소는 필수 항목입니다.")
