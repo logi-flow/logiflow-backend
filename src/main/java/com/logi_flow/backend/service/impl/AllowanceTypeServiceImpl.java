@@ -60,11 +60,11 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
             restoreAllowanceType.setDescription(dto.getDescription());
             restoreAllowanceType.setActive(true);
             restoreAllowanceType.setStatus(AllowanceTypeStatus.ACTIVE);
-            allowanceTypeRepository.save(restoreAllowanceType);
+            AllowanceType savedAllowanceType = allowanceTypeRepository.save(restoreAllowanceType);
 
-            deleteLogService.removeIfExists(TableRef.ALLOWANCE_TYPE, restoreAllowanceType.getId());
+            deleteLogService.removeIfExists(TableRef.ALLOWANCE_TYPE, savedAllowanceType.getId());
 
-            data = toCreateAllowanceTypeResponseDto(restoreAllowanceType);
+            data = toCreateAllowanceTypeResponseDto(savedAllowanceType);
 
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
         }
@@ -77,9 +77,9 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
                 .status(AllowanceTypeStatus.ACTIVE)
                 .build();
 
-        allowanceTypeRepository.save(newAllowanceType);
+        AllowanceType savedAllowanceType = allowanceTypeRepository.save(newAllowanceType);
 
-        data = toCreateAllowanceTypeResponseDto(newAllowanceType);
+        data = toCreateAllowanceTypeResponseDto(savedAllowanceType);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -125,35 +125,43 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
 
         AllowanceType savedAllowanceType = getAllowanceType(allowanceTypeId);
 
+        if (savedAllowanceType.getCode().equals("BASE")) {
+            return ResponseDto.fail(ResponseCode.SYSTEM_ITEM_IMMUTABLE, ResponseMessage.SYSTEM_ITEM_IMMUTABLE);
+        }
+
+        if (savedAllowanceType.getStatus() == AllowanceTypeStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
+        }
+
         if (!dto.getName().equals(savedAllowanceType.getName())) {
-            String prev_data = savedAllowanceType.getName();
+            String prevData = savedAllowanceType.getName();
             savedAllowanceType.setName(dto.getName());
-            createUpdateLog(user, savedAllowanceType, "name", prev_data, savedAllowanceType.getName());
+            createUpdateLog(user, savedAllowanceType, "name", prevData, savedAllowanceType.getName());
         }
 
         if (!Objects.equals(dto.getDescription(), savedAllowanceType.getDescription())) {
-            String prev_data = savedAllowanceType.getDescription();
+            String prevData = savedAllowanceType.getDescription();
             savedAllowanceType.setDescription(dto.getDescription());
-            createUpdateLog(user, savedAllowanceType, "description", prev_data, savedAllowanceType.getDescription());
+            createUpdateLog(user, savedAllowanceType, "description", prevData, savedAllowanceType.getDescription());
         }
 
         if (dto.isActive() != savedAllowanceType.isActive()) {
-            String prev_data = String.valueOf(savedAllowanceType.isActive());
+            String prevData = String.valueOf(savedAllowanceType.isActive());
             savedAllowanceType.setActive(dto.isActive());
-            createUpdateLog(user, savedAllowanceType, "is_active", prev_data, String.valueOf(savedAllowanceType.isActive()));
+            createUpdateLog(user, savedAllowanceType, "is_active", prevData, String.valueOf(savedAllowanceType.isActive()));
         }
 
-        allowanceTypeRepository.save(savedAllowanceType);
+        AllowanceType updatedAllowanceType = allowanceTypeRepository.save(savedAllowanceType);
 
         data = UpdateAllowanceTypeResponseDto.builder()
-                .id(savedAllowanceType.getId())
-                .code(savedAllowanceType.getCode())
-                .name(savedAllowanceType.getName())
-                .description(savedAllowanceType.getDescription())
-                .isActive(savedAllowanceType.isActive())
-                .status(savedAllowanceType.getStatus())
-                .createdAt(DateUtils.format(savedAllowanceType.getCreatedAt()))
-                .updatedAt(DateUtils.format(savedAllowanceType.getUpdatedAt()))
+                .id(updatedAllowanceType.getId())
+                .code(updatedAllowanceType.getCode())
+                .name(updatedAllowanceType.getName())
+                .description(updatedAllowanceType.getDescription())
+                .isActive(updatedAllowanceType.isActive())
+                .status(updatedAllowanceType.getStatus())
+                .createdAt(DateUtils.format(updatedAllowanceType.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedAllowanceType.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -167,8 +175,12 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
 
         AllowanceType allowanceType = getAllowanceType(allowanceTypeId);
 
+        if (allowanceType.getCode().equals("BASE")) {
+            return ResponseDto.fail(ResponseCode.SYSTEM_ITEM_IMMUTABLE, ResponseMessage.SYSTEM_ITEM_IMMUTABLE);
+        }
+
         if (allowanceType.getStatus() == AllowanceTypeStatus.DELETED) {
-            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
         }
 
         allowanceType.setActive(false);

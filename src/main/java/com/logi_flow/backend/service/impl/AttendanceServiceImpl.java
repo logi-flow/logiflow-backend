@@ -33,6 +33,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final DriverRepository driverRepository;
 
     @Override
+    @Transactional
     public ResponseDto<CreateAttendanceResponseDto> checkInAttendance(UserPrincipal userPrincipal) {
         CreateAttendanceResponseDto data = null;
 
@@ -47,14 +48,14 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .workStart(LocalDateTime.now())
                 .build();
 
-        attendanceRepository.save(newAttendance);
+        Attendance savedAttendance = attendanceRepository.save(newAttendance);
 
         data = CreateAttendanceResponseDto.builder()
-                .id(newAttendance.getId())
-                .driverId(newAttendance.getDriver().getId())
-                .workStart(DateUtils.format(newAttendance.getWorkStart()))
-                .createdAt(DateUtils.format(newAttendance.getCreatedAt()))
-                .updatedAt(DateUtils.format(newAttendance.getUpdatedAt()))
+                .id(savedAttendance.getId())
+                .driverId(savedAttendance.getDriver().getId())
+                .workStart(DateUtils.format(savedAttendance.getWorkStart()))
+                .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
+                .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -75,15 +76,15 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.NO_OPEN_ATTENDANCE));
 
         attendance.setWorkEnd(LocalDateTime.now());
-        attendanceRepository.save(attendance);
+        Attendance savedAttendance = attendanceRepository.save(attendance);
 
         data = UpdateAttendanceResponseDto.builder()
-                .id(attendance.getId())
-                .driverId(attendance.getDriver().getId())
-                .workStart(DateUtils.format(attendance.getWorkStart()))
-                .workEnd(DateUtils.format(attendance.getWorkEnd()))
-                .createdAt(DateUtils.format(attendance.getCreatedAt()))
-                .updatedAt(DateUtils.format(attendance.getUpdatedAt()))
+                .id(savedAttendance.getId())
+                .driverId(savedAttendance.getDriver().getId())
+                .workStart(DateUtils.format(savedAttendance.getWorkStart()))
+                .workEnd(DateUtils.format(savedAttendance.getWorkEnd()))
+                .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
+                .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);

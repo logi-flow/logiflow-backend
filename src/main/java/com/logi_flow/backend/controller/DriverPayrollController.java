@@ -40,7 +40,7 @@ public class DriverPayrollController {
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getAllDriverPayroll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDriverPayrollResponseDto> result = driverPayrollService.getAllDriverPayroll(page, size, sort);
         PageDto<GetAllDriverPayrollResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -60,7 +60,7 @@ public class DriverPayrollController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDriverPayrollResponseDto> result = driverPayrollService.getMyPayrolls(userPrincipal, page, size, sort);
         PageDto<GetAllDriverPayrollResponseDto> response = PageMapper.toPageDto(result, sort);

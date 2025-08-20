@@ -7,7 +7,7 @@ public interface ResponseCode {
     String INVALID_TOKEN = "IT";
     String MISSING_TOKEN = "MT";
 
-    String ALREADY_OPEN_ATTENDANCE = "AOA";
-
     String EXISTS_TYPE_CODE = "ETC";
+    String SYSTEM_ITEM_IMMUTABLE = "SI";
+    String ALREADY_DELETED = "AD";
 }

@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -23,6 +22,6 @@ public class UpdateDriverPayrollStatusResponseDto {
     private DriverPayrollStatus status;
     private String changeReason;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

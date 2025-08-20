@@ -40,4 +40,10 @@ public class DriverAllowance extends BaseTime {
     public void calculateAmount() {
         this.amount = quantity.multiply(new BigDecimal(this.unitPrice)).intValue();
     }
+
+    @PrePersist
+    @PreUpdate
+    private void prePersistOrUpdate() {
+        calculateAmount();
+    }
 }
