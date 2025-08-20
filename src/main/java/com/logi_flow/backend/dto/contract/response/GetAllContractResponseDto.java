@@ -16,8 +16,8 @@ public class GetAllContractResponseDto {
     private Long customerId;
     private String customerName;
     private ContractStatus status;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

@@ -24,7 +24,7 @@ public class Allocation extends BaseTime {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
-    private Assignment assignmentId;
+    private Assignment assignment;
 
     @Column(name = "district_name", nullable = false)
     private String districtName;

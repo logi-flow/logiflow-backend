@@ -25,16 +25,15 @@ public class ContractController {
 
     private final ContractService contractService;
 
-    private static final String CONTRACT_API = "/{customerId}";
-    private static final String CONTRACT_STATUS_API = "/{customerId}/status";
+    private static final String CONTRACT_API = "/{contractId}";
+    private static final String CONTRACT_STATUS_API = "/{contractId}/status";
 
     @PostMapping(CONTRACT_API)
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId,
             @Valid @RequestBody CreateContractRequestDto dto
     ){
-        ResponseDto<CreateContractResponseDto> response = contractService.createContract(userPrincipal, customerId, dto);
+        ResponseDto<CreateContractResponseDto> response = contractService.createContract(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
@@ -51,10 +50,10 @@ public class ContractController {
     @PutMapping(CONTRACT_STATUS_API)
     public ResponseEntity<ResponseDto<UpdateContractStatusResponseDto>> updateContractStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId,
+            @PathVariable Long contractId,
             @Valid @RequestBody UpdateContractStatusRequestDto dto
     ){
-        ResponseDto<UpdateContractStatusResponseDto> response = contractService.updateContractStatus(userPrincipal, customerId, dto);
+        ResponseDto<UpdateContractStatusResponseDto> response = contractService.updateContractStatus(userPrincipal, contractId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -63,7 +62,7 @@ public class ContractController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
 
     ) {
         Page<GetAllContractResponseDto> result = contractService.getAllContract(userPrincipal, page, size, sort);
@@ -74,18 +73,18 @@ public class ContractController {
     @GetMapping(CONTRACT_API)
     public ResponseEntity<ResponseDto<GetContractDetailResponseDto>> getContractDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId
+            @PathVariable Long contractId
     ) {
-        ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(userPrincipal, customerId);
+        ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(userPrincipal, contractId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping(CONTRACT_API)
-    public ResponseEntity<ResponseDto<?>> deleteContract(
+    public ResponseEntity<ResponseDto<Void>> deleteContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId
+            @PathVariable Long contractId
     ) {
-        ResponseDto<?> response = contractService.deleteContract(userPrincipal, customerId);
+        ResponseDto<Void> response = contractService.deleteContract(userPrincipal, contractId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

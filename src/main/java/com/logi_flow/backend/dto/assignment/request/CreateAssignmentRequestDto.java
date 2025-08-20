@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.List;
-
 @AllArgsConstructor
 @Getter
 public class CreateAssignmentRequestDto {
@@ -15,7 +13,7 @@ public class CreateAssignmentRequestDto {
     private Long driverId;
 
     @NotEmpty(message = "차량 ID는 필수 항목입니다.")
-    private List<Long> vehicleIds;
+    private Long vehicleId;
 
     private Boolean isPrimary;
 

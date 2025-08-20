@@ -4,8 +4,6 @@ import com.logi_flow.backend.common.enums.AssignmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "assignments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,13 +15,13 @@ public class Assignment extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
-    private List<Vehicle> vehicle;
+    private Vehicle vehicle;
 
     @Column(name = "is_primary", nullable = false)
     private boolean isPrimary = true;

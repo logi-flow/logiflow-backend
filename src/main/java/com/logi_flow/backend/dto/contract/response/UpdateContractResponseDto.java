@@ -15,11 +15,14 @@ public class UpdateContractResponseDto {
     private Long id;
     private Long customerId;
     private ContractStatus status;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
-    private int price;
-    private int volumeLimit;
+    private int baseFee;
+    private int weightLimitKg;
+    private int parcelLimit;
+    private int overWeightFeePerKg;
+    private int overParcelFee;
     private String specialTerms;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

@@ -38,7 +38,7 @@ public class DeliveryController {
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDeliveryResponseDto> result = deliveryService.getAllDelivery(page, size, sort);
         PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -56,7 +56,7 @@ public class DeliveryController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDeliveryResponseDto> result = deliveryService.getMyDeliveries(userPrincipal, page, size, sort);
         PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -94,7 +94,7 @@ public class DeliveryController {
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllWaitingDeliveryResponseDto> result = deliveryService.getAllWaitingDelivery(page, size, sort);
         PageDto<GetAllWaitingDeliveryResponseDto> response =  PageMapper.toPageDto(result, sort);
