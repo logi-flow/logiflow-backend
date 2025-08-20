@@ -1,8 +1,6 @@
 package com.logi_flow.backend.dto.contract.response;
 
 import com.logi_flow.backend.common.enums.ContractStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +15,7 @@ public class CreateContractResponseDto {
     private Long id;
     private Long customerId;
     private ContractStatus status;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
     private int baseFee;
     private int weightLimitKg;
@@ -25,6 +23,6 @@ public class CreateContractResponseDto {
     private int overWeightFeePerKg;
     private int overParcelFee;
     private String specialTerms;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

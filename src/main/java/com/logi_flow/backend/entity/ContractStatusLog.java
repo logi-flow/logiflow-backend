@@ -1,5 +1,6 @@
 package com.logi_flow.backend.entity;
 
+import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +23,7 @@ public class ContractStatusLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by")
-    private User user;
+    private User changedBy;
 
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
@@ -32,9 +33,9 @@ public class ContractStatusLog {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prev_status", nullable = false)
-    private CustomerStatus prevStatus;
+    private ContractStatus prevStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false)
-    private CustomerStatus newStatus;
+    private ContractStatus newStatus;
 }

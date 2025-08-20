@@ -7,7 +7,7 @@ public interface Regex {
     String BUSINESS_NUMBER = "^([0-9]{3})-([0-9]{2})-([0-9]{5})$";
     String IDENTITY_NUMBER = "^([0-9]{6})-([0-9]{7})$";
     String TELEPHONE = "^([0-9]{3})-([0-9]{3,4})-([0-9]{4})$";
-    String PHONE_NUMBER = "^(01[0-9]{1})-([0-9]{3,4})-([0-9]{4})$";
+    String PHONE_NUMBER = "^(01[0-9]{1})[ -]?([0-9]{3,4})[ -]?([0-9]{4})$";
     String EMAIL = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
     String ZIPCODE = "^\\d{5}$";
     String ADDRESS = "^[가-힣a-zA-Z0-9\\s\\-,]{5,100}$";

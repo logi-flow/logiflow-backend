@@ -9,9 +9,13 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface DeliveryService {
-    ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal);
+    ResponseDto<CreateDeliveryResponseDto> createDelivery(@Valid CreateDeliveryRequestDto dto, UserPrincipal userPrincipal);
 
     Page<GetAllDeliveryResponseDto> getAllDelivery(int page, int size, String sort);
 
@@ -21,11 +25,13 @@ public interface DeliveryService {
 
     ResponseDto<UpdateDeliveryResponseDto> updateDeliveryIsHidden(Long deliveryId, UpdateIsHiddenRequestDto dto, UserPrincipal userPrincipal);
 
-    ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, UpdateDeliveryRequestDto dto, UserPrincipal userPrincipal);
+    ResponseDto<UpdateDeliveryResponseDto> updateDelivery(Long deliveryId, @Valid UpdateDeliveryRequestDto dto, UserPrincipal userPrincipal);
 
     ResponseDto<UpdateDeliveryResponseDto> updateDeliveryStatus(Long deliveryId, @Valid UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal);
 
     Page<GetAllWaitingDeliveryResponseDto> getAllWaitingDelivery(int page, int size, String sort);
 
-    ResponseDto<Void> deleteDelivery(Long deliveryId);
+    ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId);
+
+    ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal);
 }

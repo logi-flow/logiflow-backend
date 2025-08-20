@@ -72,7 +72,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllCustomerResponseDto> result = customerService.getAllCustomer(userPrincipal, page, size, sort);
         PageDto<GetAllCustomerResponseDto> response = PageMapper.toPageDto(result, sort);

@@ -58,7 +58,8 @@ public class DriverServiceImpl implements DriverService {
                 .role(role)
                 .username(username)
                 .password(encodedPassword)
-                .status(UserStatus.ACTIVED)
+                .email(dto.getEmail())
+                .status(UserStatus.ACTIVE)
                 .build();
 
         userRepository.save(newUser);

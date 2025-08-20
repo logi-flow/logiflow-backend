@@ -36,6 +36,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsServiceImpl userDetailsService;
 
+    private static final String[] EXCLUDE_URLS = {
+            "/api/v1/auth/signup",
+            "/api/v1/auth/login-id/**",
+            "/api/v1/auth/email/**",
+            "/api/v1/auth/business-number/**",
+            "/api/v1/auth/password/reset/**",
+    };
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        for (String exclude : EXCLUDE_URLS) {
+            if (path.startsWith(exclude)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -66,6 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json; charset=utf-8");
             response.getWriter().write(jsonResponse);
+            return;
         }
 
         filterChain.doFilter(request, response);

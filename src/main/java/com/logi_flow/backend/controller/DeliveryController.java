@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class DeliveryController {
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDeliveryResponseDto> result = deliveryService.getAllDelivery(page, size, sort);
         PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -53,7 +56,7 @@ public class DeliveryController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllDeliveryResponseDto> result = deliveryService.getMyDeliveries(userPrincipal, page, size, sort);
         PageDto<GetAllDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
@@ -62,7 +65,7 @@ public class DeliveryController {
 
 
     @PutMapping("/{deliveryId}/is-hidden")
-    public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryIsHidden(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
@@ -81,8 +84,8 @@ public class DeliveryController {
     }
 
     @DeleteMapping("/{deliveryId}")
-    public ResponseEntity<ResponseDto<Void>> deleteDelivery(@PathVariable Long deliveryId) {
-         ResponseDto<Void> response = deliveryService.deleteDelivery(deliveryId);
+    public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
+         ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 
@@ -91,12 +94,18 @@ public class DeliveryController {
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllWaitingDeliveryResponseDto> result = deliveryService.getAllWaitingDelivery(page, size, sort);
         PageDto<GetAllWaitingDeliveryResponseDto> response =  PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+
+    @PostMapping("/upload")
+    public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file, userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
+    }
 
 }

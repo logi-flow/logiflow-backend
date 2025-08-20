@@ -98,26 +98,27 @@ public class AuthController {
     }
 
     @PostMapping(CUSTOMER_RESET_PASSWORD_API)
-    public ResponseEntity<ResponseDto<CustomerPasswordResetResponseDto>> getPasswordResetCustomer(
+    public ResponseEntity<ResponseDto<CustomerPasswordResetResponseDto>> requestPasswordResetCustomer(
             @Valid @RequestBody CustomerPasswordResetRequestDto dto
     ) {
-        ResponseDto<CustomerPasswordResetResponseDto> response = authService.getPasswordResetCustomer(dto);
+        ResponseDto<CustomerPasswordResetResponseDto> response = authService.requestPasswordResetCustomer(dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @PostMapping(USER_RESET_PASSWORD_API)
-    public ResponseEntity<ResponseDto<UserPasswordResetResponseDto>> getPasswordResetUser(
+    public ResponseEntity<ResponseDto<UserPasswordResetResponseDto>> requestPasswordResetUser(
             @Valid @RequestBody UserPasswordResetRequestDto dto
     ) {
-        ResponseDto<UserPasswordResetResponseDto> response = authService.getPasswordResetUser(dto);
+        ResponseDto<UserPasswordResetResponseDto> response = authService.requestPasswordResetUser(dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @PostMapping(RESET_PASSWORD_API)
     public ResponseEntity<ResponseDto<PasswordResetSendEmailResponseDto>> resetPassword(
+            @RequestParam String token,
             @Valid @RequestBody PasswordResetRequestDto dto
     ) {
-        ResponseDto<PasswordResetSendEmailResponseDto> response = authService.resetPassword(dto);
+        ResponseDto<PasswordResetSendEmailResponseDto> response = authService.resetPassword(token, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

@@ -7,15 +7,22 @@ import com.logi_flow.backend.dto.assignment.response.CreateAssignmentResponseDto
 import com.logi_flow.backend.dto.assignment.response.GetAllAssignmentResponseDto;
 import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponseDto;
 import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
+import com.logi_flow.backend.entity.Vehicle;
+
+import java.util.List;
 
 public interface AssignmentService {
     ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto);
 
     ResponseDto<UpdateAssignmentResponseDto> updateAssignment(Long assignmentId, UpdateAssignmentRequestDto dto);
 
-    ResponseDto<GetAllAssignmentResponseDto> getAllAssignment();
+    ResponseDto<List<GetAllAssignmentResponseDto>> getAllAssignment();
 
     ResponseDto<GetAssignmentDetailResponseDto> getAssignmentDetail(Long assignmentId);
 
     ResponseDto<?> deleteAssignment(Long assignmentId);
+
+    void pauseAssignment(Vehicle vehicle);
+
+    void removeAssignmentByVehicle(Vehicle vehicle);
 }

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 public class UpdateContractRequestDto {
     @NotNull(message = "시작일은 필수 항목입니다.")
-    private LocalDate stratDate;
+    private LocalDate startDate;
 
     @NotNull(message = "종료일은 필수 항목입니다.")
     private LocalDate endDate;

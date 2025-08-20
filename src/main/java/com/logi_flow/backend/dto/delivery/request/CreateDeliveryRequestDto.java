@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 public class CreateDeliveryRequestDto {
     @NotNull(message = "계약 ID는 필수 항목입니다.")
     private Long contractId;
-//    @NotNull(message = "고객 ID는 필수 항목입니다.")
-//    private Long customerId;
     @NotNull(message = "도착 희망일은 필수 항목입니다.")
     private LocalDateTime requestDate;
     @NotBlank(message = "품목은 필수 항목입니다.")

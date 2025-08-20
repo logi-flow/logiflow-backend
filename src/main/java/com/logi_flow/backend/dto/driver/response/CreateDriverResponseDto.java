@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class CreateDriverResponseDto {
     private Long driverId;
     private String name;
+    private String email;
     private String username;
     private String password;
     private LocalDateTime createdAt;
