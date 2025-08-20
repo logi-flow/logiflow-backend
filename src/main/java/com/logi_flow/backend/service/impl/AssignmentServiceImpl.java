@@ -21,6 +21,7 @@ import com.logi_flow.backend.service.AssignmentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final VehicleRepository vehicleRepository;
 
     @Override
+    @Transactional
     public ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto) {
         CreateAssignmentResponseDto data = null;
 
@@ -58,7 +60,6 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .build();
 
         vehicle.setStatus(VehicleStatus.IN_USE);
-
         assignmentRepository.save(newAssignment);
 
         data = CreateAssignmentResponseDto.builder()
@@ -93,5 +94,35 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public ResponseDto<?> deleteAssignment(Long assignmentId) {
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void pauseAssignment(Vehicle vehicle) {
+        assignmentRepository.findByVehicleAndStatus(vehicle, AssignmentStatus.ACTIVE)
+                .ifPresent(assignment -> {
+                    assignment.setStatus(AssignmentStatus.PAUSED);
+
+                    Vehicle subVehicle = vehicleRepository.findFirstByStatus(VehicleStatus.AVAILABLE)
+                            .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+                    Assignment subAssignment = Assignment.builder()
+                            .driver(assignment.getDriver())
+                            .vehicle(subVehicle)
+                            .status(AssignmentStatus.ACTIVE)
+                            .isPrimary(false)
+                            .build();
+
+                    assignmentRepository.save(subAssignment);
+                    subVehicle.setStatus(VehicleStatus.IN_USE);
+                });
+    }
+
+    @Override
+    public void removeAssignmentByVehicle(Vehicle vehicle) {
+        assignmentRepository.findActiveOrPausedByVehicle(vehicle)
+                .ifPresent(assignment ->
+                        assignment.setStatus(AssignmentStatus.DELETED)
+                );
     }
 }
