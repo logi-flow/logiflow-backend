@@ -12,28 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateCustomerResponseDto {
     private Long id;
-    private CustomerStatus status;
-
     private String name;
-    private String businessNumber;
-    private String representativeName;
-    private String businessType;
-    private String businessItems;
-
-    private String telephone;
-    private String email;
-    private String fax;
-
-    private String businessZipCode;
-    private String businessAddress;
-    private String businessAddressDetail;
-
-    private String chargePosition;
-    private String chargeDepartment;
-    private String chargeName;
-    private String chargePhone;
-    private String chargeEmail;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

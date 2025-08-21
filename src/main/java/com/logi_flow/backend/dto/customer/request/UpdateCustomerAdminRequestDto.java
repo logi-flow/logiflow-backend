@@ -9,10 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class UpdateCustomerAdminRequestDto {
-    @NotBlank(message = "이메일은 필수 항목입니다.")
-    @Pattern(regexp = Regex.EMAIL, message = "example@mail.com 형식이어야 합니다.")
-    private String email;
-
     @NotBlank(message = "사업자 번호는 필수 항목입니다.")
     @Pattern(regexp = Regex.BUSINESS_NUMBER, message = "사업자 번호는 00-000-00000 형식입니다.")
     private String businessNumber;
