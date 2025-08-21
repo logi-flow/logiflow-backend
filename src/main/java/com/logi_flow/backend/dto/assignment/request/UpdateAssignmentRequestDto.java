@@ -1,7 +1,6 @@
 package com.logi_flow.backend.dto.assignment.request;
 
 import com.logi_flow.backend.common.enums.AssignmentStatus;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +11,7 @@ public class UpdateAssignmentRequestDto {
     @NotNull(message = "기사 ID는 필수 항목입니다.")
     private Long driverId;
 
-    @NotEmpty(message = "차량 ID는 필수 항목입니다.")
+    @NotNull(message = "차량 ID는 필수 항목입니다.")
     private Long vehicleId;
 
     private Boolean isPrimary;
