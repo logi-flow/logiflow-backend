@@ -14,6 +14,7 @@ public class GetAllAssignmentResponseDto {
     private Long id;
     private Long driverId;
     private Long vehicleId;
+    private boolean isPrimary;
     private AssignmentStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
