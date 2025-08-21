@@ -28,7 +28,7 @@ public class ContractController {
     private static final String CONTRACT_API = "/{contractId}";
     private static final String CONTRACT_STATUS_API = "/{contractId}/status";
 
-    @PostMapping(ApiMappingPattern.CONTRACT_API)
+    @PostMapping
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody CreateContractRequestDto dto

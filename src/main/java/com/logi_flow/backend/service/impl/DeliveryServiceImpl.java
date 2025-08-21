@@ -25,7 +25,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +34,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,6 +70,10 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new IllegalArgumentException("계약 종료일이 지남");
         }
 
+        if(!contract.getStatus().equals(ContractStatus.APPROVED)) {
+            throw new IllegalArgumentException("계약 상태가 승인이 아님");
+        }
+
         Delivery newDelivery = Delivery.builder()
                 .contract(contract)
                 .customer(customer)
@@ -76,7 +81,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .item(dto.getItem())
                 .weight(dto.getWeight())
                 .message(dto.getMessage())
-                .isHidden(dto.isHidden())
+                .isHidden(false)
                 .status(dto.getStatus())
                 .pickupName(dto.getPickupName())
                 .pickupPhone(dto.getPickupPhone())
@@ -211,8 +216,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         boolean prevIsHidden = delivery.isHidden();
 
-        if(dto.isHidden() != delivery.isHidden()) {
-            delivery.setHidden(dto.isHidden());
+        if(dto.getIsHidden() != null && !dto.getIsHidden().equals(delivery.isHidden())) {
+            delivery.setHidden(dto.getIsHidden());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -222,8 +227,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .user(user)
                 .changedByUsername(username)
                 .type("is_hidden")
-                .prevData(String.valueOf(prevIsHidden))
-                .newData(String.valueOf(updatedDelivery.isHidden()))
+                .prevData(prevIsHidden ? "true" : "false")
+                .newData(updatedDelivery.isHidden() ? "true" : "false")
                 .build();
 
         deliveryUpdateLogRepository.save(deliveryUpdateLog);
@@ -275,76 +280,82 @@ public class DeliveryServiceImpl implements DeliveryService {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
+        if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
+            return ResponseDto.fail(ResponseCode.FAILED, "배송 요청 상태에만 수정 가능");
+        }
+
         List<DeliveryUpdateLog> logs = new ArrayList<>();
 
-        if(!dto.getRequestDate().equals(delivery.getRequestDate())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "request_date", delivery.getRequestDate().toString(), dto.getRequestDate().toString()));
+        if(!Objects.equals(dto.getRequestDate(), delivery.getRequestDate())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "request_date", String.valueOf(delivery.getRequestDate()), String.valueOf(dto.getRequestDate())));
             delivery.setRequestDate(dto.getRequestDate());
         }
 
-        if(!dto.getItem().equals(delivery.getItem())) {
+        if(!Objects.equals(dto.getItem(), delivery.getItem())) {
             logs.add(buildDeliveryLog(delivery, user, username, "item", delivery.getItem(), dto.getItem()));
             delivery.setItem(dto.getItem());
         }
 
-        if(dto.getWeight().compareTo(delivery.getWeight()) != 0) {
-            logs.add(buildDeliveryLog(delivery, user, username, "weight", delivery.getWeight().toString(), dto.getWeight().toString()));
-            delivery.setWeight(dto.getWeight());
+        if(dto.getWeight() != null) {
+            if(delivery.getWeight() == null || dto.getWeight().compareTo(delivery.getWeight()) != 0) {
+                logs.add(buildDeliveryLog(delivery, user, username, "weight", delivery.getWeight() != null ? delivery.getWeight().toString() : null, dto.getWeight().toString()));
+                delivery.setWeight(dto.getWeight());
+            }
         }
 
-        if(!dto.getMessage().equals(delivery.getMessage())) {
+        if(!Objects.equals(dto.getMessage(), delivery.getMessage())) {
             logs.add(buildDeliveryLog(delivery, user, username, "message", delivery.getMessage(), dto.getMessage()));
             delivery.setMessage(dto.getMessage());
         }
 
-        if(!dto.getPickupName().equals(delivery.getPickupName())) {
+        if(!Objects.equals(dto.getPickupName(), delivery.getPickupName())) {
             logs.add(buildDeliveryLog(delivery, user, username, "pickup_name", delivery.getPickupName(), dto.getPickupName()));
             delivery.setPickupName(dto.getPickupName());
         }
 
-        if(!dto.getPickupPhone().equals(delivery.getPickupPhone())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_phone", dto.getPickupPhone(), dto.getPickupPhone()));
-            delivery.setPickupPhone(dto.getPickupPhone());
+        if(!Objects.equals(dto.getPickupPhone(), delivery.getPickupPhone())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_phone", delivery.getPickupPhone(), dto.getPickupPhone()));
+            delivery.setPickupName(dto.getPickupPhone());
         }
 
-        if(!dto.getPickupZipcode().equals(delivery.getPickupZipCode())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_zipcode", dto.getPickupZipcode(), dto.getPickupZipcode()));
+        if(!Objects.equals(dto.getPickupZipcode(), delivery.getPickupZipCode())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_zipcode", delivery.getPickupZipCode(), dto.getPickupZipcode()));
             delivery.setPickupZipCode(dto.getPickupZipcode());
         }
 
-        if(!dto.getPickupAddress().equals(delivery.getPickupAddress())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address", dto.getPickupAddress(), dto.getPickupAddress()));
-            delivery.setPickupAddress(dto.getPickupAddress());
+        if(!Objects.equals(dto.getPickupAddress(), delivery.getPickupAddress())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address", delivery.getPickupAddress(), dto.getPickupAddress()));
+            delivery.setPickupName(dto.getPickupAddress());
         }
 
-        if(dto.getPickupAddressDetail() != null && !dto.getPickupAddressDetail().equals(delivery.getPickupAddressDetail())) {
+        if(dto.getPickupAddressDetail() != null && !Objects.equals(dto.getPickupAddressDetail(), delivery.getPickupAddressDetail())) {
             logs.add(buildDeliveryLog(delivery, user, username, "pickup_address_detail", dto.getPickupAddressDetail(), dto.getPickupAddressDetail()));
             delivery.setPickupAddressDetail(dto.getPickupAddressDetail());
         }
 
-        if(!dto.getRecipientName().equals(delivery.getRecipientName())) {
+        if(!Objects.equals(dto.getRecipientName(), delivery.getRecipientName())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_name", delivery.getRecipientName(), dto.getRecipientName()));
-            delivery.setRecipientName(dto.getRecipientName());
+            delivery.setPickupName(dto.getRecipientName());
         }
 
-        if(!dto.getRecipientPhone().equals(delivery.getRecipientPhone())) {
+        if(!Objects.equals(dto.getRecipientPhone(), delivery.getRecipientPhone())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_phone", delivery.getRecipientPhone(), dto.getRecipientPhone()));
-            delivery.setRecipientPhone(dto.getRecipientPhone());
+            delivery.setPickupName(dto.getRecipientPhone());
         }
 
-        if(!dto.getRecipientZipcode().equals(delivery.getRecipientZipcode())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "recipient_zipcode", dto.getRecipientZipcode(), dto.getRecipientZipcode()));
-            delivery.setRecipientZipcode(dto.getRecipientZipcode());
+        if(!Objects.equals(dto.getRecipientZipcode(), delivery.getRecipientZipcode())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_zipcode", delivery.getRecipientZipcode(), dto.getRecipientZipcode()));
+            delivery.setPickupZipCode(dto.getRecipientZipcode());
         }
 
-        if(!dto.getRecipientAddress().equals(delivery.getRecipientAddress())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "recipient_address", dto.getRecipientAddress(), dto.getRecipientAddress()));
-            delivery.setRecipientAddress(dto.getRecipientAddress());
+        if(!Objects.equals(dto.getRecipientAddress(), delivery.getRecipientAddress())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "recipient_address", delivery.getRecipientAddress(), dto.getRecipientAddress()));
+            delivery.setPickupName(dto.getRecipientAddress());
         }
 
-        if(dto.getRecipientAddressDetail() != null && !dto.getRecipientAddressDetail().equals(delivery.getRecipientAddressDetail())) {
+        if(dto.getRecipientAddressDetail() != null && !Objects.equals(dto.getRecipientAddressDetail(), delivery.getRecipientAddressDetail())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_address_detail", dto.getRecipientAddressDetail(), dto.getRecipientAddressDetail()));
-            delivery.setRecipientAddressDetail(dto.getRecipientAddressDetail());
+            delivery.setPickupAddressDetail(dto.getRecipientAddressDetail());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -435,7 +446,9 @@ public class DeliveryServiceImpl implements DeliveryService {
             int parcelLimit = contract.getParcelLimit();
 
             // (contract 계약기간동안 누적)에 delivery 에서 해당 contractId로 배송신청 건수 count 해서 건수 계산
-            long longParcelCount = deliveryRepository.countByContractAndCreatedAtBetween(contract, contract.getStartDate(), contract.getEndDate());
+            LocalDateTime startDateTime = contract.getStartDate().atStartOfDay();
+            LocalDateTime endDateTime = contract.getEndDate().atTime(LocalTime.MAX);
+            long longParcelCount = deliveryRepository.countByContractAndCreatedAtBetween(contract, startDateTime, endDateTime);
             int parcelCount = (int) longParcelCount;
 
             // limit < count 이면 (count - limit) * overParcelFee

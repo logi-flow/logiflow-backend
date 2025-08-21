@@ -22,7 +22,6 @@ public class CreateDeliveryRequestDto {
     private BigDecimal weight;
 
     private String message;
-    private boolean isHidden;
 
     @NotNull(message = "배송 상태 선택은 필수입니다.")
     private DeliveryStatus status;
