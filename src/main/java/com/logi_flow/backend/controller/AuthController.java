@@ -30,7 +30,6 @@ public class AuthController {
     private static final String CUSTOMER_RESET_PASSWORD_API = "/password/reset/customers";
     private static final String USER_RESET_PASSWORD_API = "/password/reset/users";
     private static final String RESET_PASSWORD_API = "/password/reset";
-    private static final String RESET_PASSWORD_EMAIL_API = "/password/reset/email";
     private static final String VERIFY_EMAIL_API = "/email/verify";
 
     @PostMapping(SIGNUP_API)
@@ -119,14 +118,6 @@ public class AuthController {
             @Valid @RequestBody PasswordResetRequestDto dto
     ) {
         ResponseDto<PasswordResetSendEmailResponseDto> response = authService.resetPassword(token, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @PostMapping(RESET_PASSWORD_EMAIL_API)
-    public ResponseEntity<ResponseDto<PasswordResetSendEmailResponseDto>> requestResetPasswordEmail(
-            @Valid @RequestBody PasswordResetSendEmailRequestDto dto
-    ) {
-        ResponseDto<PasswordResetSendEmailResponseDto> response = authService.requestResetPasswordEmail(dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
