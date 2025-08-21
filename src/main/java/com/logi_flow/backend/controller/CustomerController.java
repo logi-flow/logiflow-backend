@@ -87,13 +87,4 @@ public class CustomerController {
         ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(userPrincipal, customerId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
-
-    @DeleteMapping(CUSTOMER_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteCustomer(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long customerId
-    ) {
-        ResponseDto<?> response = customerService.deleteCustomer(userPrincipal, customerId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
 }

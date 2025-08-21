@@ -17,8 +17,8 @@ public class UpdateCustomerStatusResponseDto {
     private Long changedBy;
     private String changedByUsername;
     private String changedReason;
-    private String prevStatus;
-    private String newStatus;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private CustomerStatus prevStatus;
+    private CustomerStatus newStatus;
+    private String createdAt;
+    private String updatedAt;
 }

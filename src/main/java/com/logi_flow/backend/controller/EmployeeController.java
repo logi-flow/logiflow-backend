@@ -73,7 +73,7 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllEmployeeResponseDto> result = employeeService.getAllEmployee(userPrincipal, page, size, sort);
         PageDto<GetAllEmployeeResponseDto> response = PageMapper.toPageDto(result, sort);

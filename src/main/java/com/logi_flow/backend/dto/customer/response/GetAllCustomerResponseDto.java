@@ -19,6 +19,6 @@ public class GetAllCustomerResponseDto {
     private String representativeName;
     private String telephone;
     private String email;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
