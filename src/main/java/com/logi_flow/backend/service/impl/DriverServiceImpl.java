@@ -12,6 +12,7 @@ import com.logi_flow.backend.dto.driver.response.GetAllDriverResponseDto;
 import com.logi_flow.backend.dto.driver.response.GetDriverDetailResponseDto;
 import com.logi_flow.backend.dto.driver.response.UpdateDriverResponseDto;
 import com.logi_flow.backend.entity.Driver;
+import com.logi_flow.backend.entity.DriverLicense;
 import com.logi_flow.backend.entity.Role;
 import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.DriverRepository;
@@ -167,6 +168,8 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
+        DriverLicense license = driver.getDriverLicense();
+
         data = GetDriverDetailResponseDto.builder()
                 .driverId(driver.getId())
                 .name(driver.getName())
@@ -180,7 +183,7 @@ public class DriverServiceImpl implements DriverService {
                 .district(driver.getDistrict())
                 .pay(driver.getPay())
                 .companyJoin(driver.getCompanyJoin())
-                .driverType(driver.getDriverLicense().getType())
+                .driverType(license != null ? license.getType() : null)
                 .createdAt(driver.getCreatedAt())
                 .updatedAt(driver.getUpdatedAt())
                 .build();
