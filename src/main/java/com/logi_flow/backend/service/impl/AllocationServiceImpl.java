@@ -2,6 +2,8 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.allocation.request.CreateAllocationRequestDto;
 import com.logi_flow.backend.dto.allocation.request.UpdateAllocationRequestDto;
@@ -10,24 +12,36 @@ import com.logi_flow.backend.dto.allocation.response.UpdateAllocationResponseDto
 import com.logi_flow.backend.entity.Allocation;
 import com.logi_flow.backend.entity.Assignment;
 import com.logi_flow.backend.entity.Delivery;
+import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.AllocationRepository;
 import com.logi_flow.backend.repository.AssignmentRepository;
 import com.logi_flow.backend.repository.DeliveryRepository;
+import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.AllocationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import javax.naming.NoPermissionException;
 
 @RequiredArgsConstructor
 @Service
 public class AllocationServiceImpl implements AllocationService {
 
+    private final UserRepository userRepository;
     private final DeliveryRepository deliveryRepository;
     private final AssignmentRepository assignmentRepository;
     private final AllocationRepository allocationRepository;
 
     @Override
-    public ResponseDto<CreateAllocationResponseDto> createAllocation(CreateAllocationRequestDto dto) {
+    public ResponseDto<CreateAllocationResponseDto> createAllocation(CreateAllocationRequestDto dto, UserPrincipal userPrincipal) {
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)){
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
 
         Delivery delivery = deliveryRepository.findById(dto.getDeliveryId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         Assignment assignment = assignmentRepository.findById(dto.getAssignmentId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));

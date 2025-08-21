@@ -26,9 +26,6 @@ public class CustomerUpdateLog extends BaseTimeLog {
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
 
-    @Column(name = "memo")
-    private String memo;
-
     @Column(name = "type", nullable = false)
     private String type;
 

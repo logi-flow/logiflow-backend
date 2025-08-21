@@ -1,6 +1,7 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.allocation.request.CreateAllocationRequestDto;
 import com.logi_flow.backend.dto.allocation.request.UpdateAllocationRequestDto;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +24,8 @@ public class AllocationController {
     private final AllocationService allocationService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto<CreateAllocationResponseDto>> createAllocation(@Valid @RequestBody CreateAllocationRequestDto dto) {
-        ResponseDto<CreateAllocationResponseDto> response = allocationService.createAllocation(dto);
+    public ResponseEntity<ResponseDto<CreateAllocationResponseDto>> createAllocation(@Valid @RequestBody CreateAllocationRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<CreateAllocationResponseDto> response = allocationService.createAllocation(dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

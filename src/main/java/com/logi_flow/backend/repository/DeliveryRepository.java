@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
@@ -31,8 +32,8 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
         AND d.createdAt <= :endDate
     """)
     long countByContractAndCreatedAtBetween(
-            @Param("contracts") Contract contract,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("contract") Contract contract,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
             );
 }

@@ -9,10 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class UpdateCustomerRequestDto {
-    @NotBlank(message = "전화번호는 필수 항목입니다.")
-    @Pattern(regexp = Regex.TELEPHONE, message = "전화번호는 000-000-0000 형식이거나 010-0000-0000 형식입니다.")
-    private String telephone;
-
     @Pattern(regexp = Regex.FAX, message = "팩스번호 형식이 올바르지 않습니다. 예: 02-123-4567")
     private String fax;
 

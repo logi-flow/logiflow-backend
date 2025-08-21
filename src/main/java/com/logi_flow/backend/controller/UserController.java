@@ -36,7 +36,7 @@ public class UserController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort
+            @RequestParam(defaultValue = "desc") String sort
     ) {
         Page<GetAllUserResponseDto> result = userService.getAllUser(userPrincipal, page, size, sort);
         PageDto<GetAllUserResponseDto> response = PageMapper.toPageDto(result, sort);

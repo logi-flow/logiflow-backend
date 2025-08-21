@@ -35,6 +35,6 @@ public class GetCustomerDetailResponseDto {
     private String chargePhone;
     private String chargeEmail;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
