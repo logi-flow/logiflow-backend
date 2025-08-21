@@ -13,6 +13,7 @@ public interface ApiMappingPattern {
     String ASSIGNMENT_API = "/api/v1/assignments";
 
     String DELIVERY_API = "/api/v1/deliveries";
+    String RETURN_DELIVERY_API = "/api/v1/return-deliveries";
     String ALLOCATION_API = "/api/v1/allocations";
     String SCHEDULE_API = "/api/v1/schedules";
 
