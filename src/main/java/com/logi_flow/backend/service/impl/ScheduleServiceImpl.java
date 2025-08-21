@@ -41,10 +41,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             schedule.setAllocationDate(schedule.getAllocationDate());
         }
 
-
-
-
-
         return null;
     }
 
