@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -19,6 +18,6 @@ public class CreateDriverAllowanceResponseDto {
     private int amount;
     private String memo;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

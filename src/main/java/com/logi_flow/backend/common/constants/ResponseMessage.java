@@ -28,6 +28,7 @@ public interface ResponseMessage {
     String ALREADY_OPEN_ATTENDANCE = "미퇴근 기록 또는 중복된 출근 기록이 존재합니다.";
     String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
 
+    String EXISTS_PAYROLL = "해당 기간의 급여대장이 이미 존재합니다.";
     String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
     String SYSTEM_ITEM_IMMUTABLE = "시스템에서 자동 생성한 항목은 수정 및 삭제할 수 없습니다.";
     String ALREADY_DELETED = "이미 삭제된 항목입니다.";

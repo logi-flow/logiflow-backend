@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface AllowanceTypeRepository extends JpaRepository<AllowanceType, Long> {
     Optional<AllowanceType> findByCodeAndStatus(String code, AllowanceTypeStatus status);
     Page<AllowanceType> findByStatus(AllowanceTypeStatus status, Pageable pageable);
+    Optional<AllowanceType> findByCode(String code);
 }

@@ -192,7 +192,9 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
-    private AllowanceType getAllowanceType(Long allowanceTypeId) {
+    @Override
+    @Transactional(readOnly = true)
+    public AllowanceType getAllowanceType(Long allowanceTypeId) {
         return allowanceTypeRepository.findById(allowanceTypeId)
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
     }
