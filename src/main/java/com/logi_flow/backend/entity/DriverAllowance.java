@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "driver_allowances")
@@ -38,7 +39,16 @@ public class DriverAllowance extends BaseTime {
     private String memo;
 
     public void calculateAmount() {
-        this.amount = quantity.multiply(new BigDecimal(this.unitPrice)).intValue();
+        if (quantity == null) {
+            throw new IllegalArgumentException("수량(일수)은 필수 항목입니다.");
+        }
+
+        if (unitPrice < 0) {
+            throw new IllegalArgumentException("단가는 0 이상이어야 합니다.");
+        }
+
+        this.amount = quantity.multiply(BigDecimal.valueOf(this.unitPrice))
+                .setScale(0, RoundingMode.DOWN).intValueExact();
     }
 
     @PrePersist

@@ -17,6 +17,7 @@ import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DriverPayrollService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,10 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
 
         Driver driver = driverRepository.findById(dto.getDriverId())
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+
+        if (driverPayrollRepository.lockAnyActiveOverlapId(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate()).isPresent()) {
+            throw new DataIntegrityViolationException(ResponseMessage.EXISTS_PAYROLL);
+        };
 
         Optional<DriverPayroll> deletedDriverPayroll = driverPayrollRepository.findByDriverIdAndPeriodStartDateAndPeriodEndDateAndStatus(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate(), DriverPayrollStatus.DELETED);
 
@@ -115,10 +120,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     public Page<GetAllDriverPayrollResponseDto> getMyPayrolls(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllDriverPayrollResponseDto> data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
-
-        Driver driver = driverRepository.findByUserId(user.getId())
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
@@ -134,7 +136,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     public ResponseDto<UpdateDriverPayrollStatusResponseDto> updateDriverPayrollStatus(UserPrincipal userPrincipal, Long payrollId, UpdateDriverPayrollStatusRequestDto dto) {
         UpdateDriverPayrollStatusResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
+        User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
@@ -164,10 +166,11 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateDriverPayrollResponseDto> updateDriverPayroll(UserPrincipal userPrincipal, Long payrollId, UpdateDriverPayrollRequestDto dto) {
         UpdateDriverPayrollResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
+        User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
@@ -211,7 +214,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     @Override
     @Transactional
     public ResponseDto<Void> deleteDriverPayroll(UserPrincipal userPrincipal, Long payrollId) {
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
+        User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
@@ -228,7 +231,9 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
-    private DriverPayroll getDriverPayroll(Long payrollId) {
+    @Override
+    @Transactional(readOnly = true)
+    public DriverPayroll getDriverPayroll(Long payrollId) {
         return driverPayrollRepository.findById(payrollId)
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
     }

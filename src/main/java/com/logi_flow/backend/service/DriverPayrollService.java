@@ -6,6 +6,7 @@ import com.logi_flow.backend.dto.driverPayroll.request.CreateDriverPayrollReques
 import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollRequestDto;
 import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollStatusRequestDto;
 import com.logi_flow.backend.dto.driverPayroll.response.*;
+import com.logi_flow.backend.entity.DriverPayroll;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
@@ -17,4 +18,5 @@ public interface DriverPayrollService {
     ResponseDto<UpdateDriverPayrollStatusResponseDto> updateDriverPayrollStatus(UserPrincipal userPrincipal, Long payrollId, @Valid UpdateDriverPayrollStatusRequestDto dto);
     ResponseDto<UpdateDriverPayrollResponseDto> updateDriverPayroll(UserPrincipal userPrincipal, Long payrollId, @Valid UpdateDriverPayrollRequestDto dto);
     ResponseDto<Void> deleteDriverPayroll(UserPrincipal userPrincipal, Long payrollId);
+    DriverPayroll getDriverPayroll(Long payrollId);
 }
