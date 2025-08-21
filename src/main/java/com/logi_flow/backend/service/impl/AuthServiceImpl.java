@@ -307,6 +307,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = jwtProvider.generateResetPasswordJwtToken(dto.getEmail());
+        System.out.println("RESET TOKEN = " + token);
 
         try {
             mailService.sendResetPasswordEmail(
@@ -414,11 +415,6 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-    }
-
-    @Override
-    public ResponseDto<PasswordResetSendEmailResponseDto> requestResetPasswordEmail(PasswordResetSendEmailRequestDto dto) {
-        return null;
     }
 
     @Override

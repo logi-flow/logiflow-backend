@@ -30,8 +30,6 @@ public interface AuthService {
 
     ResponseDto<PasswordResetSendEmailResponseDto> resetPassword(String token, @Valid PasswordResetRequestDto dto);
 
-    ResponseDto<PasswordResetSendEmailResponseDto> requestResetPasswordEmail(@Valid PasswordResetSendEmailRequestDto dto);
-
     ResponseDto<PasswordResetSendEmailResponseDto> verifyEmail(String token);
 
     boolean checkPassword(User user, String password);
