@@ -1,9 +1,11 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.vehicle.request.CreateVehicleRequestDto;
 import com.logi_flow.backend.dto.vehicle.request.UpdateVehicleRequestDto;
+import com.logi_flow.backend.dto.vehicle.request.UpdateVehicleStatusRequestDto;
 import com.logi_flow.backend.dto.vehicle.response.CreateVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
@@ -13,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +28,7 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     private static final String VEHICLE_ID_API = "/{vehicleId}";
+    private static final String UPDATE_STATUS_API = VEHICLE_ID_API + "/status";
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateVehicleResponseDto>> createVehicle(
@@ -40,6 +44,16 @@ public class VehicleController {
             @Valid @RequestBody UpdateVehicleRequestDto dto
     ) {
         ResponseDto<UpdateVehicleResponseDto> response = vehicleService.updateVehicle(vehicleId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping(UPDATE_STATUS_API)
+    public ResponseEntity<ResponseDto<UpdateVehicleResponseDto>> updateVehicleStatus(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long vehicleId,
+            @Valid @RequestBody UpdateVehicleStatusRequestDto dto
+    ) {
+        ResponseDto<UpdateVehicleResponseDto> response = vehicleService.updateVehicleStatus(userPrincipal, vehicleId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
