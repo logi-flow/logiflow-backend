@@ -5,6 +5,7 @@ import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.allocation.request.CreateAllocationRequestDto;
 import com.logi_flow.backend.dto.allocation.request.UpdateAllocationRequestDto;
+import com.logi_flow.backend.dto.allocation.request.UpdateAllocationStatusRequestDto;
 import com.logi_flow.backend.dto.allocation.response.CreateAllocationResponseDto;
 import com.logi_flow.backend.dto.allocation.response.UpdateAllocationResponseDto;
 import com.logi_flow.backend.service.AllocationService;
@@ -31,8 +32,14 @@ public class AllocationController {
 
 
     @PutMapping("/{allocationId}")
-    public ResponseEntity<ResponseDto<UpdateAllocationResponseDto>> updateAllocation(@PathVariable Long allocationId, @Valid @RequestBody UpdateAllocationRequestDto dto) {
-        ResponseDto<UpdateAllocationResponseDto> response = allocationService.updateAllocation(allocationId, dto);
+    public ResponseEntity<ResponseDto<UpdateAllocationResponseDto>> updateAllocation(@PathVariable Long allocationId, @Valid @RequestBody UpdateAllocationRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<UpdateAllocationResponseDto> response = allocationService.updateAllocation(allocationId, dto, userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping("/{allocationId}/status")
+    public ResponseEntity<ResponseDto<UpdateAllocationResponseDto>> updateAllocationStatus(@PathVariable Long allocationId, @Valid @RequestBody UpdateAllocationStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<UpdateAllocationResponseDto> response = allocationService.updateAllocationStatus(allocationId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

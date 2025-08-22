@@ -57,9 +57,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Transactional
     public ResponseDto<CreateDeliveryResponseDto> createDelivery(CreateDeliveryRequestDto dto, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Contract contract = contractRepository.findById(dto.getContractId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -186,9 +186,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public Page<GetAllDeliveryResponseDto> getMyDeliveries(UserPrincipal userPrincipal, int page, int size, String sort) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Page<GetAllDeliveryResponseDto> data = null;
 
@@ -206,9 +206,9 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!delivery.getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -272,9 +272,9 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!delivery.getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -315,7 +315,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(!Objects.equals(dto.getPickupPhone(), delivery.getPickupPhone())) {
             logs.add(buildDeliveryLog(delivery, user, username, "pickup_phone", delivery.getPickupPhone(), dto.getPickupPhone()));
-            delivery.setPickupName(dto.getPickupPhone());
+            delivery.setPickupPhone(dto.getPickupPhone());
         }
 
         if(!Objects.equals(dto.getPickupZipcode(), delivery.getPickupZipCode())) {
@@ -325,7 +325,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(!Objects.equals(dto.getPickupAddress(), delivery.getPickupAddress())) {
             logs.add(buildDeliveryLog(delivery, user, username, "pickup_address", delivery.getPickupAddress(), dto.getPickupAddress()));
-            delivery.setPickupName(dto.getPickupAddress());
+            delivery.setPickupAddress(dto.getPickupAddress());
         }
 
         if(dto.getPickupAddressDetail() != null && !Objects.equals(dto.getPickupAddressDetail(), delivery.getPickupAddressDetail())) {
@@ -335,12 +335,12 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(!Objects.equals(dto.getRecipientName(), delivery.getRecipientName())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_name", delivery.getRecipientName(), dto.getRecipientName()));
-            delivery.setPickupName(dto.getRecipientName());
+            delivery.setRecipientName(dto.getRecipientName());
         }
 
         if(!Objects.equals(dto.getRecipientPhone(), delivery.getRecipientPhone())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_phone", delivery.getRecipientPhone(), dto.getRecipientPhone()));
-            delivery.setPickupName(dto.getRecipientPhone());
+            delivery.setRecipientPhone(dto.getRecipientPhone());
         }
 
         if(!Objects.equals(dto.getRecipientZipcode(), delivery.getRecipientZipcode())) {
@@ -350,7 +350,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(!Objects.equals(dto.getRecipientAddress(), delivery.getRecipientAddress())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_address", delivery.getRecipientAddress(), dto.getRecipientAddress()));
-            delivery.setPickupName(dto.getRecipientAddress());
+            delivery.setRecipientAddress(dto.getRecipientAddress());
         }
 
         if(dto.getRecipientAddressDetail() != null && !Objects.equals(dto.getRecipientAddressDetail(), delivery.getRecipientAddressDetail())) {
@@ -403,7 +403,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Contract contract = delivery.getContract();
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -580,7 +580,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Transactional
     public ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
