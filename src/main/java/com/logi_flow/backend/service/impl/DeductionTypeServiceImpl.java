@@ -180,7 +180,8 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
-    private DeductionType getDeductionType(Long deductionTypeId) {
+    @Override
+    public DeductionType getDeductionType(Long deductionTypeId) {
         return deductionTypeRepository.findById(deductionTypeId)
                 .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
     }

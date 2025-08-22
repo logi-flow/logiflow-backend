@@ -9,9 +9,10 @@ import com.logi_flow.backend.dto.driverDeduction.response.GetDriverDeductionDeta
 import com.logi_flow.backend.dto.driverDeduction.response.UpdateDriverDeductionResponseDto;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 public interface DriverDeductionService {
     ResponseDto<CreateDriverDeductionResponseDto> createDriverDeduction(Long payrollId, @Valid CreateDriverDeductionRequestDto dto);
     ResponseDto<GetDriverDeductionDetailResponseDto> getDriverDeduction(Long payrollId);
-    ResponseDto<UpdateDriverDeductionResponseDto> updateDriverDeduction(UserPrincipal userPrincipal, Long payrollId, Long deductionId, @Valid UpdateDriverDeductionRequestDto dto);
-    ResponseDto<Void> deleteDriverDeduction(UserPrincipal userPrincipal, Long payrollId, Long deductionId);
+    ResponseDto<List<UpdateDriverDeductionResponseDto>> updateDriverDeduction(UserPrincipal userPrincipal, Long payrollId, List<UpdateDriverDeductionRequestDto.Item> items);
 }
