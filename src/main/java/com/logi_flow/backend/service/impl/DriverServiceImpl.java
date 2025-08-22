@@ -5,6 +5,7 @@ import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
+import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.request.*;
@@ -17,11 +18,11 @@ import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.DriverService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -234,22 +235,15 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public ResponseDto<List<GetAllDriverResponseDto>> getAllDriver() {
-        List<GetAllDriverResponseDto> data = null;
+    public Page<GetAllDriverResponseDto> getAllDriver(int page, int size, String sort) {
+        Page<GetAllDriverResponseDto> data = null;
 
-        List<Driver> drivers = driverRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Driver> drivers = driverRepository.findAll(pageable);
 
-        data = drivers.stream()
-                .map(driver -> GetAllDriverResponseDto.builder()
-                        .driverId(driver.getId())
-                        .name(driver.getName())
-                        .status(driver.getStatus())
-                        .phoneNumber(driver.getPhoneNumber())
-                        .createdAt(driver.getCreatedAt())
-                        .updatedAt(driver.getUpdatedAt())
-                        .build()).collect(Collectors.toList());
+        data = drivers.map(this::toGetAllDriverResponseDto);
 
-        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+        return data;
     }
 
     @Override
@@ -283,8 +277,51 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public ResponseDto<GetDriverDetailResponseDto> getMyInfo(UserPrincipal userPrincipal) {
+        GetDriverDetailResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Driver driver = driverRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        DriverLicense license = driver.getDriverLicense();
+
+        data = GetDriverDetailResponseDto.builder()
+                .driverId(driver.getId())
+                .name(driver.getName())
+                .username(driver.getUser().getUsername())
+                .status(driver.getStatus())
+                .PhoneNumber(driver.getPhoneNumber())
+                .identityNumber(driver.getIdentityNumber())
+                .zipcode(driver.getZipcode())
+                .address(driver.getAddress())
+                .addressDetail(driver.getAddressDetail())
+                .district(driver.getDistrict())
+                .pay(driver.getPay())
+                .companyJoin(driver.getCompanyJoin())
+                .driverType(license != null ? license.getType() : null)
+                .createdAt(driver.getCreatedAt())
+                .updatedAt(driver.getUpdatedAt())
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
+    @Override
     public ResponseDto<?> deleteDriver(Long driverId) {
         return null;
     }
 
+    private GetAllDriverResponseDto toGetAllDriverResponseDto(Driver driver) {
+        return GetAllDriverResponseDto.builder()
+                .driverId(driver.getId())
+                .name(driver.getName())
+                .status(driver.getStatus())
+                .phoneNumber(driver.getPhoneNumber())
+                .createdAt(driver.getCreatedAt())
+                .updatedAt(driver.getUpdatedAt())
+                .build();
+    }
 }

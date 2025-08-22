@@ -10,15 +10,14 @@ import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
 import jakarta.validation.Valid;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface VehicleService {
     ResponseDto<CreateVehicleResponseDto> createVehicle(@Valid CreateVehicleRequestDto dto);
 
     ResponseDto<UpdateVehicleResponseDto> updateVehicle(Long vehicleId, @Valid UpdateVehicleRequestDto dto);
 
-    ResponseDto<List<GetAllVehicleResponseDto>> getAllVehicle();
+    Page<GetAllVehicleResponseDto> getAllVehicle(int page, int size, String sort);
 
     ResponseDto<GetVehicleDetailResponseDto> getVehicleDetail(Long vehicleId);
 

@@ -1,7 +1,9 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.vehicle.request.CreateVehicleRequestDto;
 import com.logi_flow.backend.dto.vehicle.request.UpdateVehicleRequestDto;
@@ -13,12 +15,11 @@ import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
 import com.logi_flow.backend.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,8 +59,13 @@ public class VehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<GetAllVehicleResponseDto>>> getAllVehicle(){
-        ResponseDto<List<GetAllVehicleResponseDto>> response = vehicleService.getAllVehicle();
+    public ResponseEntity<ResponseDto<PageDto<GetAllVehicleResponseDto>>> getAllVehicle(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "desc") String sort
+    ){
+        Page<GetAllVehicleResponseDto> result = vehicleService.getAllVehicle(page, size, sort);
+        PageDto<GetAllVehicleResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

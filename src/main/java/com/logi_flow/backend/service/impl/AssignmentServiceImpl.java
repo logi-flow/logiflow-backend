@@ -4,6 +4,7 @@ import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AssignmentStatus;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
+import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.assignment.request.CreateAssignmentRequestDto;
@@ -19,12 +20,13 @@ import com.logi_flow.backend.service.AssignmentService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -172,24 +174,15 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public ResponseDto<List<GetAllAssignmentResponseDto>> getAllAssignment() {
-        List<GetAllAssignmentResponseDto> data = null;
+    public Page<GetAllAssignmentResponseDto> getAllAssignment(int page, int size, String sort) {
+        Page<GetAllAssignmentResponseDto> data = null;
 
-        List<Assignment> assignments = assignmentRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Assignment> assignments = assignmentRepository.findAll(pageable);
 
-        data = assignments.stream()
-                .map(assignment -> GetAllAssignmentResponseDto.builder()
-                        .id(assignment.getId())
-                        .driverId(assignment.getDriver().getId())
-                        .vehicleId(assignment.getVehicle().getId())
-                        .status(assignment.getStatus())
-                        .isPrimary(assignment.isPrimary())
-                        .createdAt(assignment.getCreatedAt())
-                        .updatedAt(assignment.getUpdatedAt())
-                        .build()
-                ).collect(Collectors.toList());
+        data = assignments.map(this::toGetAllAssignmentResponseDto);
 
-        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+        return data;
     }
 
     @Override
@@ -295,5 +288,17 @@ public class AssignmentServiceImpl implements AssignmentService {
 
                     assignmentStatusLogRepository.save(assignmentUpdateLog);
                 });
+    }
+
+    private GetAllAssignmentResponseDto toGetAllAssignmentResponseDto(Assignment assignment) {
+        return GetAllAssignmentResponseDto.builder()
+                .id(assignment.getId())
+                .driverId(assignment.getDriver().getId())
+                .vehicleId(assignment.getVehicle().getId())
+                .isPrimary(assignment.isPrimary())
+                .status(assignment.getStatus())
+                .createdAt(assignment.getCreatedAt())
+                .updatedAt(assignment.getUpdatedAt())
+                .build();
     }
 }

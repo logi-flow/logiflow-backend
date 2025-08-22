@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
+import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.vehicle.request.CreateVehicleRequestDto;
@@ -22,10 +23,10 @@ import com.logi_flow.backend.service.AssignmentService;
 import com.logi_flow.backend.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -155,22 +156,15 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public ResponseDto<List<GetAllVehicleResponseDto>> getAllVehicle() {
-        List<GetAllVehicleResponseDto> data = null;
+    public Page<GetAllVehicleResponseDto> getAllVehicle(int page, int size, String sort) {
+        Page<GetAllVehicleResponseDto> data = null;
 
-        List<Vehicle> vehicles = vehicleRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Vehicle> vehicles = vehicleRepository.findAll(pageable);
 
-        data = vehicles.stream()
-                .map(vehicle -> GetAllVehicleResponseDto.builder()
-                        .vehicleId(vehicle.getId())
-                        .vehicleNumber(vehicle.getVehicleNumber())
-                        .status(vehicle.getStatus())
-                        .modelName(vehicle.getModelName())
-                        .createdAt(vehicle.getCreatedAt())
-                        .updatedAt(vehicle.getUpdatedAt())
-                        .build()).collect(Collectors.toList());
+        data = vehicles.map(this::toGetAllVehicleResponseDto);
 
-        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+        return data;
     }
 
     @Override
@@ -201,4 +195,14 @@ public class VehicleServiceImpl implements VehicleService {
         return null;
     }
 
+    private GetAllVehicleResponseDto toGetAllVehicleResponseDto(Vehicle vehicle) {
+        return GetAllVehicleResponseDto.builder()
+                .vehicleId(vehicle.getId())
+                .vehicleNumber(vehicle.getVehicleNumber())
+                .status(vehicle.getStatus())
+                .modelName(vehicle.getModelName())
+                .createdAt(vehicle.getCreatedAt())
+                .updatedAt(vehicle.getUpdatedAt())
+                .build();
+    }
 }
