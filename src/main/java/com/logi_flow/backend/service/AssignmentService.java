@@ -11,8 +11,7 @@ import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponse
 import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
 import com.logi_flow.backend.entity.Vehicle;
 import jakarta.validation.Valid;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface AssignmentService {
     ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto);
@@ -21,7 +20,7 @@ public interface AssignmentService {
 
     ResponseDto<UpdateAssignmentResponseDto> updateAssignmentStatus(UserPrincipal userPrincipal, Long assignmentId, @Valid UpdateAssignmentStatusRequestDto dto);
 
-    ResponseDto<List<GetAllAssignmentResponseDto>> getAllAssignment();
+    Page<GetAllAssignmentResponseDto> getAllAssignment(int page, int size, String sort);
 
     ResponseDto<GetAssignmentDetailResponseDto> getAssignmentDetail(Long assignmentId);
 
