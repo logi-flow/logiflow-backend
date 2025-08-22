@@ -1,4 +1,4 @@
-package com.logi_flow.backend.dto.returnDelivery.response;
+package com.logi_flow.backend.dto.delivery.response;
 
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import lombok.AllArgsConstructor;
@@ -6,17 +6,16 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 @Builder
-public class GetAllReturnDeliveryResponseDto {
+public class GetAllWaitingReturnDeliveryResponseDto {
     private Long id;
     private Long customerId;
-    private String customerName;
-    private LocalDate requestDate;
+    private Long customerName;
+    private LocalDateTime requestDate;
     private String item;
     private BigDecimal weight;
     private String reason;

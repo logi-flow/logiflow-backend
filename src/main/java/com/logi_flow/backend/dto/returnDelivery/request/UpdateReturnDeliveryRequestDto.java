@@ -6,13 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 public class UpdateReturnDeliveryRequestDto {
     @NotNull(message = "도착 희망일은 필수 항목입니다.")
-    private LocalDateTime requestDate;
+    private LocalDate requestDate;
 
     @NotBlank(message = "반품 사유는 필수 항목입니다.")
     private String reason;

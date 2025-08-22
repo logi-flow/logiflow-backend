@@ -10,7 +10,8 @@ import java.time.LocalDate;
 @Table(name = "return_deliveries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 public class ReturnDelivery extends BaseTime {
     @Id
@@ -61,4 +62,19 @@ public class ReturnDelivery extends BaseTime {
 
     @Column(name = "recipient_address_detail")
     private String recipientAddressDetail;
+
+    @Column(name = "final_fee", nullable = false)
+    private int finalFee;
+
+    @Column(name = "over_weight_fee", nullable = false)
+    private int overWeightFee = 0;
+
+    @Column(name = "over_parcel_fee", nullable = false)
+    private int overParcelFee = 0;
+
+    @Column(name = "is_over_weight", nullable = false)
+    private boolean isOverWeight = false;
+
+    @Column(name = "is_over_parcel", nullable = false)
+    private boolean isOverParcel = false;
 }
