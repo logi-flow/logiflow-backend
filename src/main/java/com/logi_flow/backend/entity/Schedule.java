@@ -3,8 +3,8 @@ package com.logi_flow.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "schedules")
@@ -22,11 +22,11 @@ public class Schedule extends BaseTime {
     private Allocation allocation;
 
     @Column(name = "allocation_date", nullable = false)
-    private Date allocationDate;
+    private LocalDate allocationDate;
 
-    @Column(name = "departure_time", nullable = false)
-    private LocalDateTime departureTime;
+    @Column(name = "departure_time")
+    private LocalDateTime departureTime = null;
 
-    @Column(name = "arrival_time", nullable = false)
-    private LocalDateTime arrivalTime;
+    @Column(name = "arrival_time")
+    private LocalDateTime arrivalTime = null;
 }

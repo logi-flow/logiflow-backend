@@ -1,7 +1,6 @@
 package com.logi_flow.backend.entity;
 
 import com.logi_flow.backend.common.enums.ContractStatus;
-import com.logi_flow.backend.common.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-public class ContractStatusLog {
+public class ContractStatusLog extends BaseTimeLog{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

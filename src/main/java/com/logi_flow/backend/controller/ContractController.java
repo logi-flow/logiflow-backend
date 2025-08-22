@@ -28,12 +28,13 @@ public class ContractController {
     private static final String CONTRACT_API = "/{contractId}";
     private static final String CONTRACT_STATUS_API = "/{contractId}/status";
 
-    @PostMapping
+    @PostMapping("/{customerId}")
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long customerId,
             @Valid @RequestBody CreateContractRequestDto dto
     ){
-        ResponseDto<CreateContractResponseDto> response = contractService.createContract(userPrincipal, dto);
+        ResponseDto<CreateContractResponseDto> response = contractService.createContract(userPrincipal, customerId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

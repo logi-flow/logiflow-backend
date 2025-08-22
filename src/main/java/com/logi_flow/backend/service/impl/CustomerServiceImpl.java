@@ -114,8 +114,11 @@ public class CustomerServiceImpl implements CustomerService {
     public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(UserPrincipal userPrincipal) {
         GetCustomerDetailResponseDto data = null;
 
-        Customer customer = customerRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user)
+                .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         data = GetCustomerDetailResponseDto.builder()
                 .id(customer.getId())
@@ -154,6 +157,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
 
         List<CustomerUpdateLog> logs = new ArrayList<>();
 

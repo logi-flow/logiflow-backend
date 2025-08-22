@@ -23,10 +23,10 @@ public class UpdateCustomerRequestDto {
     @Pattern(regexp = Regex.ADDRESS_DETAIL, message = "상세주소 형식이 올바르지 않습니다.")
     private String businessAddressDetail;
 
-    @Pattern(regexp = Regex.BUSINESS, message = "대표자 직책은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, 괄호)만 사용가능합니다.")
+    @Pattern(regexp = Regex.BUSINESS, message = "대표자 직책은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, ,, 괄호)만 사용가능합니다.")
     private String chargePosition;
 
-    @Pattern(regexp = Regex.BUSINESS, message = "대표자 부서는 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, 괄호)만 사용가능합니다.")
+    @Pattern(regexp = Regex.BUSINESS, message = "대표자 부서는 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, ,, 괄호)만 사용가능합니다.")
     private String chargeDepartment;
 
     @Pattern(regexp = Regex.NAME_KOREAN, message = "이름은 총 2~10자 이내의 한글이어야 합니다.")

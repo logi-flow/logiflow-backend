@@ -44,10 +44,15 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, CreateContractRequestDto dto) {
+    public ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, Long customerId, CreateContractRequestDto dto) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         Contract newContract = Contract.builder()
                 .customer(customer)
@@ -89,7 +94,7 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -164,9 +169,11 @@ public class ContractServiceImpl implements ContractService {
     public ResponseDto<UpdateContractStatusResponseDto> updateContractStatus(UserPrincipal userPrincipal, Long contractId, UpdateContractStatusRequestDto dto) {
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!contract.getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
@@ -220,7 +227,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId) {
         String username = userPrincipal.getUsername();
-        User user =  userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user =  userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -255,7 +262,7 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public ResponseDto<Void> deleteContract(UserPrincipal userPrincipal, Long contractId) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         if(contract.getStatus() == ContractStatus.DELETED) {

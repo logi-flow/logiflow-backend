@@ -25,8 +25,8 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<ResponseDto<UpdateScheduleResponseDto>> updateSchedule(@PathVariable Long scheduleId, @Valid @RequestBody UpdateScheduleRequestDto dto) {
-        ResponseDto<UpdateScheduleResponseDto> response = scheduleService.updateSchedule(scheduleId, dto);
+    public ResponseEntity<ResponseDto<UpdateScheduleResponseDto>> updateSchedule(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long scheduleId, @Valid @RequestBody UpdateScheduleRequestDto dto) {
+        ResponseDto<UpdateScheduleResponseDto> response = scheduleService.updateSchedule(userPrincipal, scheduleId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -47,7 +47,7 @@ public class ScheduleController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @GetMapping("/{driverId}")
+    @GetMapping("/driver/{driverId}")
     public ResponseEntity<ResponseDto<PageDto<GetAllScheduleResponseDto>>> getScheduleByDriverId(
             @PathVariable Long driverId,
             @RequestParam(defaultValue = "0") int page,

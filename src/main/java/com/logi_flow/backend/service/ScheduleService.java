@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 
 public interface ScheduleService {
 
-    ResponseDto<UpdateScheduleResponseDto> updateSchedule(Long scheduleId, @Valid UpdateScheduleRequestDto dto);
+    ResponseDto<UpdateScheduleResponseDto> updateSchedule(UserPrincipal userPrincipal, Long scheduleId, @Valid UpdateScheduleRequestDto dto);
 
     Page<GetAllScheduleResponseDto> getAllSchedule(int page, int size, String sort);
 
