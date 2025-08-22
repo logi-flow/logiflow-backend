@@ -25,4 +25,5 @@ public interface ResponseCode {
     String EXISTS_TYPE_CODE = "ETC";
     String SYSTEM_ITEM_IMMUTABLE = "SI";
     String ALREADY_DELETED = "AD";
+    String LOCK_PAYROLL_CONFIRMED = "LPC";
 }

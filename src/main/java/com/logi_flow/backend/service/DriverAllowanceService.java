@@ -9,9 +9,10 @@ import com.logi_flow.backend.dto.driverAllowance.response.GetDriverAllowanceDeta
 import com.logi_flow.backend.dto.driverAllowance.response.UpdateDriverAllowanceResponseDto;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 public interface DriverAllowanceService {
     ResponseDto<CreateDriverAllowanceResponseDto> createDriverAllowance(Long payrollId, @Valid CreateDriverAllowanceRequestDto dto);
     ResponseDto<GetDriverAllowanceDetailResponseDto> getDriverAllowance(Long payrollId);
-    ResponseDto<UpdateDriverAllowanceResponseDto> updateDriverAllowance(UserPrincipal userPrincipal, Long payrollId, Long allowanceId, @Valid UpdateDriverAllowanceRequestDto dto);
-    ResponseDto<Void> deleteDriverAllowance(UserPrincipal userPrincipal, Long payrollId, Long allowanceId);
+    ResponseDto<List<UpdateDriverAllowanceResponseDto>> updateDriverAllowance(UserPrincipal userPrincipal, Long payrollId, List<UpdateDriverAllowanceRequestDto.Item> items);
 }

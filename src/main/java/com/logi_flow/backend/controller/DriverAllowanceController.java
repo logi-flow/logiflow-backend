@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -23,7 +25,6 @@ public class DriverAllowanceController {
     private final DriverAllowanceService driverAllowanceService;
 
     private final static String ALLOWANCE_API = "/{payrollId}/allowance";
-    private final static String ALLOWANCE_ID_API = ALLOWANCE_API + "/{allowanceId}";
 
     @PostMapping(ALLOWANCE_API)
     public ResponseEntity<ResponseDto<CreateDriverAllowanceResponseDto>> createDriverAllowance(
@@ -42,24 +43,13 @@ public class DriverAllowanceController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping(ALLOWANCE_ID_API)
-    public ResponseEntity<ResponseDto<UpdateDriverAllowanceResponseDto>> updateDriverAllowance(
+    @PutMapping(ALLOWANCE_API)
+    public ResponseEntity<ResponseDto<List<UpdateDriverAllowanceResponseDto>>> updateDriverAllowance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
-            @PathVariable Long allowanceId,
             @Valid @RequestBody UpdateDriverAllowanceRequestDto dto
     ) {
-        ResponseDto<UpdateDriverAllowanceResponseDto> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, allowanceId, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @DeleteMapping(ALLOWANCE_ID_API)
-    public ResponseEntity<ResponseDto<Void>> deleteDriverAllowance(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long payrollId,
-            @PathVariable Long allowanceId
-    ) {
-        ResponseDto<Void> response = driverAllowanceService.deleteDriverAllowance(userPrincipal, payrollId, allowanceId);
+        ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

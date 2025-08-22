@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -23,7 +25,6 @@ public class DriverDeductionController {
     private final DriverDeductionService driverDeductionService;
 
     private final static String DEDUCTION_API = "/{payrollId}/deduction";
-    private final static String DEDUCTION_ID_API = DEDUCTION_API + "/{deductionId}";
 
     @PostMapping(DEDUCTION_API)
     public ResponseEntity<ResponseDto<CreateDriverDeductionResponseDto>> createDriverDeduction(
@@ -42,24 +43,13 @@ public class DriverDeductionController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping(DEDUCTION_ID_API)
-    public ResponseEntity<ResponseDto<UpdateDriverDeductionResponseDto>> updateDriverDeduction(
+    @PutMapping(DEDUCTION_API)
+    public ResponseEntity<ResponseDto<List<UpdateDriverDeductionResponseDto>>> updateDriverDeduction(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
-            @PathVariable Long deductionId,
             @Valid @RequestBody UpdateDriverDeductionRequestDto dto
     ) {
-        ResponseDto<UpdateDriverDeductionResponseDto> response = driverDeductionService.updateDriverDeduction(userPrincipal, payrollId, deductionId, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @DeleteMapping(DEDUCTION_ID_API)
-    public ResponseEntity<ResponseDto<Void>> deleteDriverDeduction(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long payrollId,
-            @PathVariable Long deductionId
-    ) {
-        ResponseDto<Void> response = driverDeductionService.deleteDriverDeduction(userPrincipal, payrollId, deductionId);
+        ResponseDto<List<UpdateDriverDeductionResponseDto>> response = driverDeductionService.updateDriverDeduction(userPrincipal, payrollId, dto.getItems());
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
