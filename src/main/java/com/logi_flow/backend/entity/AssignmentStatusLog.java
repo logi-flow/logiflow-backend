@@ -1,28 +1,28 @@
 package com.logi_flow.backend.entity;
 
-import com.logi_flow.backend.common.enums.ContractStatus;
+import com.logi_flow.backend.common.enums.AssignmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "contracts_status_logs")
+@Table(name = "assignments_status_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Builder
-public class ContractStatusLog extends BaseTimeLog{
+public class AssignmentStatusLog extends BaseTimeLog{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id")
-    private Contract contract;
+    @JoinColumn(name = "assignment_id")
+    private Assignment assignment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by")
-    private User changedBy;
+    private User user;
 
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
@@ -32,9 +32,9 @@ public class ContractStatusLog extends BaseTimeLog{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prev_status", nullable = false)
-    private ContractStatus prevStatus;
+    private AssignmentStatus prevStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false)
-    private ContractStatus newStatus;
+    private AssignmentStatus newStatus;
 }
