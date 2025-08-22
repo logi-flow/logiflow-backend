@@ -1,6 +1,5 @@
 package com.logi_flow.backend.dto.allocation.request;
 
-import com.logi_flow.backend.common.enums.AllocationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,4 @@ public class UpdateAllocationRequestDto {
 
     @NotBlank(message = "구역 선택은 필수입니다.")
     private String districtName;
-
-    @NotNull(message = "배차 상태 선택은 필수입니다.")
-    private AllocationStatus status;
 }

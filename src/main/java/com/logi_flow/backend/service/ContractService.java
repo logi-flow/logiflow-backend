@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 public interface ContractService {
-    ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, @Valid CreateContractRequestDto dto);
+    ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, Long customerId, @Valid CreateContractRequestDto dto);
 
     ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long contractId, @Valid UpdateContractRequestDto dto);
 
