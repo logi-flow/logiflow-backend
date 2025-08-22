@@ -135,6 +135,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElse(null);
 
         if (user == null) {
+            System.out.println(dto.getUsername());
             return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
         }
 

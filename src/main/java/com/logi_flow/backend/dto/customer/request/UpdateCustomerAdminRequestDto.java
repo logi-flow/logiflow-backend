@@ -14,7 +14,7 @@ public class UpdateCustomerAdminRequestDto {
     private String businessNumber;
 
     @NotBlank(message = "사업장명은 필수 항목입니다.")
-    @Pattern(regexp = Regex.BUSINESS, message = "사업장명은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, 괄호)만 사용가능합니다.")
+    @Pattern(regexp = Regex.BUSINESS, message = "사업장명은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, ,, 괄호)만 사용가능합니다.")
     private String name;
 
     @NotBlank(message = "대표자명은 필수 항목입니다.")
@@ -22,15 +22,15 @@ public class UpdateCustomerAdminRequestDto {
     private String representativeName;
 
     @NotBlank(message = "업태는 필수 항목입니다.")
-    @Pattern(regexp = Regex.BUSINESS, message = "업태는 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, 괄호)만 사용가능합니다.")
+    @Pattern(regexp = Regex.BUSINESS, message = "업태는 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, ,, 괄호)만 사용가능합니다.")
     private String businessType;
 
     @NotBlank(message = "업종은 필수 항목입니다.")
-    @Pattern(regexp = Regex.BUSINESS, message = "업종은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, 괄호)만 사용가능합니다.")
+    @Pattern(regexp = Regex.BUSINESS, message = "업종은 한글, 영문, 숫자, 공백, 특수문자(·, &, /, -, ,, 괄호)만 사용가능합니다.")
     private String businessItems;
 
     @NotBlank(message = "전화번호는 필수 항목입니다.")
-    @Pattern(regexp = Regex.TELEPHONE, message = "전화번호는 000-000-0000 형식이거나 010-0000-0000 형식입니다.")
+    @Pattern(regexp = Regex.TELEPHONE, message = "전화번호는 00(0)-000(0)-0000 형식입니다.")
     private String telephone;
 
     @Pattern(regexp = Regex.FAX, message = "팩스번호 형식이 올바르지 않습니다. 예: 02-123-4567")
