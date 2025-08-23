@@ -93,6 +93,6 @@ public class DriverPayrollController {
             @PathVariable Long payrollId
     ) {
         ResponseDto<Void> response = driverPayrollService.deleteDriverPayroll(userPrincipal, payrollId);
-        return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

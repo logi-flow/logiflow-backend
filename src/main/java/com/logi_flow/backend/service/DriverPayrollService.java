@@ -19,4 +19,5 @@ public interface DriverPayrollService {
     ResponseDto<UpdateDriverPayrollResponseDto> updateDriverPayroll(UserPrincipal userPrincipal, Long payrollId, @Valid UpdateDriverPayrollRequestDto dto);
     ResponseDto<Void> deleteDriverPayroll(UserPrincipal userPrincipal, Long payrollId);
     DriverPayroll getDriverPayroll(Long payrollId);
+    DriverPayroll getDriverPayrollForUpdate(Long payrollId);
 }

@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetAllAllowanceTypeResponseDto {
+    private Long id;
     private String code;
     private String name;
     private boolean isActive;

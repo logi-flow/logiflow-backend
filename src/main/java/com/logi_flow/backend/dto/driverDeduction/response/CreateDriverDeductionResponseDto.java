@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.driverDeduction.response;
 
+import com.logi_flow.backend.common.enums.DriverDeductionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class CreateDriverDeductionResponseDto {
     private int unitPrice;
     private int amount;
     private String memo;
+    private DriverDeductionStatus status;
 
     private String createdAt;
     private String updatedAt;

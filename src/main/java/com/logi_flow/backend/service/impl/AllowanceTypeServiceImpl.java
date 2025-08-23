@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AllowanceTypeStatus;
+import com.logi_flow.backend.common.enums.DriverPayrollStatus;
 import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
@@ -16,12 +17,15 @@ import com.logi_flow.backend.dto.allowanceType.response.GetAllowanceTypeDetailRe
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import com.logi_flow.backend.entity.AllowanceType;
 import com.logi_flow.backend.entity.AllowanceTypeUpdateLog;
+import com.logi_flow.backend.entity.DriverAllowance;
 import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.AllowanceTypeRepository;
 import com.logi_flow.backend.repository.AllowanceTypeUpdateLogRepository;
+import com.logi_flow.backend.repository.DriverAllowanceRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.AllowanceTypeService;
 import com.logi_flow.backend.service.DeleteLogService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +42,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
 
     private final AllowanceTypeRepository allowanceTypeRepository;
     private final UserRepository userRepository;
+    private final DriverAllowanceRepository driverAllowanceRepository;
     private final AllowanceTypeUpdateLogRepository allowanceTypeUpdateLogRepository;
     private final DeleteLogService deleteLogService;
 
@@ -85,7 +90,6 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllAllowanceTypeResponseDto> getAllAllowanceType(int page, int size, String sort) {
         Page<GetAllAllowanceTypeResponseDto> data = null;
 
@@ -102,6 +106,10 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     public ResponseDto<GetAllowanceTypeDetailResponseDto> getAllowanceTypeDetail(Long allowanceTypeId) {
         GetAllowanceTypeDetailResponseDto data = null;
         AllowanceType allowanceType = getAllowanceType(allowanceTypeId);
+
+        if (allowanceType.getStatus() == AllowanceTypeStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
+        }
 
         data = GetAllowanceTypeDetailResponseDto.builder()
                 .code(allowanceType.getCode())
@@ -120,8 +128,8 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     public ResponseDto<UpdateAllowanceTypeResponseDto> updateAllowanceType(UserPrincipal userPrincipal, Long allowanceTypeId, UpdateAllowanceTypeRequestDto dto) {
         UpdateAllowanceTypeResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         AllowanceType savedAllowanceType = getAllowanceType(allowanceTypeId);
 
@@ -170,12 +178,17 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     @Override
     @Transactional
     public ResponseDto<Void> deleteAllowanceType(UserPrincipal userPrincipal, Long allowanceTypeId) {
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         AllowanceType allowanceType = getAllowanceType(allowanceTypeId);
+        boolean usedInConfirmedPayroll = driverAllowanceRepository.existsByAllowanceTypeIdAndDriverPayroll_Status(allowanceTypeId, DriverPayrollStatus.CONFIRMED);
 
-        if (allowanceType.getCode().equals("BASE")) {
+        if (usedInConfirmedPayroll) {
+            return ResponseDto.fail(ResponseCode.NOT_DELETE_USED_TYPE, ResponseMessage.NOT_DELETE_USED_TYPE);
+        }
+
+        if ("BASE".equals(allowanceType.getCode())) {
             return ResponseDto.fail(ResponseCode.SYSTEM_ITEM_IMMUTABLE, ResponseMessage.SYSTEM_ITEM_IMMUTABLE);
         }
 
@@ -196,7 +209,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
     @Transactional(readOnly = true)
     public AllowanceType getAllowanceType(Long allowanceTypeId) {
         return allowanceTypeRepository.findById(allowanceTypeId)
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
     }
 
     private CreateAllowanceTypeResponseDto toCreateAllowanceTypeResponseDto(AllowanceType allowanceType) {
@@ -214,6 +227,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
 
     private GetAllAllowanceTypeResponseDto toGetAllAllowanceTypeResponseDto(AllowanceType allowanceType) {
         return GetAllAllowanceTypeResponseDto.builder()
+                .id(allowanceType.getId())
                 .code(allowanceType.getCode())
                 .name(allowanceType.getName())
                 .isActive(allowanceType.isActive())

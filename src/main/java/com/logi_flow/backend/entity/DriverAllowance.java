@@ -1,5 +1,6 @@
 package com.logi_flow.backend.entity;
 
+import com.logi_flow.backend.common.enums.DriverAllowanceStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Entity
-@Table(name = "driver_allowances")
+@Table(
+        name = "driver_allowances",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_driver_allowances_payroll_id_allowance_type_id",
+                        columnNames = { "payroll_id", "allowance_type_id" }
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter @Setter
@@ -37,6 +46,10 @@ public class DriverAllowance extends BaseTime {
 
     @Column(name = "memo", columnDefinition = "TEXT")
     private String memo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private DriverAllowanceStatus status;
 
     public void calculateAmount() {
         if (quantity == null) {

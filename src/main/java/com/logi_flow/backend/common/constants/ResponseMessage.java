@@ -25,12 +25,13 @@ public interface ResponseMessage {
     String MAIL_SEND_FAIL = "메일 발송에 실패하였습니다.";
     String MAIL_NOT_FOUND = "이메일을 찾을 수 없습니다.";
 
-    String ALREADY_OPEN_ATTENDANCE = "미퇴근 기록 또는 중복된 출근 기록이 존재합니다.";
     String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
 
     String EXISTS_PAYROLL = "해당 기간의 급여대장이 이미 존재합니다.";
     String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
+    String NOT_USED_INACTIVE_TYPE = "비활성화된 타입은 사용할 수 없습니다.";
     String SYSTEM_ITEM_IMMUTABLE = "시스템에서 자동 생성한 항목은 수정 및 삭제할 수 없습니다.";
     String ALREADY_DELETED = "이미 삭제된 항목입니다.";
     String LOCK_PAYROLL_CONFIRMED = "확정된 급여대장은 수정 및 삭제를 할 수 없습니다.";
+    String NOT_DELETE_USED_TYPE = "확정된 급여대장에 사용된 항목은 삭제할 수 없습니다.";
 }

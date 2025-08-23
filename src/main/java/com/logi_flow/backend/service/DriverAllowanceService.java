@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface DriverAllowanceService {
     ResponseDto<CreateDriverAllowanceResponseDto> createDriverAllowance(Long payrollId, @Valid CreateDriverAllowanceRequestDto dto);
-    ResponseDto<GetDriverAllowanceDetailResponseDto> getDriverAllowance(Long payrollId);
+    ResponseDto<List<GetDriverAllowanceDetailResponseDto>> getDriverAllowance(Long payrollId);
     ResponseDto<List<UpdateDriverAllowanceResponseDto>> updateDriverAllowance(UserPrincipal userPrincipal, Long payrollId, List<UpdateDriverAllowanceRequestDto.Item> items);
+    ResponseDto<Void> deleteDriverAllowance(UserPrincipal userPrincipal, Long payrollId, Long allowanceId);
 }
