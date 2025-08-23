@@ -47,7 +47,7 @@ public class CustomerServiceImpl implements CustomerService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findById(userPrincipal.getId())
+        Customer customer = customerRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         List<CustomerUpdateLog> logs = new ArrayList<>();

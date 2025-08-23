@@ -8,10 +8,7 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
-import com.logi_flow.backend.dto.employee.response.CreateEmployeeResponseDto;
-import com.logi_flow.backend.dto.employee.response.GetAllEmployeeResponseDto;
-import com.logi_flow.backend.dto.employee.response.GetEmployeeDetailResponseDto;
-import com.logi_flow.backend.dto.employee.response.UpdateEmployeeResponseDto;
+import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,16 @@ public class EmployeeController {
     private static final String EMPLOYEE_MY_INFO_API = "/me";
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
 
+    @PostMapping(EMPLOYEE_ID_API)
+    public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long employeeId,
+            @Valid @RequestBody CreateEmployeeRequestDto dto
+    ){
+        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, employeeId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
+    }
+
     @PutMapping(EMPLOYEE_MY_INFO_API)
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -46,16 +53,6 @@ public class EmployeeController {
     ) {
         ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetail(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @PostMapping(EMPLOYEE_ID_API)
-    public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long employeeId,
-            @Valid @RequestBody CreateEmployeeRequestDto dto
-    ){
-        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, employeeId, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(EMPLOYEE_ID_API)
@@ -81,11 +78,11 @@ public class EmployeeController {
     }
 
     @GetMapping(EMPLOYEE_ID_API)
-    public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetailAdmin(
+    public ResponseEntity<ResponseDto<GetEmployeeDetailAdminResponseDto>> getEmployeeDetailAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId
     ) {
-        ResponseDto<GetEmployeeDetailResponseDto> response = employeeService.getEmployeeDetailAdmin(userPrincipal, employeeId);
+        ResponseDto<GetEmployeeDetailAdminResponseDto> response = employeeService.getEmployeeDetailAdmin(userPrincipal, employeeId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

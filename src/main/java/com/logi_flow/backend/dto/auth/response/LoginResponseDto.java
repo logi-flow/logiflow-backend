@@ -18,6 +18,6 @@ public class LoginResponseDto {
     private String username;
     private String name;
     private String profileImageUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

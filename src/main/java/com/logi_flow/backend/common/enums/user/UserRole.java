@@ -4,6 +4,7 @@ public enum UserRole {
     ADMIN,
     DRIVER,
     CUSTOMER,
+    EMPLOYEE,
     ALLOCATIONS_MANAGER,
     HUMAN_RESOURCES_MANAGER
 }
