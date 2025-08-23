@@ -7,16 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 @Builder
-public class GetEmployeeDetailResponseDto {
+public class GetEmployeeDetailAdminResponseDto {
     private Long id;
     private Long userId;
     private String name;
-    private String identityNumberMasked;
+    private String identityNumber;
     private String phoneNumber;
     private String email;
     private String zipcode;

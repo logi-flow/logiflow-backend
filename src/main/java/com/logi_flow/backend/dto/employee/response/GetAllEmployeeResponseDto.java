@@ -18,4 +18,6 @@ public class GetAllEmployeeResponseDto {
     private Department department;
     private Position position;
     private LocalDate companyJoin;
+    private String createdAt;
+    private String updatedAt;
 }

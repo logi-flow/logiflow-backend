@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 public class CustomerSignUpResponseDto {
     private Long id;
     private String username;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

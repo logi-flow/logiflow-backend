@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 public class UpdateEmployeeResponseDto {
     private Long id;
     private Long userId;
-    private String username;
     private String name;
     private String identityNumberMasked;
     private String phoneNumber;
@@ -30,6 +29,6 @@ public class UpdateEmployeeResponseDto {
     private Department department;
     private Position position;
     private LocalDate companyJoin;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

@@ -35,4 +35,9 @@ public class UserServiceImpl implements UserService {
     public ResponseDto<UpdateUserRoleResponseDto> updateUserRole(UserPrincipal userPrincipal, Long userId, UpdateUserRoleRequestDto dto) {
         return null;
     }
+
+    @Override
+    public ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long userId) {
+        return null;
+    }
 }

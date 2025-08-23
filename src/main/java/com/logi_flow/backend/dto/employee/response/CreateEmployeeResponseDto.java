@@ -26,6 +26,6 @@ public class CreateEmployeeResponseDto {
     private Department department;
     private Position position;
     private LocalDate companyJoin;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
