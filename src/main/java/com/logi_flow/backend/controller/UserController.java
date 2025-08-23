@@ -73,11 +73,11 @@ public class UserController {
     }
 
     @DeleteMapping(USER_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteEmployee(
+    public ResponseEntity<ResponseDto<?>> deleteUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId
     ) {
-        ResponseDto<?> response = userService.deleteEmployee(userPrincipal, userId);
+        ResponseDto<?> response = userService.deleteUser(userPrincipal, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

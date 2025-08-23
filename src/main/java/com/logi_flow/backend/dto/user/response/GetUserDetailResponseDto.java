@@ -16,6 +16,6 @@ public class GetUserDetailResponseDto {
     private String username;
     private UserRole role;
     private UserStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
