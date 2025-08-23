@@ -9,11 +9,11 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.attendance.response.*;
 import com.logi_flow.backend.entity.Attendance;
 import com.logi_flow.backend.entity.Driver;
-import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.AttendanceRepository;
 import com.logi_flow.backend.repository.DriverRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.AttendanceService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,11 +37,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     public ResponseDto<CreateAttendanceResponseDto> checkInAttendance(UserPrincipal userPrincipal) {
         CreateAttendanceResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
-
-        Driver driver = driverRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Attendance newAttendance = Attendance.builder()
                 .driver(driver)
@@ -66,14 +63,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     public ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal) {
         UpdateAttendanceResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
-
-        Driver driver = driverRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Attendance attendance = attendanceRepository.findOpenAttendanceForUpdate(driver.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.NO_OPEN_ATTENDANCE));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.NO_OPEN_ATTENDANCE));
 
         attendance.setWorkEnd(LocalDateTime.now());
         Attendance savedAttendance = attendanceRepository.save(attendance);
@@ -91,7 +85,6 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllAttendanceResponseDto> getAllAttendance(int page, int size, String sort) {
         Page<GetAllAttendanceResponseDto> data = null;
 
@@ -104,12 +97,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ResponseDto<GetAttendanceDetailResponseDto> getAttendanceDetails(Long attendanceId) {
         GetAttendanceDetailResponseDto data = null;
 
         Attendance attendance = attendanceRepository.findById(attendanceId)
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         data = GetAttendanceDetailResponseDto.builder()
                 .id(attendance.getId())
@@ -128,15 +120,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ResponseDto<GetMyAttendanceDetailResponseDto> getMyAttendance(UserPrincipal userPrincipal) {
         GetMyAttendanceDetailResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
-
-        Driver driver = driverRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Optional<Attendance> attendance = attendanceRepository.findOpenAttendance(driver.getId());
 
@@ -164,15 +152,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllMyAttendanceResponseDto> getAllMyAttendance(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllMyAttendanceResponseDto> data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
-
-        Driver driver = driverRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
         Page<Attendance> attendances = attendanceRepository.findByDriverId(driver.getId(), pageable);
@@ -184,6 +168,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private GetAllAttendanceResponseDto toGetAllAttendanceResponseDto(Attendance attendance) {
         return GetAllAttendanceResponseDto.builder()
+                .driverId(attendance.getDriver().getId())
                 .driverName(attendance.getDriver().getName())
                 .workStart(DateUtils.format(attendance.getWorkStart()))
                 .workEnd(DateUtils.format(attendance.getWorkEnd()))

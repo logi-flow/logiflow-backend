@@ -71,6 +71,6 @@ public class DeductionTypeController {
             @PathVariable Long deductionTypeId
     ) {
         ResponseDto<Void> response = deductionTypeService.deleteDeductionType(userPrincipal, deductionTypeId);
-        return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

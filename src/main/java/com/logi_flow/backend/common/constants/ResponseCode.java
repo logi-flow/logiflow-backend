@@ -20,10 +20,10 @@ public interface ResponseCode {
     String MAIL_SEND_FAIL = "MSF";
     String MAIL_NOT_FOUND = "MNF";
 
-    String ALREADY_OPEN_ATTENDANCE = "AOA";
-
     String EXISTS_TYPE_CODE = "ETC";
+    String NOT_USED_INACTIVE_TYPE = "NUT";
     String SYSTEM_ITEM_IMMUTABLE = "SI";
     String ALREADY_DELETED = "AD";
     String LOCK_PAYROLL_CONFIRMED = "LPC";
+    String NOT_DELETE_USED_TYPE = "NDT";
 }

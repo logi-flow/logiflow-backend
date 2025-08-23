@@ -71,6 +71,6 @@ public class AllowanceTypeController {
             @PathVariable Long allowanceTypeId
     ) {
         ResponseDto<Void> response = allowanceTypeService.deleteAllowanceType(userPrincipal, allowanceTypeId);
-        return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

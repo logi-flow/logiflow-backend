@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface DriverDeductionService {
     ResponseDto<CreateDriverDeductionResponseDto> createDriverDeduction(Long payrollId, @Valid CreateDriverDeductionRequestDto dto);
-    ResponseDto<GetDriverDeductionDetailResponseDto> getDriverDeduction(Long payrollId);
+    ResponseDto<List<GetDriverDeductionDetailResponseDto>> getDriverDeduction(Long payrollId);
     ResponseDto<List<UpdateDriverDeductionResponseDto>> updateDriverDeduction(UserPrincipal userPrincipal, Long payrollId, List<UpdateDriverDeductionRequestDto.Item> items);
+    ResponseDto<Void> deleteDriverDeduction(UserPrincipal userPrincipal, Long payrollId, Long deductionId);
 }

@@ -25,6 +25,7 @@ public class DriverDeductionController {
     private final DriverDeductionService driverDeductionService;
 
     private final static String DEDUCTION_API = "/{payrollId}/deduction";
+    private final static String DEDUCTION_ID_API = "/{payrollId}/deduction/{deductionId}";
 
     @PostMapping(DEDUCTION_API)
     public ResponseEntity<ResponseDto<CreateDriverDeductionResponseDto>> createDriverDeduction(
@@ -36,10 +37,10 @@ public class DriverDeductionController {
     }
 
     @GetMapping(DEDUCTION_API)
-    public ResponseEntity<ResponseDto<GetDriverDeductionDetailResponseDto>> getDriverDeduction(
+    public ResponseEntity<ResponseDto<List<GetDriverDeductionDetailResponseDto>>> getDriverDeduction(
             @PathVariable Long payrollId
     ) {
-        ResponseDto<GetDriverDeductionDetailResponseDto> response = driverDeductionService.getDriverDeduction(payrollId);
+        ResponseDto<List<GetDriverDeductionDetailResponseDto>> response = driverDeductionService.getDriverDeduction(payrollId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -50,6 +51,16 @@ public class DriverDeductionController {
             @Valid @RequestBody UpdateDriverDeductionRequestDto dto
     ) {
         ResponseDto<List<UpdateDriverDeductionResponseDto>> response = driverDeductionService.updateDriverDeduction(userPrincipal, payrollId, dto.getItems());
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @DeleteMapping(DEDUCTION_ID_API)
+    public ResponseEntity<ResponseDto<Void>> deleteDriverDeduction(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long payrollId,
+            @PathVariable Long deductionId
+    ) {
+        ResponseDto<Void> response = driverDeductionService.deleteDriverDeduction(userPrincipal, payrollId, deductionId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

@@ -59,4 +59,10 @@ public class DriverPayroll extends BaseTime {
 
     @OneToMany(mappedBy = "driverPayroll", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DriverDeduction> driverDeductions = new ArrayList<>();
+
+    public void applyTotals(int totalAllowance, int totalDeduction) {
+        this.totalAllowance = totalAllowance;
+        this.totalDeduction = totalDeduction;
+        this.finalAmount = totalAllowance - totalDeduction;
+    }
 }

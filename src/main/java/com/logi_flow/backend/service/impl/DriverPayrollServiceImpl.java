@@ -16,6 +16,7 @@ import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DriverPayrollService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -44,7 +45,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         CreateDriverPayrollResponseDto data = null;
 
         Driver driver = driverRepository.findById(dto.getDriverId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (driverPayrollRepository.lockAnyActiveOverlapId(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate()).isPresent()) {
             throw new DataIntegrityViolationException(ResponseMessage.EXISTS_PAYROLL);
@@ -80,12 +81,11 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllDriverPayrollResponseDto> getAllDriverPayroll(int page, int size, String sort) {
         Page<GetAllDriverPayrollResponseDto> data = null;
 
         Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
-        Page<DriverPayroll> payrolls = driverPayrollRepository.findAll(pageable);
+        Page<DriverPayroll> payrolls = driverPayrollRepository.findByStatusNot(DriverPayrollStatus.DELETED, pageable);
 
         data = payrolls.map(this::toGetAllDriverPayrollResponseDto);
 
@@ -93,7 +93,6 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ResponseDto<GetDriverPayrollDetailResponseDto> getDriverPayrollDetail(Long payrollId) {
         GetDriverPayrollDetailResponseDto data = null;
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
@@ -116,12 +115,11 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllDriverPayrollResponseDto> getMyPayrolls(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllDriverPayrollResponseDto> data = null;
 
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
         Page<DriverPayroll> payrolls = driverPayrollRepository.findByDriverIdAndStatus(driver.getId(), DriverPayrollStatus.CONFIRMED, pageable);
@@ -137,7 +135,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         UpdateDriverPayrollStatusResponseDto data = null;
 
         User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
         DriverPayrollStatus prevStatus = savedDriverPayroll.getStatus();
@@ -171,9 +169,15 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         UpdateDriverPayrollResponseDto data = null;
 
         User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
+
+        if (savedDriverPayroll.getStatus() == DriverPayrollStatus.CONFIRMED) {
+            return ResponseDto.fail(ResponseCode.LOCK_PAYROLL_CONFIRMED, ResponseMessage.LOCK_PAYROLL_CONFIRMED);
+        } else if (savedDriverPayroll.getStatus() == DriverPayrollStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED,ResponseMessage.ALREADY_DELETED);
+        }
 
         if (!Objects.equals(dto.getTitle(), savedDriverPayroll.getTitle())) {
             String prevData = savedDriverPayroll.getTitle();
@@ -215,12 +219,14 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     @Transactional
     public ResponseDto<Void> deleteDriverPayroll(UserPrincipal userPrincipal, Long payrollId) {
         User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
 
-        if (savedDriverPayroll.getStatus() == DriverPayrollStatus.DELETED) {
-            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
+        if (savedDriverPayroll.getStatus() == DriverPayrollStatus.CONFIRMED) {
+            return ResponseDto.fail(ResponseCode.LOCK_PAYROLL_CONFIRMED, ResponseMessage.LOCK_PAYROLL_CONFIRMED);
+        } else if (savedDriverPayroll.getStatus() == DriverPayrollStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED,ResponseMessage.ALREADY_DELETED);
         }
 
         savedDriverPayroll.setStatus(DriverPayrollStatus.DELETED);
@@ -232,10 +238,15 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public DriverPayroll getDriverPayroll(Long payrollId) {
         return driverPayrollRepository.findById(payrollId)
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+    }
+
+    @Override
+    public DriverPayroll getDriverPayrollForUpdate(Long payrollId) {
+        return driverPayrollRepository.findByIdForUpdate(payrollId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
     }
 
     private CreateDriverPayrollResponseDto toCreateDriverPayrollResponseDto(DriverPayroll driverPayroll) {
@@ -255,6 +266,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
 
     private GetAllDriverPayrollResponseDto toGetAllDriverPayrollResponseDto(DriverPayroll driverPayroll) {
         return GetAllDriverPayrollResponseDto.builder()
+                .id(driverPayroll.getId())
                 .driverId(driverPayroll.getDriver().getId())
                 .driverName(driverPayroll.getDriver().getName())
                 .title(driverPayroll.getTitle())

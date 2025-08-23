@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.DeductionTypeStatus;
+import com.logi_flow.backend.common.enums.DriverPayrollStatus;
 import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
@@ -19,9 +20,11 @@ import com.logi_flow.backend.entity.DeductionTypeUpdateLog;
 import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.DeductionTypeRepository;
 import com.logi_flow.backend.repository.DeductionTypeUpdateLogRepository;
+import com.logi_flow.backend.repository.DriverDeductionRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.DeductionTypeService;
 import com.logi_flow.backend.service.DeleteLogService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +41,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
 
     private final DeductionTypeRepository deductionTypeRepository;
     private final UserRepository userRepository;
+    private final DriverDeductionRepository driverDeductionRepository;
     private final DeductionTypeUpdateLogRepository deductionTypeUpdateLogRepository;
     private final DeleteLogService deleteLogService;
 
@@ -85,7 +89,6 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<GetAllDeductionTypeResponseDto> getAllDeductionType(int page, int size, String sort) {
         Page<GetAllDeductionTypeResponseDto> data = null;
 
@@ -98,10 +101,13 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ResponseDto<GetDeductionTypeDetailResponseDto> getDeductionTypeDetail(Long deductionTypeId) {
         GetDeductionTypeDetailResponseDto data = null;
         DeductionType deductionType = getDeductionType(deductionTypeId);
+
+        if (deductionType.getStatus() == DeductionTypeStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
+        }
 
         data = GetDeductionTypeDetailResponseDto.builder()
                 .code(deductionType.getCode())
@@ -120,8 +126,8 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     public ResponseDto<UpdateDeductionTypeResponseDto> updateDeductionType(UserPrincipal userPrincipal, Long deductionTypeId, UpdateDeductionTypeRequestDto dto) {
         UpdateDeductionTypeResponseDto data = null;
 
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DeductionType savedDeductionType = getDeductionType(deductionTypeId);
 
@@ -162,13 +168,18 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     @Override
     @Transactional
     public ResponseDto<Void> deleteDeductionType(UserPrincipal userPrincipal, Long deductionTypeId) {
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DeductionType deductionType = getDeductionType(deductionTypeId);
+        boolean usedInConfirmedPayroll = driverDeductionRepository.existsByDeductionTypeIdAndDriverPayroll_Status(deductionTypeId, DriverPayrollStatus.CONFIRMED);
+
+        if (usedInConfirmedPayroll) {
+            return ResponseDto.fail(ResponseCode.NOT_DELETE_USED_TYPE, ResponseMessage.NOT_DELETE_USED_TYPE);
+        }
 
         if (deductionType.getStatus() == DeductionTypeStatus.DELETED) {
-            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+            return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
         }
 
         deductionType.setActive(false);
@@ -183,7 +194,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
     @Override
     public DeductionType getDeductionType(Long deductionTypeId) {
         return deductionTypeRepository.findById(deductionTypeId)
-                .orElseThrow(() -> new IllegalArgumentException(ResponseMessage.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
     }
 
     private CreateDeductionTypeResponseDto toCreateDeductionTypeResponseDto(DeductionType deductionType) {
@@ -201,6 +212,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
 
     private GetAllDeductionTypeResponseDto toGetAllDeductionTypeResponseDto(DeductionType deductionType) {
         return GetAllDeductionTypeResponseDto.builder()
+                .id(deductionType.getId())
                 .code(deductionType.getCode())
                 .name(deductionType.getName())
                 .isActive(deductionType.isActive())

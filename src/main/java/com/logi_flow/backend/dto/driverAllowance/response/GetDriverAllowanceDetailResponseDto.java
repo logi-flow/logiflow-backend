@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 @Getter
 @Builder
 public class GetDriverAllowanceDetailResponseDto {
+    private Long id;
+    private Long allowanceTypeId;
     private String allowanceTypeCode;
     private String allowanceTypeName;
     private BigDecimal quantity;

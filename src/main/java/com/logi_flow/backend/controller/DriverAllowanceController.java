@@ -25,6 +25,7 @@ public class DriverAllowanceController {
     private final DriverAllowanceService driverAllowanceService;
 
     private final static String ALLOWANCE_API = "/{payrollId}/allowance";
+    private final static String ALLOWANCE_ID_API = "/{payrollId}/allowance/{allowanceId}";
 
     @PostMapping(ALLOWANCE_API)
     public ResponseEntity<ResponseDto<CreateDriverAllowanceResponseDto>> createDriverAllowance(
@@ -36,10 +37,10 @@ public class DriverAllowanceController {
     }
 
     @GetMapping(ALLOWANCE_API)
-    public ResponseEntity<ResponseDto<GetDriverAllowanceDetailResponseDto>> getDriverAllowance(
+    public ResponseEntity<ResponseDto<List<GetDriverAllowanceDetailResponseDto>>> getDriverAllowance(
             @PathVariable Long payrollId
     ) {
-        ResponseDto<GetDriverAllowanceDetailResponseDto> response = driverAllowanceService.getDriverAllowance(payrollId);
+        ResponseDto<List<GetDriverAllowanceDetailResponseDto>> response = driverAllowanceService.getDriverAllowance(payrollId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -50,6 +51,16 @@ public class DriverAllowanceController {
             @Valid @RequestBody UpdateDriverAllowanceRequestDto dto
     ) {
         ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @DeleteMapping(ALLOWANCE_ID_API)
+    public ResponseEntity<ResponseDto<Void>> deleteDriverAllowance(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long payrollId,
+            @PathVariable Long allowanceId
+    ) {
+        ResponseDto<Void> response = driverAllowanceService.deleteDriverAllowance(userPrincipal, payrollId, allowanceId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }

@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.driverAllowance.response;
 
+import com.logi_flow.backend.common.enums.DriverAllowanceStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class CreateDriverAllowanceResponseDto {
     private int unitPrice;
     private int amount;
     private String memo;
+    private DriverAllowanceStatus status;
 
     private String createdAt;
     private String updatedAt;
