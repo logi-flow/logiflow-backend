@@ -17,8 +17,8 @@ public class UpdateUserRoleResponseDto {
     private Long changedBy;
     private String changedByUsername;
     private String changedReason;
-    private String prevRole;
-    private String newRole;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private UserRole prevRole;
+    private UserRole newRole;
+    private String createdAt;
+    private String updatedAt;
 }

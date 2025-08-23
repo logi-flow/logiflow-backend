@@ -19,4 +19,6 @@ public interface UserService {
     ResponseDto<UpdateUserStatusResponseDto> updateUserStatus(UserPrincipal userPrincipal, Long userId, @Valid UpdateUserStatusRequestDto dto);
 
     ResponseDto<UpdateUserRoleResponseDto> updateUserRole(UserPrincipal userPrincipal, Long userId, @Valid UpdateUserRoleRequestDto dto);
+
+    ResponseDto<?> deleteUser(UserPrincipal userPrincipal, Long userId);
 }

@@ -14,4 +14,6 @@ public class GetAllUserResponseDto {
     private String username;
     private UserRole role;
     private UserStatus status;
+    private String createdAt;
+    private String updatedAt;
 }

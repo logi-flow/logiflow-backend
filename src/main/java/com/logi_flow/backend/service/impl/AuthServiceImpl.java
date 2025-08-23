@@ -120,8 +120,8 @@ public class AuthServiceImpl implements AuthService {
         data = CustomerSignUpResponseDto.builder()
                 .id(customer.getId())
                 .username(user.getUsername())
-                .createdAt(customer.getCreatedAt())
-                .updatedAt(customer.getUpdatedAt())
+                .createdAt(DateUtils.format(customer.getCreatedAt()))
+                .updatedAt(DateUtils.format(customer.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -166,8 +166,8 @@ public class AuthServiceImpl implements AuthService {
                     .role(user.getRole().getName())
                     .username(user.getUsername())
                     .name(user.getUsername())
-                    .createdAt(user.getCreatedAt())
-                    .updatedAt(user.getUpdatedAt())
+                    .createdAt(DateUtils.format(user.getCreatedAt()))
+                    .updatedAt(DateUtils.format(user.getUpdatedAt()))
                     .build();
 
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);

@@ -71,4 +71,13 @@ public class UserController {
         ResponseDto<UpdateUserRoleResponseDto> response = userService.updateUserRole(userPrincipal, userId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
+
+    @DeleteMapping(USER_ID_API)
+    public ResponseEntity<ResponseDto<?>> deleteUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long userId
+    ) {
+        ResponseDto<?> response = userService.deleteUser(userPrincipal, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+    }
 }
