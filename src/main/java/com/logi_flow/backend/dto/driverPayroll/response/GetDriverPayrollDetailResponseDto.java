@@ -1,15 +1,17 @@
 package com.logi_flow.backend.dto.driverPayroll.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
-@Getter
+@Getter @Setter
 @Builder
 public class GetDriverPayrollDetailResponseDto {
+    private Long id;
     private Long driverId;
     private String driverName;
     private String title;
@@ -22,4 +24,10 @@ public class GetDriverPayrollDetailResponseDto {
 
     private String createdAt;
     private String updatedAt;
+
+    @Builder.Default
+    private List<AllowanceItemDto> allowanceItems = new ArrayList<>();
+
+    @Builder.Default
+    private List<DeductionItemDto> deductionItems = new ArrayList<>();
 }

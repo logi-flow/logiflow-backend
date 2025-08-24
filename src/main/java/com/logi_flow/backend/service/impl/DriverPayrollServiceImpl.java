@@ -2,8 +2,10 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.DriverAllowanceStatus;
 import com.logi_flow.backend.common.enums.DriverPayrollStatus;
 import com.logi_flow.backend.common.enums.TableRef;
+import com.logi_flow.backend.common.mapper.DriverPayrollMapper;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
@@ -25,8 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.nio.file.AccessDeniedException;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +38,14 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     private final DriverPayrollRepository driverPayrollRepository;
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final AllowanceTypeRepository allowanceTypeRepository;
+    private final DriverAllowanceRepository driverAllowanceRepository;
+    private final DriverDeductionRepository driverDeductionRepository;
     private final DriverPayrollStatusLogRepository driverPayrollStatusLogRepository;
     private final DriverPayrollUpdateLogRepository driverPayrollUpdateLogRepository;
     private final DeleteLogService deleteLogService;
+    private final DriverPayrollMapper driverPayrollMapper;
 
     @Override
     @Transactional
@@ -49,31 +57,46 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
 
         if (driverPayrollRepository.lockAnyActiveOverlapId(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate()).isPresent()) {
             throw new DataIntegrityViolationException(ResponseMessage.EXISTS_PAYROLL);
-        };
-
-        Optional<DriverPayroll> deletedDriverPayroll = driverPayrollRepository.findByDriverIdAndPeriodStartDateAndPeriodEndDateAndStatus(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate(), DriverPayrollStatus.DELETED);
-
-        if (deletedDriverPayroll.isPresent()) {
-            DriverPayroll restoreDriverPayroll = deletedDriverPayroll.get();
-            restoreDriverPayroll.setTitle(dto.getTitle());
-            restoreDriverPayroll.setStatus(DriverPayrollStatus.CREATED);
-            DriverPayroll savedDriverPayroll = driverPayrollRepository.save(restoreDriverPayroll);
-
-            deleteLogService.removeIfExists(TableRef.DRIVER_PAYROLL, savedDriverPayroll.getId());
-
-            data = toCreateDriverPayrollResponseDto(savedDriverPayroll);
-
-            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
         }
 
-        DriverPayroll newDriverPayroll = DriverPayroll.builder()
-                .driver(driver)
-                .status(DriverPayrollStatus.CREATED)
-                .title(dto.getTitle())
-                .periodStartDate(dto.getPeriodStartDate())
-                .periodEndDate(dto.getPeriodEndDate())
-                .build();
-        DriverPayroll savedDriverPayroll = driverPayrollRepository.save(newDriverPayroll);
+        DriverPayroll driverPayroll = driverPayrollRepository.findByDriverIdAndPeriodStartDateAndPeriodEndDateAndStatus(dto.getDriverId(), dto.getPeriodStartDate(), dto.getPeriodEndDate(), DriverPayrollStatus.DELETED)
+                .map(p -> {
+                    p.setTitle(dto.getTitle());
+                    p.setStatus(DriverPayrollStatus.CREATED);
+                    return p;
+                })
+                .orElseGet(() -> DriverPayroll.builder()
+                        .driver(driver)
+                        .status(DriverPayrollStatus.CREATED)
+                        .title(dto.getTitle())
+                        .periodStartDate(dto.getPeriodStartDate())
+                        .periodEndDate(dto.getPeriodEndDate())
+                        .build());
+
+        DriverPayroll savedDriverPayroll = driverPayrollRepository.save(driverPayroll);
+
+        deleteLogService.removeIfExists(TableRef.DRIVER_PAYROLL, savedDriverPayroll.getId());
+
+        int workDays = attendanceRepository.countWorkDays(driver.getId(), dto.getPeriodStartDate(), dto.getPeriodEndDate());
+        AllowanceType baseType = allowanceTypeRepository.findByCode("BASE")
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        DriverAllowance base = driverAllowanceRepository.findByDriverPayrollIdAndAllowanceTypeIdAndStatus(savedDriverPayroll.getId(), baseType.getId(), DriverAllowanceStatus.ACTIVE)
+                .orElseGet(() ->  DriverAllowance.builder()
+                        .driverPayroll(savedDriverPayroll)
+                        .allowanceType(baseType)
+                        .status(DriverAllowanceStatus.ACTIVE)
+                        .build());
+
+        base.setQuantity(new BigDecimal(workDays));
+        base.setUnitPrice(driver.getPay());
+        base.setMemo(workDays + "(일) × " + driver.getPay() + "(원)");
+        driverAllowanceRepository.save(base);
+
+        int totalAllowance = driverAllowanceRepository.sumAmountByDriverPayrollId(savedDriverPayroll.getId());
+        int totalDeduction = driverDeductionRepository.sumAmountByDriverPayrollId(savedDriverPayroll.getId());
+
+        savedDriverPayroll.applyTotals(totalAllowance, totalDeduction);
 
         data = toCreateDriverPayrollResponseDto(savedDriverPayroll);
 
@@ -93,23 +116,15 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetDriverPayrollDetailResponseDto> getDriverPayrollDetail(Long payrollId) {
         GetDriverPayrollDetailResponseDto data = null;
-        DriverPayroll savedDriverPayroll = getDriverPayroll(payrollId);
 
-        data = GetDriverPayrollDetailResponseDto.builder()
-                .driverId(savedDriverPayroll.getDriver().getId())
-                .driverName(savedDriverPayroll.getDriver().getName())
-                .title(savedDriverPayroll.getTitle())
-                .periodStartDate(savedDriverPayroll.getPeriodStartDate())
-                .periodEndDate(savedDriverPayroll.getPeriodEndDate())
-                .totalAllowance(savedDriverPayroll.getTotalAllowance())
-                .totalDeduction(savedDriverPayroll.getTotalDeduction())
-                .finalAmount(savedDriverPayroll.getFinalAmount())
-                .status(savedDriverPayroll.getStatus().name())
-                .createdAt(DateUtils.format(savedDriverPayroll.getCreatedAt()))
-                .updatedAt(DateUtils.format(savedDriverPayroll.getUpdatedAt()))
-                .build();
+        data = driverPayrollMapper.getDriverPayrollDetail(payrollId);
+
+        if (data == null) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -127,6 +142,27 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         data = payrolls.map(this::toGetAllDriverPayrollResponseDto);
 
         return data;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseDto<GetDriverPayrollDetailResponseDto> getMyPayrollDetail(UserPrincipal userPrincipal, Long payrollId) throws AccessDeniedException {
+        GetDriverPayrollDetailResponseDto data = null;
+
+        Driver driver = driverRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        data = driverPayrollMapper.getDriverPayrollDetail(payrollId);
+
+        if (data == null) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        if (!driver.getId().equals(data.getDriverId())) {
+            throw new AccessDeniedException(ResponseMessage.NOT_OWN_PAYROLL);
+        }
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
@@ -273,6 +309,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
                 .totalAllowance(driverPayroll.getTotalAllowance())
                 .totalDeduction(driverPayroll.getTotalDeduction())
                 .finalAmount(driverPayroll.getFinalAmount())
+                .status(driverPayroll.getStatus())
                 .createdAt(DateUtils.format(driverPayroll.getCreatedAt()))
                 .updatedAt(DateUtils.format(driverPayroll.getUpdatedAt()))
                 .build();

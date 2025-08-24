@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -27,6 +29,7 @@ public class DriverPayrollController {
     private final static String PAYROLL_ID_API = "/{payrollId}";
     private final static String UPDATE_STATUS_API = PAYROLL_ID_API + "/status";
     private final static String MY_PAYROLL_API = "/me";
+    private final static String MY_PAYROLL_PAYROLL_ID_API = MY_PAYROLL_API + PAYROLL_ID_API;
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateDriverPayrollResponseDto>> createDriverPayroll(
@@ -64,6 +67,15 @@ public class DriverPayrollController {
     ) {
         Page<GetAllDriverPayrollResponseDto> result = driverPayrollService.getMyPayrolls(userPrincipal, page, size, sort);
         PageDto<GetAllDriverPayrollResponseDto> response = PageMapper.toPageDto(result, sort);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping(MY_PAYROLL_PAYROLL_ID_API)
+    public ResponseEntity<ResponseDto<GetDriverPayrollDetailResponseDto>> getMyPayrollDetail(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long payrollId
+    ) throws AccessDeniedException {
+        ResponseDto<GetDriverPayrollDetailResponseDto> response = driverPayrollService.getMyPayrollDetail(userPrincipal, payrollId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

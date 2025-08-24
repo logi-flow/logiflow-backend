@@ -3,7 +3,6 @@ package com.logi_flow.backend.repository;
 import com.logi_flow.backend.common.enums.DriverAllowanceStatus;
 import com.logi_flow.backend.common.enums.DriverPayrollStatus;
 import com.logi_flow.backend.entity.DriverAllowance;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

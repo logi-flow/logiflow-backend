@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.logi_flow.backend.common.mapper.DriverPayrollMapper">
+    <resultMap id="DriverPayrollDetailMap" type="com.logi_flow.backend.dto.driverPayroll.response.GetDriverPayrollDetailResponseDto">
+        <id property="id" column="id"/>
+        <result property="driverId" column="driver_id"/>
+        <result property="driverName" column="driver_name"/>
+        <result property="title" column="title"/>
+        <result property="periodStartDate" column="period_start_date"/>
+        <result property="periodEndDate" column="period_end_date"/>
+        <result property="totalAllowance" column="total_allowance"/>
+        <result property="totalDeduction" column="total_deduction"/>
+        <result property="finalAmount" column="final_amount"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+
+        <collection property="allowanceItems"
+                    ofType="com.logi_flow.backend.dto.driverPayroll.response.AllowanceItemDto"
+                    column="{payrollId=id}"
+                    select="selectAllowanceItemsByDriverPayrollId"/>
+        <collection property="deductionItems"
+                    ofType="com.logi_flow.backend.dto.driverPayroll.response.DeductionItemDto"
+                    column="{payrollId=id}"
+                    select="selectDeductionItemsByDriverPayrollId"/>
+    </resultMap>
+
+    <select id="getDriverPayrollDetail" resultMap="DriverPayrollDetailMap">
+        SELECT
+            dp.id AS id,
+            dp.driver_id AS driver_id,
+            d.name AS driver_name,
+            dp.title AS title,
+            dp.period_start_date AS period_start_date,
+            dp.period_end_date AS period_end_date,
+            dp.total_allowance AS total_allowance,
+            dp.total_deduction AS total_deduction,
+            dp.final_amount AS final_amount,
+            dp.status AS status,
+            DATE_FORMAT(dp.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+            DATE_FORMAT(dp.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+        FROM driver_payrolls dp
+        JOIN drivers d ON d.id = dp.driver_id
+        WHERE dp.id = #{payrollId}
+            AND dp.status != 'DELETED'
+    </select>
+
+    <select id="selectAllowanceItemsByDriverPayrollId" resultType="com.logi_flow.backend.dto.driverPayroll.response.AllowanceItemDto">
+       SELECT
+           da.id AS id,
+           da.allowance_type_id AS allowance_type_id,
+           at.code AS allowance_type_code,
+           at.name AS allowance_type_name,
+           da.quantity AS quantity,
+           da.unit_price AS unit_price,
+           da.amount AS amount,
+           da.memo AS memo,
+           DATE_FORMAT(da.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+           DATE_FORMAT(da.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+       FROM driver_allowances da
+       JOIN allowance_types at ON at.id = da.allowance_type_id
+       WHERE da.payroll_id = #{payrollId}
+           AND da.status = 'ACTIVE'
+       ORDER BY da.created_at ASC
+    </select>
+
+    <select id="selectDeductionItemsByDriverPayrollId" resultType="com.logi_flow.backend.dto.driverPayroll.response.DeductionItemDto">
+        SELECT
+            dd.id AS id,
+            dd.deduction_type_id AS deduction_type_id,
+            dt.code AS deduction_type_code,
+            dt.name AS deduction_type_name,
+            dd.quantity AS quantity,
+            dd.unit_price AS unit_price,
+            dd.amount AS amount,
+            dd.memo AS memo,
+            DATE_FORMAT(dd.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+            DATE_FORMAT(dd.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+        FROM driver_deductions dd
+                 JOIN deduction_types dt ON dt.id = dd.deduction_type_id
+        WHERE dd.payroll_id = #{payrollId}
+          AND dd.status = 'ACTIVE'
+        ORDER BY dd.created_at ASC
+    </select>
+</mapper>
