@@ -41,10 +41,11 @@ public class AssignmentController {
 
     @PutMapping(ASSIGNMENT_ID_API)
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignment(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId,
             @Valid @RequestBody UpdateAssignmentRequestDto dto
     ) {
-        ResponseDto<UpdateAssignmentResponseDto> response = assignmentService.updateAssignment(assignmentId, dto);
+        ResponseDto<UpdateAssignmentResponseDto> response = assignmentService.updateAssignment(userPrincipal, assignmentId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

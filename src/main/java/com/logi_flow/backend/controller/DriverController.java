@@ -47,19 +47,21 @@ public class DriverController {
 
     @PutMapping(DRIVER_ID_API)
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriverByAdmin(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
             @Valid @RequestBody UpdateDriverByAdminRequestDto dto
     ) {
-        ResponseDto<UpdateDriverResponseDto> response = driverService.updateDriverByAdmin(driverId, dto);
+        ResponseDto<UpdateDriverResponseDto> response = driverService.updateDriverByAdmin(userPrincipal, driverId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @PutMapping(UPDATE_PAY_API)
     public ResponseEntity<ResponseDto<UpdateDriverPayResponseDto>> updateDriverPay(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
             @Valid @RequestBody UpdateDriverPayRequestDto dto
     ) {
-        ResponseDto<UpdateDriverPayResponseDto> response = driverService.updateDriverPay(driverId, dto);
+        ResponseDto<UpdateDriverPayResponseDto> response = driverService.updateDriverPay(userPrincipal, driverId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

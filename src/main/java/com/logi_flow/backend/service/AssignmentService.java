@@ -16,7 +16,7 @@ import org.springframework.data.domain.Page;
 public interface AssignmentService {
     ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto);
 
-    ResponseDto<UpdateAssignmentResponseDto> updateAssignment(Long assignmentId, @Valid UpdateAssignmentRequestDto dto);
+    ResponseDto<UpdateAssignmentResponseDto> updateAssignment(UserPrincipal userPrincipal, Long assignmentId, @Valid UpdateAssignmentRequestDto dto);
 
     ResponseDto<UpdateAssignmentResponseDto> updateAssignmentStatus(UserPrincipal userPrincipal, Long assignmentId, @Valid UpdateAssignmentStatusRequestDto dto);
 

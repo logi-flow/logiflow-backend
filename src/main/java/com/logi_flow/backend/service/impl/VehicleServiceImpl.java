@@ -27,9 +27,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
@@ -156,6 +158,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllVehicleResponseDto> getAllVehicle(int page, int size, String sort) {
         Page<GetAllVehicleResponseDto> data = null;
 
@@ -168,6 +171,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetVehicleDetailResponseDto> getVehicleDetail(Long vehicleId) {
         GetVehicleDetailResponseDto data = null;
 
