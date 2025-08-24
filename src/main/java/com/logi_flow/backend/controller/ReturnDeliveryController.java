@@ -5,6 +5,8 @@ import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.delivery.response.GetAllWaitingDeliveryResponseDto;
+import com.logi_flow.backend.dto.delivery.response.GetAllWaitingReturnDeliveryResponseDto;
 import com.logi_flow.backend.dto.returnDelivery.request.CreateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryStatusRequestDto;
@@ -77,6 +79,17 @@ public class ReturnDeliveryController {
     @DeleteMapping("/{returnDeliveryId}")
     public ResponseEntity<ResponseDto<Void>> deleteReturnDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long returnDeliveryId) {
         ResponseDto<Void> response = returnDeliveryService.deleteReturnDelivery(userPrincipal, returnDeliveryId);
-        return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<ResponseDto<PageDto<GetAllWaitingReturnDeliveryResponseDto>>> getAllWaitingDelivery(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "desc") String sort
+    ) {
+        Page<GetAllWaitingReturnDeliveryResponseDto> result = returnDeliveryService.getAllWaitingReturnDelivery(page, size, sort);
+        PageDto<GetAllWaitingReturnDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
