@@ -34,4 +34,5 @@ public interface ResponseMessage {
     String ALREADY_DELETED = "이미 삭제된 항목입니다.";
     String LOCK_PAYROLL_CONFIRMED = "확정된 급여대장은 수정 및 삭제를 할 수 없습니다.";
     String NOT_DELETE_USED_TYPE = "확정된 급여대장에 사용된 항목은 삭제할 수 없습니다.";
+    String NOT_OWN_PAYROLL = "본인의 급여대장이 아닙니다.";
 }
