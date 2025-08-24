@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class ReturnDeliveryStatusLog extends BaseTime{
+public class ReturnDeliveryStatusLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -79,7 +79,7 @@ public class ReturnDeliveryController {
     @DeleteMapping("/{returnDeliveryId}")
     public ResponseEntity<ResponseDto<Void>> deleteReturnDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long returnDeliveryId) {
         ResponseDto<Void> response = returnDeliveryService.deleteReturnDelivery(userPrincipal, returnDeliveryId);
-        return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping("/waiting")

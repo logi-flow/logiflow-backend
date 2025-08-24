@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class GetAllWaitingReturnDeliveryResponseDto {
     private Long id;
     private Long customerId;
     private Long customerName;
-    private LocalDateTime requestDate;
+    private LocalDate requestDate;
     private String item;
     private BigDecimal weight;
     private String reason;

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class UpdateReturnDeliveryResponseDto {
     private Long id;
     private Long customerId;
-    private Long customerName;
+    private String customerName;
     private LocalDate requestDate;
     private String item;
     private BigDecimal weight;

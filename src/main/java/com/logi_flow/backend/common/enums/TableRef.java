@@ -13,6 +13,7 @@ public enum TableRef {
     DRIVER_LICENSE("driver_licenses"),
     VEHICLE("vehicles"),
     DELIVERY("deliveries"),
+    RETURN_DELIVERY("return_deliveries"),
     ASSIGNMENT("assignments"),
     ALLOCATION("allocations"),
     SCHEDULE("schedules"),
