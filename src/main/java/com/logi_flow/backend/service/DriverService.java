@@ -22,7 +22,7 @@ public interface DriverService {
 
     ResponseDto<UpdateDriverResponseDto> updateDriverStatus(UserPrincipal userPrincipal, Long driverId, @Valid UpdateDriverStatusRequestDto dto);
 
-    ResponseDto<UpdateDriverPayResponseDto> updateDriverPay(Long driverId, @Valid UpdateDriverPayRequestDto dto);
+    ResponseDto<UpdateDriverPayResponseDto> updateDriverPay(UserPrincipal userPrincipal, Long driverId, @Valid UpdateDriverPayRequestDto dto);
 
-    ResponseDto<UpdateDriverResponseDto> updateDriverByAdmin(Long driverId, @Valid UpdateDriverByAdminRequestDto dto);
+    ResponseDto<UpdateDriverResponseDto> updateDriverByAdmin(UserPrincipal userPrincipal, Long driverId, @Valid UpdateDriverByAdminRequestDto dto);
 }

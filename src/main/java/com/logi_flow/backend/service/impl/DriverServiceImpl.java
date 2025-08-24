@@ -11,10 +11,7 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.request.*;
 import com.logi_flow.backend.dto.driver.response.*;
 import com.logi_flow.backend.entity.*;
-import com.logi_flow.backend.repository.DriverRepository;
-import com.logi_flow.backend.repository.DriverStatusLogRepository;
-import com.logi_flow.backend.repository.RoleRepository;
-import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.DriverService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +20,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
@@ -33,6 +32,7 @@ public class DriverServiceImpl implements DriverService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DriverStatusLogRepository driverStatusLogRepository;
+    private final DriverUpdateLogRepository driverUpdateLogRepository;
 
     @Override
     public ResponseDto<CreateDriverResponseDto> createDriver(CreateDriverRequestDto dto) {
@@ -100,23 +100,36 @@ public class DriverServiceImpl implements DriverService {
     public ResponseDto<UpdateDriverResponseDto> updateDriver(UserPrincipal userPrincipal, UpdateDriverRequestDto dto) {
         UpdateDriverResponseDto data = null;
 
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (dto.getName() != null && !driver.getName().equals(dto.getName())) {
+            String prevData = driver.getName();
             driver.setName(dto.getName());
+            createUpdateLog(driver, user, "name", prevData, driver.getName());
         }
         if (dto.getPhoneNumber() != null && !driver.getPhoneNumber().equals(dto.getPhoneNumber())) {
+            String prevData = driver.getPhoneNumber();
             driver.setPhoneNumber(dto.getPhoneNumber());
+            createUpdateLog(driver, user, "phoneNumber", prevData, driver.getPhoneNumber());
         }
         if (dto.getZipcode() != null && !driver.getZipcode().equals(dto.getZipcode())) {
+            String prevData = driver.getZipcode();
             driver.setZipcode(dto.getZipcode());
+            createUpdateLog(driver, user, "zipcode", prevData, driver.getZipcode());
         }
         if (dto.getAddress() != null && !driver.getAddress().equals(dto.getAddress())) {
+            String prevData = driver.getAddress();
             driver.setAddress(dto.getAddress());
+            createUpdateLog(driver, user, "address", prevData, driver.getAddress());
         }
         if (dto.getAddressDetail() != null && !driver.getAddressDetail().equals(dto.getAddressDetail())) {
+            String prevData = driver.getAddressDetail();
             driver.setAddressDetail(dto.getAddressDetail());
+            createUpdateLog(driver, user, "addressDetail", prevData, driver.getAddressDetail());
         }
 
         driverRepository.save(driver);
@@ -173,14 +186,19 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public ResponseDto<UpdateDriverPayResponseDto> updateDriverPay(Long driverId, UpdateDriverPayRequestDto dto) {
+    public ResponseDto<UpdateDriverPayResponseDto> updateDriverPay(UserPrincipal userPrincipal, Long driverId, UpdateDriverPayRequestDto dto) {
         UpdateDriverPayResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (dto.getPay() != null && !driver.getPay().equals(dto.getPay())) {
+            String prevData = String.valueOf(driver.getPay());
             driver.setPay(dto.getPay());
+            createUpdateLog(driver, user, "pay", prevData, String.valueOf(driver.getPay()));
         }
 
         driverRepository.save(driver);
@@ -193,33 +211,48 @@ public class DriverServiceImpl implements DriverService {
                 .updatedAt(driver.getUpdatedAt())
                 .build();
 
-        return null;
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
-    public ResponseDto<UpdateDriverResponseDto> updateDriverByAdmin(Long driverId, UpdateDriverByAdminRequestDto dto) {
+    public ResponseDto<UpdateDriverResponseDto> updateDriverByAdmin(UserPrincipal userPrincipal, Long driverId, UpdateDriverByAdminRequestDto dto) {
         UpdateDriverResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (dto.getName() != null && !driver.getName().equals(dto.getName())) {
+            String prevData = driver.getName();
             driver.setName(dto.getName());
+            createUpdateLog(driver, user, "name", prevData, driver.getName());
         }
         if (dto.getPhoneNumber() != null && !driver.getPhoneNumber().equals(dto.getPhoneNumber())) {
+            String prevData = driver.getPhoneNumber();
             driver.setPhoneNumber(dto.getPhoneNumber());
+            createUpdateLog(driver, user, "phoneNumber", prevData, driver.getPhoneNumber());
         }
         if (dto.getZipcode() != null && !driver.getZipcode().equals(dto.getZipcode())) {
+            String prevData = driver.getZipcode();
             driver.setZipcode(dto.getZipcode());
+            createUpdateLog(driver, user, "zipcode", prevData, driver.getZipcode());
         }
         if (dto.getAddress() != null && !driver.getAddress().equals(dto.getAddress())) {
+            String prevData = driver.getAddress();
             driver.setAddress(dto.getAddress());
+            createUpdateLog(driver, user, "address", prevData, driver.getAddress());
         }
         if (dto.getAddressDetail() != null && !driver.getAddressDetail().equals(dto.getAddressDetail())) {
+            String prevData = driver.getAddressDetail();
             driver.setAddressDetail(dto.getAddressDetail());
+            createUpdateLog(driver, user, "addressDetail", prevData, driver.getAddressDetail());
         }
         if (dto.getDistrict() != null && !driver.getDistrict().equals(dto.getDistrict())) {
+            String prevData = String.valueOf(driver.getDistrict());
             driver.setDistrict(dto.getDistrict());
+            createUpdateLog(driver, user, "addressDetail", prevData, String.valueOf(driver.getDistrict()));
         }
 
         driverRepository.save(driver);
@@ -235,6 +268,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllDriverResponseDto> getAllDriver(int page, int size, String sort) {
         Page<GetAllDriverResponseDto> data = null;
 
@@ -247,6 +281,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetDriverDetailResponseDto> getDriverDetail(Long driverId) {
         GetDriverDetailResponseDto data = null;
 
@@ -277,6 +312,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetDriverDetailResponseDto> getMyInfo(UserPrincipal userPrincipal) {
         GetDriverDetailResponseDto data = null;
 
@@ -323,5 +359,18 @@ public class DriverServiceImpl implements DriverService {
                 .createdAt(driver.getCreatedAt())
                 .updatedAt(driver.getUpdatedAt())
                 .build();
+    }
+
+    private void createUpdateLog(Driver driver, User user, String type, String prevData, String newData) {
+        DriverUpdateLog driverUpdateLog = DriverUpdateLog.builder()
+                .driver(driver)
+                .user(user)
+                .changedByUsername(user.getUsername())
+                .type(type)
+                .prevData(prevData)
+                .newData(newData)
+                .build();
+
+        driverUpdateLogRepository.save(driverUpdateLog);
     }
 }

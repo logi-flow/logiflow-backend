@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class AssignmentServiceImpl implements AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
@@ -38,9 +39,9 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final UserRepository userRepository;
     private final AssignmentStatusLogRepository assignmentStatusLogRepository;
     private final VehicleStatusLogRepository vehicleStatusLogRepository;
+    private final AssignmentUpdateLogRepository assignmentUpdateLogRepository;
 
     @Override
-    @Transactional
     public ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto) {
         CreateAssignmentResponseDto data = null;
 
@@ -99,8 +100,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public ResponseDto<UpdateAssignmentResponseDto> updateAssignment(Long assignmentId, @Valid UpdateAssignmentRequestDto dto) {
+    public ResponseDto<UpdateAssignmentResponseDto> updateAssignment(UserPrincipal userPrincipal, Long assignmentId, @Valid UpdateAssignmentRequestDto dto) {
         UpdateAssignmentResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
@@ -111,7 +115,9 @@ public class AssignmentServiceImpl implements AssignmentService {
                 assignmentRepository.findByDriverAndIsPrimaryTrueAndStatus(driver, AssignmentStatus.ACTIVE)
                         .ifPresent(currentPrimary -> currentPrimary.setPrimary(false));
             }
+            String prevData = String.valueOf(assignment.isPrimary());
             assignment.setPrimary(dto.getIsPrimary());
+            createUpdateLog(assignment, user, "is_primary", prevData, String.valueOf(assignment.isPrimary()));
         }
 
         assignmentRepository.save(assignment);
@@ -174,6 +180,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllAssignmentResponseDto> getAllAssignment(int page, int size, String sort) {
         Page<GetAllAssignmentResponseDto> data = null;
 
@@ -186,6 +193,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetAssignmentDetailResponseDto> getAssignmentDetail(Long assignmentId) {
         GetAssignmentDetailResponseDto data = null;
 
@@ -211,7 +219,6 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    @Transactional
     public void pauseAssignment(Vehicle vehicle) {
         assignmentRepository.findByVehicleAndStatus(vehicle, AssignmentStatus.ACTIVE)
                 .ifPresent(assignment -> {
@@ -264,7 +271,6 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    @Transactional
     public void removeAssignmentByVehicle(Vehicle vehicle) {
         assignmentRepository.findActiveOrPausedByVehicle(vehicle)
                 .ifPresent(assignment -> {
@@ -300,5 +306,18 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .createdAt(assignment.getCreatedAt())
                 .updatedAt(assignment.getUpdatedAt())
                 .build();
+    }
+
+    private void createUpdateLog(Assignment assignment, User user, String type, String prevData, String newData) {
+        AssignmentUpdateLog assignmentUpdateLog = AssignmentUpdateLog.builder()
+                .assignment(assignment)
+                .user(user)
+                .changedByUsername(user.getUsername())
+                .type(type)
+                .prevData(prevData)
+                .newData(newData)
+                .build();
+
+        assignmentUpdateLogRepository.save(assignmentUpdateLog);
     }
 }

@@ -1,6 +1,7 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.request.CreateDriverLicenseRequestDto;
 import com.logi_flow.backend.dto.driver.request.UpdateDriverLicenseRequestDto;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,11 +37,12 @@ public class DriverLicenseController {
 
     @PutMapping(UPDATE_LICENSE_API)
     public ResponseEntity<ResponseDto<UpdateDriverLicenseResponseDto>> updateDriverLicense(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
             @PathVariable Long licenseId,
             @Valid @RequestBody UpdateDriverLicenseRequestDto dto
     ) {
-        ResponseDto<UpdateDriverLicenseResponseDto> response = driverLicenseService.updateDriverLicense(driverId, licenseId, dto);
+        ResponseDto<UpdateDriverLicenseResponseDto> response = driverLicenseService.updateDriverLicense(userPrincipal, driverId, licenseId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
