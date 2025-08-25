@@ -6,6 +6,7 @@ import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -129,8 +130,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .overParcelFee(newReturnDelivery.getOverParcelFee())
             .isOverWeight(newReturnDelivery.isOverWeight())
             .isOverParcel(newReturnDelivery.isOverParcel())
-            .createdAt(newReturnDelivery.getCreatedAt())
-            .updatedAt(newReturnDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(newReturnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(newReturnDelivery.getUpdatedAt()))
             .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
@@ -176,8 +177,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .overParcelFee(returnDelivery.getOverParcelFee())
             .isOverWeight(returnDelivery.isOverWeight())
             .isOverParcel(returnDelivery.isOverParcel())
-            .createdAt(returnDelivery.getCreatedAt())
-            .updatedAt(returnDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
@@ -251,8 +252,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .overParcelFee(updateDelivery.getOverParcelFee())
             .isOverWeight(updateDelivery.isOverWeight())
             .isOverParcel(updateDelivery.isOverParcel())
-            .createdAt(updateDelivery.getCreatedAt())
-            .updatedAt(updateDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(updateDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(updateDelivery.getUpdatedAt()))
             .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
@@ -420,8 +421,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .overParcelFee(updatedReturnDelivery.getOverParcelFee())
             .isOverWeight(updatedReturnDelivery.isOverWeight())
             .isOverParcel(updatedReturnDelivery.isOverParcel())
-            .createdAt(updatedReturnDelivery.getCreatedAt())
-            .updatedAt(updatedReturnDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(updatedReturnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(updatedReturnDelivery.getUpdatedAt()))
             .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
@@ -474,8 +475,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
             .recipientName(returnDelivery.getRecipientName())
-            .createdAt(returnDelivery.getCreatedAt())
-            .updatedAt(returnDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
     }
 
@@ -524,8 +525,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
             .recipientName(returnDelivery.getRecipientName())
-            .createdAt(returnDelivery.getCreatedAt())
-            .updatedAt(returnDelivery.getUpdatedAt())
+            .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
     }
 }
