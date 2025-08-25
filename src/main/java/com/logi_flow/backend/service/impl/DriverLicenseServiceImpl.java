@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.request.CreateDriverLicenseRequestDto;
@@ -53,8 +54,8 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
                 .name(newDriverLicense.getDriver().getName())
                 .driverNumber(newDriverLicense.getDriverNumber())
                 .expiredDate(newDriverLicense.getExpiredDate())
-                .createdAt(newDriverLicense.getCreatedAt())
-                .updatedAt(newDriverLicense.getUpdatedAt())
+                .createdAt(DateUtils.format(newDriverLicense.getCreatedAt()))
+                .updatedAt(DateUtils.format(newDriverLicense.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -96,8 +97,8 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
                 .name(driverLicense.getDriver().getName())
                 .driverNumber(driverLicense.getDriverNumber())
                 .expiredDate(driverLicense.getExpiredDate())
-                .createdAt(driverLicense.getCreatedAt())
-                .updatedAt(driverLicense.getUpdatedAt())
+                .createdAt(DateUtils.format(driverLicense.getCreatedAt()))
+                .updatedAt(DateUtils.format(driverLicense.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
