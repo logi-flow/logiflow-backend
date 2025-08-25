@@ -14,11 +14,11 @@ public interface ReturnDeliveryRepository extends JpaRepository<ReturnDelivery, 
 
     Page<ReturnDelivery> findByDeliveryCustomer(Customer customer, Pageable pageable);
 
-//    @Query("""
-//    SELECT d
-//    FROM ReturnDelivery d
-//    LEFT JOIN Allocation a ON a.delivery = d
-//    WHERE a.id IS NULL
-//    """)
-//    Page<ReturnDelivery> findAllWaitingReturnDelivery(Pageable pageable);
+    @Query("""
+    SELECT r
+    FROM ReturnDelivery r
+    LEFT JOIN Allocation a ON a.returnDelivery = r
+    WHERE a.id IS NULL AND r.status = "ASSIGNED"
+    """)
+    Page<ReturnDelivery> findAllWaitingReturnDelivery(Pageable pageable);
 }
