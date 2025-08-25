@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -21,6 +20,6 @@ public class GetVehicleDetailResponseDto {
     private VehicleStatus status;
     private String modelName;
     private Integer modelYear;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

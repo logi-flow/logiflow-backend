@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -15,6 +14,6 @@ public class UpdateDriverLicenseResponseDto {
     private String name;
     private String driverNumber;
     private LocalDate expiredDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

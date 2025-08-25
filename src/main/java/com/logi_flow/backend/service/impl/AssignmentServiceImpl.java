@@ -4,6 +4,7 @@ import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AssignmentStatus;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -92,8 +93,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .vehicleIds(newAssignment.getVehicle().getId())
                 .isPrimary(newAssignment.isPrimary())
                 .status(newAssignment.getStatus())
-                .createdAt(newAssignment.getCreatedAt())
-                .updatedAt(newAssignment.getUpdatedAt())
+                .createdAt(DateUtils.format(newAssignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(newAssignment.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -128,8 +129,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .vehicleId(assignment.getVehicle().getId())
                 .isPrimary(assignment.isPrimary())
                 .status(assignment.getStatus())
-                .createdAt(assignment.getCreatedAt())
-                .updatedAt(assignment.getUpdatedAt())
+                .createdAt(DateUtils.format(assignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -172,8 +173,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .vehicleId(assignment.getVehicle().getId())
                 .isPrimary(assignment.isPrimary())
                 .status(assignment.getStatus())
-                .createdAt(assignment.getCreatedAt())
-                .updatedAt(assignment.getUpdatedAt())
+                .createdAt(DateUtils.format(assignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -206,8 +207,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .vehicleIds(assignment.getVehicle().getId())
                 .isPrimary(assignment.isPrimary())
                 .status(assignment.getStatus())
-                .createdAt(assignment.getCreatedAt())
-                .updatedAt(assignment.getUpdatedAt())
+                .createdAt(DateUtils.format(assignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -303,8 +304,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .vehicleId(assignment.getVehicle().getId())
                 .isPrimary(assignment.isPrimary())
                 .status(assignment.getStatus())
-                .createdAt(assignment.getCreatedAt())
-                .updatedAt(assignment.getUpdatedAt())
+                .createdAt(DateUtils.format(assignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
     }
 

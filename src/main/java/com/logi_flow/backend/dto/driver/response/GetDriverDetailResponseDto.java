@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -27,6 +26,6 @@ public class GetDriverDetailResponseDto {
     private Integer pay;
     private LocalDate companyJoin;
     private DriverLicenseType driverType;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

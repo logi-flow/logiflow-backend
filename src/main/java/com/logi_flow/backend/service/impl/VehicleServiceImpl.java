@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -59,8 +60,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .vehicleId(newVehicle.getId())
                 .vehicleNumber(newVehicle.getVehicleNumber())
                 .status(newVehicle.getStatus())
-                .createdAt(newVehicle.getCreatedAt())
-                .updatedAt(newVehicle.getUpdatedAt())
+                .createdAt(DateUtils.format(newVehicle.getCreatedAt()))
+                .updatedAt(DateUtils.format(newVehicle.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -99,8 +100,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .vehicleId(updateVehicle.getId())
                 .vehicleNumber(updateVehicle.getVehicleNumber())
                 .status(updateVehicle.getStatus())
-                .createdAt(updateVehicle.getCreatedAt())
-                .updatedAt(updateVehicle.getUpdatedAt())
+                .createdAt(DateUtils.format(updateVehicle.getCreatedAt()))
+                .updatedAt(DateUtils.format(updateVehicle.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -150,8 +151,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .vehicleId(updateVehicle.getId())
                 .vehicleNumber(updateVehicle.getVehicleNumber())
                 .status(updateVehicle.getStatus())
-                .createdAt(updateVehicle.getCreatedAt())
-                .updatedAt(updateVehicle.getUpdatedAt())
+                .createdAt(DateUtils.format(updateVehicle.getCreatedAt()))
+                .updatedAt(DateUtils.format(updateVehicle.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -187,8 +188,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .status(vehicle.getStatus())
                 .modelName(vehicle.getModelName())
                 .modelYear(vehicle.getModelYear())
-                .createdAt(vehicle.getCreatedAt())
-                .updatedAt(vehicle.getUpdatedAt())
+                .createdAt(DateUtils.format(vehicle.getCreatedAt()))
+                .updatedAt(DateUtils.format(vehicle.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -205,8 +206,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .vehicleNumber(vehicle.getVehicleNumber())
                 .status(vehicle.getStatus())
                 .modelName(vehicle.getModelName())
-                .createdAt(vehicle.getCreatedAt())
-                .updatedAt(vehicle.getUpdatedAt())
+                .createdAt(DateUtils.format(vehicle.getCreatedAt()))
+                .updatedAt(DateUtils.format(vehicle.getUpdatedAt()))
                 .build();
     }
 }
