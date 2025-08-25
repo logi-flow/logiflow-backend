@@ -127,8 +127,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(newDelivery.getOverParcelFee())
                 .isOverWeight(newDelivery.isOverWeight())
                 .isOverParcel(newDelivery.isOverParcel())
-                .createdAt(newDelivery.getCreatedAt())
-                .updatedAt(newDelivery.getUpdatedAt())
+                .createdAt(DateUtils.format(newDelivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(newDelivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -678,8 +678,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(delivery.getOverParcelFee())
                 .isOverWeight(delivery.isOverWeight())
                 .isOverParcel(delivery.isOverParcel())
-                .createdAt(delivery.getCreatedAt())
-                .updatedAt(delivery.getUpdatedAt())
+                .createdAt(DateUtils.format(delivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build())
             .collect(Collectors.toList());
 
