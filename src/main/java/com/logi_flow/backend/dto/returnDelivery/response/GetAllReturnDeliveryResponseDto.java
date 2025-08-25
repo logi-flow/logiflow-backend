@@ -24,6 +24,6 @@ public class GetAllReturnDeliveryResponseDto {
     private String pickupName;
     private String recipientName;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
