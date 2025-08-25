@@ -28,10 +28,9 @@ public class EmployeeController {
     private static final String EMPLOYEE_MY_INFO_API = "/me";
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
 
-    @PostMapping(EMPLOYEE_ID_API)
+    @PostMapping
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-
             @Valid @RequestBody CreateEmployeeRequestDto dto
     ){
         ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, dto);
@@ -41,10 +40,9 @@ public class EmployeeController {
     @PutMapping(EMPLOYEE_MY_INFO_API)
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long employeeId,
             @Valid @RequestBody UpdateEmployeeRequestDto dto
     ){
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(userPrincipal, employeeId, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

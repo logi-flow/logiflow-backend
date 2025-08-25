@@ -12,7 +12,7 @@ import org.springframework.data.domain.Page;
 public interface EmployeeService {
     ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, @Valid CreateEmployeeRequestDto dto);
 
-    ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, Long employeeId, @Valid UpdateEmployeeRequestDto dto);
+    ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, @Valid UpdateEmployeeRequestDto dto);
 
     ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(UserPrincipal userPrincipal);
 

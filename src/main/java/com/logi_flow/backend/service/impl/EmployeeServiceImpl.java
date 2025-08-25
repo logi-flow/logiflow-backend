@@ -106,14 +106,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, UpdateEmployeeRequestDto dto) {
         UpdateEmployeeResponseDto data = null;
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Employee employee = employeeRepository.findById(employeeId)
+        Employee employee = employeeRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         List<EmployeeUpdateLog> logs = new ArrayList<>();
@@ -353,12 +353,17 @@ public class EmployeeServiceImpl implements EmployeeService {
                 Map.entry('ㅆ', "ss"), Map.entry('ㅉ', "jj")
                 );
 
+        char[] choseongList = {
+                'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ',
+                'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+        };
+
         StringBuilder sb = new StringBuilder();
         for (char c : name.toCharArray()) {
             if (c >= '가' && c <= '힣') {
                 int uniVal = c - 0xAC00;
                 int choseongIndex = uniVal / (21 * 28);
-                char choseong = (char) (0x3131 + choseongIndex);
+                char choseong = choseongList[choseongIndex];
                 sb.append(choseongMap.getOrDefault(choseong, ""));
             }
         }
