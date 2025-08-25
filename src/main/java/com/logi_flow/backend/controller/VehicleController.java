@@ -41,10 +41,11 @@ public class VehicleController {
 
     @PutMapping(VEHICLE_ID_API)
     public ResponseEntity<ResponseDto<UpdateVehicleResponseDto>> updateVehicle(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long vehicleId,
             @Valid @RequestBody UpdateVehicleRequestDto dto
     ) {
-        ResponseDto<UpdateVehicleResponseDto> response = vehicleService.updateVehicle(vehicleId, dto);
+        ResponseDto<UpdateVehicleResponseDto> response = vehicleService.updateVehicle(userPrincipal, vehicleId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -78,10 +79,11 @@ public class VehicleController {
     }
 
     @DeleteMapping(VEHICLE_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteVehicle(
+    public ResponseEntity<ResponseDto<Void>> deleteVehicle(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long vehicleId
     ) {
-        ResponseDto<?> response = vehicleService.delete(vehicleId);
+        ResponseDto<Void> response = vehicleService.deleteVehicle(userPrincipal, vehicleId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

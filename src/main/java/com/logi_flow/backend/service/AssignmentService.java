@@ -24,7 +24,7 @@ public interface AssignmentService {
 
     ResponseDto<GetAssignmentDetailResponseDto> getAssignmentDetail(Long assignmentId);
 
-    ResponseDto<?> deleteAssignment(Long assignmentId);
+    ResponseDto<Void> deleteAssignment(UserPrincipal userPrincipal, Long assignmentId);
 
     void pauseAssignment(Vehicle vehicle);
 
