@@ -40,6 +40,6 @@ public class UpdateDeliveryResponseDto {
     private boolean isOverWeight;
     private boolean isOverParcel;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

@@ -14,10 +14,11 @@ import java.time.LocalDateTime;
 public class CreateAllocationResponseDto {
     private Long id;
     private Long deliveryId;
+    private Long returnDeliveryId;
     private Long assignmentId;
     private String districtName;
     private AllocationStatus status;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

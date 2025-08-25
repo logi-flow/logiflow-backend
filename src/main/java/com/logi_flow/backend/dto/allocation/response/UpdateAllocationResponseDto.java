@@ -5,19 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @Getter
 @Builder
 public class UpdateAllocationResponseDto {
     private Long id;
     private Long deliveryId;
+    private Long returnDeliveryId;
     private Long assignmentId;
     private String districtName;
     private AllocationStatus status;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

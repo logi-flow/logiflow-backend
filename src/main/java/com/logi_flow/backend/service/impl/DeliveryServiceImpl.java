@@ -127,8 +127,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(newDelivery.getOverParcelFee())
                 .isOverWeight(newDelivery.isOverWeight())
                 .isOverParcel(newDelivery.isOverParcel())
-                .createdAt(newDelivery.getCreatedAt())
-                .updatedAt(newDelivery.getUpdatedAt())
+                .createdAt(DateUtils.format(newDelivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(newDelivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -176,8 +176,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(delivery.getOverParcelFee())
                 .isOverWeight(delivery.isOverWeight())
                 .isOverParcel(delivery.isOverParcel())
-                .createdAt(delivery.getCreatedAt())
-                .updatedAt(delivery.getUpdatedAt())
+                .createdAt(DateUtils.format(delivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -259,8 +259,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(updatedDelivery.getOverParcelFee())
                 .isOverWeight(updatedDelivery.isOverWeight())
                 .isOverParcel(updatedDelivery.isOverParcel())
-                .createdAt(updatedDelivery.getCreatedAt())
-                .updatedAt(updatedDelivery.getUpdatedAt())
+                .createdAt(DateUtils.format(updatedDelivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -389,8 +389,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(updatedDelivery.getOverParcelFee())
                 .isOverWeight(updatedDelivery.isOverWeight())
                 .isOverParcel(updatedDelivery.isOverParcel())
-                .createdAt(updatedDelivery.getCreatedAt())
-                .updatedAt(updatedDelivery.getUpdatedAt())
+                .createdAt(DateUtils.format(updatedDelivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -415,7 +415,6 @@ public class DeliveryServiceImpl implements DeliveryService {
             delivery.setStatus(dto.getStatus());
         }
 
-        // 승인되면 요금 들어감
         if(delivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
 
             int prevOverWeightFee = delivery.getOverWeightFee();
@@ -426,46 +425,33 @@ public class DeliveryServiceImpl implements DeliveryService {
 
             int prevFinalFee = delivery.getFinalFee();
 
-            // 무게 요금 계산
-            // limitKg < delivery.weight 이면 (weight - limitKg) * overWeightFeePerKg 해서 delivery.OverWeightFee에 추가
-            int intWeight = delivery.getWeight().intValue(); // 소숫점 버림
+            int intWeight = delivery.getWeight().intValue();
             int limitKg = contract.getWeightLimitKg();
             if(limitKg < intWeight) {
                 int overWeight = intWeight - limitKg;
                 int overWeightFee = overWeight * contract.getOverWeightFeePerKg();
                 delivery.setOverWeightFee(overWeightFee);
 
-                // overWeightFee 0 아니면 isOverWeight - true로 / 0이면 false
-                // 무게 초과 true 설정
                 if (overWeight > 0) {
                     delivery.setOverWeight(true);
                 }
             }
-            // 건수 요금 계산
-            // contract.parcelLimit 건수 제한 가져옴
+
             int parcelLimit = contract.getParcelLimit();
+            int parcelCount = delivery.getCustomer().getParcelCount();
 
-            // (contract 계약기간동안 누적)에 delivery 에서 해당 contractId로 배송신청 건수 count 해서 건수 계산
-            LocalDateTime startDateTime = contract.getStartDate().atStartOfDay();
-            LocalDateTime endDateTime = contract.getEndDate().atTime(LocalTime.MAX);
-            long longParcelCount = deliveryRepository.countByContractAndCreatedAtBetween(contract, startDateTime, endDateTime);
-            int parcelCount = (int) longParcelCount;
-
-            // limit < count 이면 (count - limit) * overParcelFee
-            // overParcelFee 0 아니면 isOverParcel - true / 0 이면 false
-            if(parcelCount > parcelLimit) {
+            if(parcelCount >= parcelLimit) {
                 delivery.setOverParcelFee(contract.getOverParcelFee());
                 delivery.setOverParcel(true);
+                delivery.getCustomer().setParcelCount(parcelCount + 1);
             } else {
                 delivery.setOverParcelFee(0);
                 delivery.setOverParcel(false);
+                delivery.getCustomer().setParcelCount(parcelCount + 1);
             }
 
-            // 무게 추가 요금 + 건수 추가 요금 + contract.baseFee => delivery.finalFee
             int finalFee = contract.getBaseFee() + delivery.getOverWeightFee() + delivery.getOverParcelFee();
             delivery.setFinalFee(finalFee);
-
-            // 위에 두개 전부 deliveryUpdateLog에 저장되야 함.
 
             List<DeliveryUpdateLog> logs = new ArrayList<>();
 
@@ -487,7 +473,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                                 .changedByUsername(username)
                                 .type("is_over_weight")
                                 .prevData(String.valueOf(prevIsOverWeight))
-                                .newData(String.valueOf(delivery.getOverWeightFee()))
+                                .newData(String.valueOf(delivery.isOverWeight()))
                         .build());
             }
 
@@ -509,7 +495,18 @@ public class DeliveryServiceImpl implements DeliveryService {
                                 .changedByUsername(username)
                                 .type("is_over_parcel")
                                 .prevData(String.valueOf(prevIsOverParcel))
-                                .newData(String.valueOf(delivery.getOverParcelFee()))
+                                .newData(String.valueOf(delivery.isOverParcel()))
+                        .build());
+            }
+
+            if(prevFinalFee != delivery.getFinalFee()) {
+                logs.add(DeliveryUpdateLog.builder()
+                                .delivery(delivery)
+                                .user(user)
+                                .changedByUsername(username)
+                                .type("final_fee")
+                                .prevData(String.valueOf(prevFinalFee))
+                                .newData(String.valueOf(delivery.getFinalFee()))
                         .build());
             }
 
@@ -518,8 +515,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             }
         }
 
-
-
+        customerRepository.save(delivery.getCustomer());
         Delivery updatedDelivery = deliveryRepository.save(delivery);
 
         DeliveryStatusLog deliveryStatusLog = DeliveryStatusLog.builder()
@@ -558,8 +554,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .overParcelFee(updatedDelivery.getOverParcelFee())
                 .isOverWeight(updatedDelivery.isOverWeight())
                 .isOverParcel(updatedDelivery.isOverParcel())
-                .createdAt(updatedDelivery.getCreatedAt())
-                .updatedAt(updatedDelivery.getUpdatedAt())
+                .createdAt(DateUtils.format(updatedDelivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -612,8 +608,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .status(delivery.getStatus())
                 .pickupName(delivery.getPickupName())
                 .recipientName(delivery.getRecipientName())
-                .createdAt(delivery.getCreatedAt())
-                .updatedAt(delivery.getUpdatedAt())
+                .createdAt(DateUtils.format(delivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build();
     }
 
@@ -629,8 +625,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .status(delivery.getStatus())
                 .pickupName(delivery.getPickupName())
                 .recipientName(delivery.getRecipientName())
-                .createdAt(delivery.getCreatedAt())
-                .updatedAt(delivery.getUpdatedAt())
+                .createdAt(DateUtils.format(delivery.getCreatedAt()))
+                .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build();
     }
   

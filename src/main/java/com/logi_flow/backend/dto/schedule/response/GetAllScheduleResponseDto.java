@@ -14,9 +14,9 @@ public class GetAllScheduleResponseDto {
     private Long id;
     private Long allocationId;
     private LocalDate allocationDate;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalTime;
+    private String departureTime;
+    private String arrivalTime;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }
