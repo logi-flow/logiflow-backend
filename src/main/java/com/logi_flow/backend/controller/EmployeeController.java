@@ -31,19 +31,20 @@ public class EmployeeController {
     @PostMapping(EMPLOYEE_ID_API)
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long employeeId,
+
             @Valid @RequestBody CreateEmployeeRequestDto dto
     ){
-        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, employeeId, dto);
+        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @PutMapping(EMPLOYEE_MY_INFO_API)
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long employeeId,
             @Valid @RequestBody UpdateEmployeeRequestDto dto
     ){
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(userPrincipal, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployee(userPrincipal, employeeId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

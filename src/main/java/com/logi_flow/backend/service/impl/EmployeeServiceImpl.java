@@ -40,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeUpdateLogRepository employeeUpdateLogRepository;
 
     @Override
-    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, Long employeeId, CreateEmployeeRequestDto dto) {
+    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto) {
         CreateEmployeeResponseDto data = null;
 
         if (employeeRepository.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
@@ -106,14 +106,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, UpdateEmployeeRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeRequestDto dto) {
         UpdateEmployeeResponseDto data = null;
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Employee employee = employeeRepository.findByUser(user)
+        Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         List<EmployeeUpdateLog> logs = new ArrayList<>();
