@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 public interface EmployeeService {
-    ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, Long employeeId, @Valid CreateEmployeeRequestDto dto);
+    ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, @Valid CreateEmployeeRequestDto dto);
 
     ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, @Valid UpdateEmployeeRequestDto dto);
 

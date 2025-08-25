@@ -40,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeUpdateLogRepository employeeUpdateLogRepository;
 
     @Override
-    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, Long employeeId, CreateEmployeeRequestDto dto) {
+    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto) {
         CreateEmployeeResponseDto data = null;
 
         if (employeeRepository.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
@@ -353,12 +353,17 @@ public class EmployeeServiceImpl implements EmployeeService {
                 Map.entry('ㅆ', "ss"), Map.entry('ㅉ', "jj")
                 );
 
+        char[] choseongList = {
+                'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ',
+                'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+        };
+
         StringBuilder sb = new StringBuilder();
         for (char c : name.toCharArray()) {
             if (c >= '가' && c <= '힣') {
                 int uniVal = c - 0xAC00;
                 int choseongIndex = uniVal / (21 * 28);
-                char choseong = (char) (0x3131 + choseongIndex);
+                char choseong = choseongList[choseongIndex];
                 sb.append(choseongMap.getOrDefault(choseong, ""));
             }
         }

@@ -28,13 +28,12 @@ public class EmployeeController {
     private static final String EMPLOYEE_MY_INFO_API = "/me";
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
 
-    @PostMapping(EMPLOYEE_ID_API)
+    @PostMapping
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long employeeId,
             @Valid @RequestBody CreateEmployeeRequestDto dto
     ){
-        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, employeeId, dto);
+        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

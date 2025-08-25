@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -79,6 +80,7 @@ public class UserServiceImpl implements UserService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
+    @Transactional
     @Override
     public ResponseDto<UpdateUserStatusResponseDto> updateUserStatus(UserPrincipal userPrincipal, Long userId, UpdateUserStatusRequestDto dto) {
         UpdateUserStatusResponseDto data = null;
@@ -87,12 +89,12 @@ public class UserServiceImpl implements UserService {
         User loginUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
         if(!loginUser.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         UserStatus prevStatus = user.getStatus();
 
@@ -116,7 +118,7 @@ public class UserServiceImpl implements UserService {
         data = UpdateUserStatusResponseDto.builder()
                 .id(updatedUser.getId())
                 .status(updatedUser.getStatus())
-                .changedBy(user.getId())
+                .changedBy(loginUser.getId())
                 .changedByUsername(username)
                 .changedReason(userStatusLog.getChangeReason())
                 .prevStatus(prevStatus)

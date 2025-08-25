@@ -14,17 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 public class CreateEmployeeRequestDto {
-    @NotBlank(message = "아이디는 필수 항목입니다.")
-    @Pattern(regexp = Regex.USER_NAME, message = "아이디는 영문자로 시작하며, 총 5~12자 이내의 영문과 숫자 조합이어야 합니다.")
-    private String username;
-
-    @NotBlank(message = "비밀번호는 필수 항목입니다.")
-    @Pattern(regexp = Regex.PASSWORD, message = "비밀번호는 영문/숫자/특수문자(~!@#$%^&*()-_=+)를 포함한 8~15자 이내이어야 합니다.")
-    private String password;
-
-    @NotBlank(message = "비밀번호 확인은 필수 항목입니다.")
-    private String confirmPassword;
-
     @NotBlank(message = "이름은 필수 항목입니다.")
     @Pattern(regexp = Regex.NAME_KOREAN, message = "이름은 총 2~10자 이내의 한글이어야 합니다.")
     private String name;
