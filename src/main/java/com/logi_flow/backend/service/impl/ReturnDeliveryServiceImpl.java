@@ -9,7 +9,6 @@ import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
-import com.logi_flow.backend.dto.delivery.response.GetAllWaitingDeliveryResponseDto;
 import com.logi_flow.backend.dto.delivery.response.GetAllWaitingReturnDeliveryResponseDto;
 import com.logi_flow.backend.dto.returnDelivery.request.CreateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryRequestDto;
@@ -34,8 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -343,7 +340,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
                     .changedByUsername(username)
                     .type("is_over_weight")
                     .prevData(String.valueOf(prevIsOverWeight))
-                    .newData(String.valueOf(returnDelivery.getOverWeightFee()))
+                    .newData(String.valueOf(!prevIsOverWeight))
                     .build());
             }
 
@@ -365,7 +362,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
                     .changedByUsername(username)
                     .type("is_over_parcel")
                     .prevData(String.valueOf(prevIsOverParcel))
-                    .newData(String.valueOf(returnDelivery.getOverParcelFee()))
+                    .newData(String.valueOf(!prevIsOverParcel))
                     .build());
             }
 
@@ -456,14 +453,13 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
     @Override
     public Page<GetAllWaitingReturnDeliveryResponseDto> getAllWaitingReturnDelivery(int page, int size, String sort) {
-//        Page<GetAllWaitingReturnDeliveryResponseDto> data = null;
-//
-//        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
-//        Page<ReturnDelivery> returnDeliveries = returnDeliveryRepository.findAllWaitingReturnDelivery(pageable);
-//
-//        data = returnDeliveries.map(this::toGetAllWaitingDeliveryResponseDto);
-//        return data;
-        return null;
+        Page<GetAllWaitingReturnDeliveryResponseDto> data = null;
+
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<ReturnDelivery> returnDeliveries = returnDeliveryRepository.findAllWaitingReturnDelivery(pageable);
+
+        data = returnDeliveries.map(this::toGetAllWaitingDeliveryResponseDto);
+        return data;
     }
 
     private GetAllReturnDeliveryResponseDto toGetAllDeliveryResponseDto(ReturnDelivery returnDelivery) {
