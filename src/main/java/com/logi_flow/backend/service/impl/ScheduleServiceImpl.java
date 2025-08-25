@@ -4,6 +4,7 @@ import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AllocationStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -80,12 +81,11 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .id(schedule.getId())
                 .allocationId(schedule.getAllocation().getId())
                 .allocationDate(schedule.getAllocationDate())
-                .departureTime(schedule.getDepartureTime())
-                .arrivalTime(schedule.getArrivalTime())
-                .createdAt(schedule.getCreatedAt())
-                .updatedAt(schedule.getUpdatedAt())
+                .departureTime(DateUtils.format(schedule.getDepartureTime()))
+                .arrivalTime(DateUtils.format(schedule.getArrivalTime()))
+                .createdAt(DateUtils.format(schedule.getCreatedAt()))
+                .updatedAt(DateUtils.format(schedule.getUpdatedAt()))
                 .build();
-
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -111,10 +111,10 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .id(schedule.getId())
                 .allocationId(schedule.getAllocation().getId())
                 .allocationDate(schedule.getAllocationDate())
-                .departureTime(schedule.getDepartureTime())
-                .arrivalTime(schedule.getArrivalTime())
-                .createdAt(schedule.getCreatedAt())
-                .updatedAt(schedule.getUpdatedAt())
+                .departureTime(DateUtils.format(schedule.getDepartureTime()))
+                .arrivalTime(DateUtils.format(schedule.getArrivalTime()))
+                .createdAt(DateUtils.format(schedule.getCreatedAt()))
+                .updatedAt(DateUtils.format(schedule.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -152,10 +152,10 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .id(schedule.getId())
                 .allocationId(schedule.getAllocation().getId())
                 .allocationDate(schedule.getAllocationDate())
-                .departureTime(schedule.getDepartureTime())
-                .arrivalTime(schedule.getArrivalTime())
-                .createdAt(schedule.getCreatedAt())
-                .updatedAt(schedule.getUpdatedAt())
+                .departureTime(DateUtils.format(schedule.getDepartureTime()))
+                .arrivalTime(DateUtils.format(schedule.getArrivalTime()))
+                .createdAt(DateUtils.format(schedule.getCreatedAt()))
+                .updatedAt(DateUtils.format(schedule.getUpdatedAt()))
                 .build();
     }
 }

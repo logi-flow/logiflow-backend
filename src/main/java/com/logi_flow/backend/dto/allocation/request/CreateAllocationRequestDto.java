@@ -9,8 +9,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CreateAllocationRequestDto {
-    @NotNull(message = "배송지 선택은 필수입니다.")
+
     private Long deliveryId;
+    private Long returnDeliveryId;
 
     @NotNull(message = "배정 선택은 필수입니다.")
     private Long assignmentId;
