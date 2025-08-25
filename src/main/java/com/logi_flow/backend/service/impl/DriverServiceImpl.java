@@ -5,6 +5,7 @@ import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
+import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -89,8 +90,8 @@ public class DriverServiceImpl implements DriverService {
                 .name(newDriver.getName())
                 .username(newDriver.getUser().getUsername())
                 .password(newDriver.getUser().getPassword())
-                .createdAt(newDriver.getCreatedAt())
-                .updatedAt(newDriver.getUpdatedAt())
+                .createdAt(DateUtils.format(newDriver.getCreatedAt()))
+                .updatedAt(DateUtils.format(newDriver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -137,8 +138,8 @@ public class DriverServiceImpl implements DriverService {
         data = UpdateDriverResponseDto.builder()
                 .driverId(driver.getId())
                 .name(driver.getName())
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -178,8 +179,8 @@ public class DriverServiceImpl implements DriverService {
         data = UpdateDriverResponseDto.builder()
                 .driverId(driver.getId())
                 .name(driver.getName())
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -207,8 +208,8 @@ public class DriverServiceImpl implements DriverService {
                 .driverId(driver.getId())
                 .name(driver.getName())
                 .pay(driver.getPay())
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -260,8 +261,8 @@ public class DriverServiceImpl implements DriverService {
         data = UpdateDriverResponseDto.builder()
                 .driverId(driver.getId())
                 .name(driver.getName())
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -304,8 +305,8 @@ public class DriverServiceImpl implements DriverService {
                 .pay(driver.getPay())
                 .companyJoin(driver.getCompanyJoin())
                 .driverType(license != null ? license.getType() : null)
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -338,8 +339,8 @@ public class DriverServiceImpl implements DriverService {
                 .pay(driver.getPay())
                 .companyJoin(driver.getCompanyJoin())
                 .driverType(license != null ? license.getType() : null)
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -356,8 +357,8 @@ public class DriverServiceImpl implements DriverService {
                 .name(driver.getName())
                 .status(driver.getStatus())
                 .phoneNumber(driver.getPhoneNumber())
-                .createdAt(driver.getCreatedAt())
-                .updatedAt(driver.getUpdatedAt())
+                .createdAt(DateUtils.format(driver.getCreatedAt()))
+                .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
     }
 
