@@ -103,10 +103,11 @@ public class DriverController {
     }
 
     @DeleteMapping(DRIVER_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteDriver(
+    public ResponseEntity<ResponseDto<Void>> deleteDriver(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId
     ) {
-        ResponseDto<?> response = driverService.deleteDriver(driverId);
+        ResponseDto<?> response = driverService.deleteDriver(userPrincipal, driverId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

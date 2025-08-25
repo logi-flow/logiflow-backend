@@ -79,10 +79,11 @@ public class AssignmentController {
     }
 
     @DeleteMapping(ASSIGNMENT_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteAssignment(
+    public ResponseEntity<ResponseDto<Void>> deleteAssignment(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId
     ) {
-       ResponseDto<?> response = assignmentService.deleteAssignment(assignmentId);
+       ResponseDto<?> response = assignmentService.deleteAssignment(userPrincipal, assignmentId);
        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

@@ -3,6 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AssignmentStatus;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
@@ -18,6 +19,7 @@ import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.AssignmentService;
+import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentStatusLogRepository assignmentStatusLogRepository;
     private final VehicleStatusLogRepository vehicleStatusLogRepository;
     private final AssignmentUpdateLogRepository assignmentUpdateLogRepository;
+    private final DeleteLogService deleteLogService;
 
     @Override
     public ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto) {
@@ -215,8 +218,23 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public ResponseDto<?> deleteAssignment(Long assignmentId) {
-        return null;
+    public ResponseDto<Void> deleteAssignment(UserPrincipal userPrincipal, Long assignmentId) {
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (assignment.getStatus() == AssignmentStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        assignment.setStatus(AssignmentStatus.DELETED);
+        assignmentRepository.save(assignment);
+
+        deleteLogService.createLog(TableRef.ASSIGNMENT, assignmentId, user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     @Override

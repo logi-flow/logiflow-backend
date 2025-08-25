@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.driver.VehicleStatus;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
@@ -14,13 +15,13 @@ import com.logi_flow.backend.dto.vehicle.response.CreateVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
-import com.logi_flow.backend.entity.User;
-import com.logi_flow.backend.entity.Vehicle;
-import com.logi_flow.backend.entity.VehicleStatusLog;
+import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.repository.VehicleRepository;
 import com.logi_flow.backend.repository.VehicleStatusLogRepository;
+import com.logi_flow.backend.repository.VehicleUpdateLogRepository;
 import com.logi_flow.backend.service.AssignmentService;
+import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,8 @@ public class VehicleServiceImpl implements VehicleService {
     private final AssignmentService assignmentService;
     private final UserRepository userRepository;
     private final VehicleStatusLogRepository vehicleStatusLogRepository;
+    private final VehicleUpdateLogRepository vehicleUpdateLogRepository;
+    private final DeleteLogService deleteLogService;
 
     @Override
     public ResponseDto<CreateVehicleResponseDto> createVehicle(CreateVehicleRequestDto dto) {
@@ -68,30 +71,45 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public ResponseDto<UpdateVehicleResponseDto> updateVehicle(Long vehicleId, UpdateVehicleRequestDto dto) {
+    public ResponseDto<UpdateVehicleResponseDto> updateVehicle(UserPrincipal userPrincipal, Long vehicleId, UpdateVehicleRequestDto dto) {
         UpdateVehicleResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
 
         if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber())) {
+            String prevData = dto.getVehicleNumber();
             vehicle.setVehicleNumber(dto.getVehicleNumber());
+            createUpdateLog(vehicle, user, "vehicle_number", prevData, vehicle.getVehicleNumber());
         }
         if (dto.getCapacity() != null && !dto.getCapacity().equals(vehicle.getCapacity())) {
+            String prevData = String.valueOf(dto.getCapacity());
             vehicle.setCapacity(dto.getCapacity());
+            createUpdateLog(vehicle, user, "capacity", prevData, String.valueOf(vehicle.getCapacity()));
         }
         if (dto.getFuel() != null && !vehicle.getFuel().equals(dto.getFuel())) {
+            String prevData = String.valueOf(dto.getFuel());
             vehicle.setFuel(dto.getFuel());
+            createUpdateLog(vehicle, user, "fuel", prevData, String.valueOf(vehicle.getFuel()));
         }
         if (dto.getMileage() != null && !vehicle.getMileage().equals(dto.getMileage())) {
+            String prevData = String.valueOf(dto.getMileage());
             vehicle.setMileage(dto.getMileage());
+            createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
         if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName())) {
+            String prevData = dto.getModelName();
             vehicle.setModelName(dto.getModelName());
+            createUpdateLog(vehicle, user, "model_name", prevData, String.valueOf(vehicle.getModelName()));
         }
         if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear())) {
+            String prevData = String.valueOf(dto.getModelYear());
             vehicle.setModelYear(dto.getModelYear());
+            createUpdateLog(vehicle, user, "model_year", prevData, String.valueOf(vehicle.getModelYear()));
         }
 
         Vehicle updateVehicle = vehicleRepository.save(vehicle);
@@ -196,8 +214,23 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public ResponseDto<?> delete(Long vehicleId) {
-        return null;
+    public ResponseDto<Void> deleteVehicle(UserPrincipal userPrincipal, Long vehicleId) {
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (vehicle.getStatus() == VehicleStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        vehicle.setStatus(VehicleStatus.DELETED);
+        vehicleRepository.save(vehicle);
+
+        deleteLogService.createLog(TableRef.VEHICLE, vehicleId, user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private GetAllVehicleResponseDto toGetAllVehicleResponseDto(Vehicle vehicle) {
@@ -209,5 +242,18 @@ public class VehicleServiceImpl implements VehicleService {
                 .createdAt(DateUtils.format(vehicle.getCreatedAt()))
                 .updatedAt(DateUtils.format(vehicle.getUpdatedAt()))
                 .build();
+    }
+
+    private void createUpdateLog(Vehicle vehicle, User user, String type, String prevData, String newData) {
+        VehicleUpdateLog vehicleUpdateLog = VehicleUpdateLog.builder()
+                .vehicle(vehicle)
+                .user(user)
+                .changedByUsername(user.getUsername())
+                .type(type)
+                .prevData(prevData)
+                .newData(newData)
+                .build();
+
+        vehicleUpdateLogRepository.save(vehicleUpdateLog);
     }
 }

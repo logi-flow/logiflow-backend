@@ -18,7 +18,7 @@ public interface DriverService {
 
     ResponseDto<GetDriverDetailResponseDto> getMyInfo(UserPrincipal userPrincipal);
 
-    ResponseDto<?> deleteDriver(Long driverId);
+    ResponseDto<Void> deleteDriver(UserPrincipal userPrincipal, Long driverId);
 
     ResponseDto<UpdateDriverResponseDto> updateDriverStatus(UserPrincipal userPrincipal, Long driverId, @Valid UpdateDriverStatusRequestDto dto);
 

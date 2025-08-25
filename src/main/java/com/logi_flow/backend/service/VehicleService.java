@@ -15,13 +15,13 @@ import org.springframework.data.domain.Page;
 public interface VehicleService {
     ResponseDto<CreateVehicleResponseDto> createVehicle(@Valid CreateVehicleRequestDto dto);
 
-    ResponseDto<UpdateVehicleResponseDto> updateVehicle(Long vehicleId, @Valid UpdateVehicleRequestDto dto);
+    ResponseDto<UpdateVehicleResponseDto> updateVehicle(UserPrincipal userPrincipal, Long vehicleId, @Valid UpdateVehicleRequestDto dto);
 
     Page<GetAllVehicleResponseDto> getAllVehicle(int page, int size, String sort);
 
     ResponseDto<GetVehicleDetailResponseDto> getVehicleDetail(Long vehicleId);
 
-    ResponseDto<?> delete(Long vehicleId);
+    ResponseDto<Void> deleteVehicle(UserPrincipal userPrincipal, Long vehicleId);
 
     ResponseDto<UpdateVehicleResponseDto> updateVehicleStatus(UserPrincipal userPrincipal, Long vehicleId, @Valid UpdateVehicleStatusRequestDto dto);
 }

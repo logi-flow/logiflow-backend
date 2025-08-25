@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
@@ -13,6 +14,7 @@ import com.logi_flow.backend.dto.driver.request.*;
 import com.logi_flow.backend.dto.driver.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DriverService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class DriverServiceImpl implements DriverService {
     private final PasswordEncoder passwordEncoder;
     private final DriverStatusLogRepository driverStatusLogRepository;
     private final DriverUpdateLogRepository driverUpdateLogRepository;
+    private final DeleteLogService deleteLogService;
 
     @Override
     public ResponseDto<CreateDriverResponseDto> createDriver(CreateDriverRequestDto dto) {
@@ -347,8 +350,23 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public ResponseDto<?> deleteDriver(Long driverId) {
-        return null;
+    public ResponseDto<Void> deleteDriver(UserPrincipal userPrincipal, Long driverId) {
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (driver.getStatus() == DriverStatus.RETIRED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        driver.setStatus(DriverStatus.RETIRED);
+        driverRepository.save(driver);
+
+        deleteLogService.createLog(TableRef.DRIVER, driverId, user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private GetAllDriverResponseDto toGetAllDriverResponseDto(Driver driver) {
