@@ -107,7 +107,7 @@ public class DriverController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId
     ) {
-        ResponseDto<?> response = driverService.deleteDriver(userPrincipal, driverId);
+        ResponseDto<Void> response = driverService.deleteDriver(userPrincipal, driverId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

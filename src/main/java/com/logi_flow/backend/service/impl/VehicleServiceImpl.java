@@ -82,32 +82,32 @@ public class VehicleServiceImpl implements VehicleService {
 
 
         if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber())) {
-            String prevData = dto.getVehicleNumber();
+            String prevData = vehicle.getVehicleNumber();
             vehicle.setVehicleNumber(dto.getVehicleNumber());
             createUpdateLog(vehicle, user, "vehicle_number", prevData, vehicle.getVehicleNumber());
         }
         if (dto.getCapacity() != null && !dto.getCapacity().equals(vehicle.getCapacity())) {
-            String prevData = String.valueOf(dto.getCapacity());
+            String prevData = String.valueOf(vehicle.getCapacity());
             vehicle.setCapacity(dto.getCapacity());
             createUpdateLog(vehicle, user, "capacity", prevData, String.valueOf(vehicle.getCapacity()));
         }
         if (dto.getFuel() != null && !vehicle.getFuel().equals(dto.getFuel())) {
-            String prevData = String.valueOf(dto.getFuel());
+            String prevData = String.valueOf(vehicle.getFuel());
             vehicle.setFuel(dto.getFuel());
             createUpdateLog(vehicle, user, "fuel", prevData, String.valueOf(vehicle.getFuel()));
         }
         if (dto.getMileage() != null && !vehicle.getMileage().equals(dto.getMileage())) {
-            String prevData = String.valueOf(dto.getMileage());
+            String prevData = String.valueOf(vehicle.getMileage());
             vehicle.setMileage(dto.getMileage());
             createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
         if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName())) {
-            String prevData = dto.getModelName();
+            String prevData = vehicle.getModelName()
             vehicle.setModelName(dto.getModelName());
             createUpdateLog(vehicle, user, "model_name", prevData, String.valueOf(vehicle.getModelName()));
         }
         if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear())) {
-            String prevData = String.valueOf(dto.getModelYear());
+            String prevData = String.valueOf(vehicle.getModelYear());
             vehicle.setModelYear(dto.getModelYear());
             createUpdateLog(vehicle, user, "model_year", prevData, String.valueOf(vehicle.getModelYear()));
         }
