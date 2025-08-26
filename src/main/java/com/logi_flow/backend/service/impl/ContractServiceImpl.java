@@ -8,7 +8,6 @@ import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
-import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.contract.request.CreateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractRequestDto;
@@ -16,6 +15,7 @@ import com.logi_flow.backend.dto.contract.request.UpdateContractStatusRequestDto
 import com.logi_flow.backend.dto.contract.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.ContractService;
 import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ public class ContractServiceImpl implements ContractService {
     private final ContractStatusLogRepository contractStatusLogRepository;
 
     private final DeleteLogService  deleteLogService;
+    private final AlertService alertService;
 
     @Override
     @Transactional
@@ -68,6 +68,9 @@ public class ContractServiceImpl implements ContractService {
                 .build();
 
         contractRepository.save(newContract);
+
+        String alertMessage = "새로운 계약이 생성되었습니다.";
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
 
         CreateContractResponseDto data = CreateContractResponseDto.builder()
                 .id(newContract.getId())
@@ -144,6 +147,9 @@ public class ContractServiceImpl implements ContractService {
 
         Contract updatedContract = contractRepository.save(contract);
         contractUpdateLogRepository.saveAll(logs);
+
+        String alertMessage = "계약 #" + contractId + "의 정보가 수정되었습니다.";
+        alertService.sendToUser(contract.getCustomer().getUser().getId(), alertMessage);
 
         UpdateContractResponseDto data = UpdateContractResponseDto.builder()
                 .id(updatedContract.getId())
@@ -265,6 +271,10 @@ public class ContractServiceImpl implements ContractService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
         if(contract.getStatus() == ContractStatus.DELETED) {
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         }
@@ -273,6 +283,9 @@ public class ContractServiceImpl implements ContractService {
         contractRepository.save(contract);
 
         deleteLogService.createLog(TableRef.CONTRACT, contractId, user);
+
+        String alertMessage = "계약 #" + contractId + "이 삭제되었습니다.";
+        alertService.sendToUser(contract.getCustomer().getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
