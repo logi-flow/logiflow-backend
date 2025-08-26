@@ -25,4 +25,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     List<Assignment> findByDriverAndIsPrimaryFalseAndStatus(Driver driver, AssignmentStatus status);
 
     Optional<Assignment> findByDriverAndIsPrimaryTrueAndStatus(Driver driver, AssignmentStatus status);
+
+    Optional<Assignment> findByDriverIdAndStatus(Long driverId, AssignmentStatus assignmentStatus);
 }

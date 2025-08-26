@@ -2,17 +2,21 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.AssignmentStatus;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.attendance.request.UpdateAttendanceRequestDto;
 import com.logi_flow.backend.dto.attendance.response.*;
+import com.logi_flow.backend.entity.Assignment;
 import com.logi_flow.backend.entity.Attendance;
 import com.logi_flow.backend.entity.Driver;
+import com.logi_flow.backend.repository.AssignmentRepository;
 import com.logi_flow.backend.repository.AttendanceRepository;
 import com.logi_flow.backend.repository.DriverRepository;
-import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.AttendanceService;
+import com.logi_flow.backend.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -29,8 +34,9 @@ import java.util.Optional;
 public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
-    private final UserRepository userRepository;
     private final DriverRepository driverRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final VehicleService vehicleService;
 
     @Override
     @Transactional
@@ -51,6 +57,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .id(savedAttendance.getId())
                 .driverId(savedAttendance.getDriver().getId())
                 .workStart(DateUtils.format(savedAttendance.getWorkStart()))
+                .openFlag(savedAttendance.getOpenFlag())
                 .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
                 .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();
@@ -60,11 +67,16 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     @Transactional
-    public ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal) {
+    public ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal, UpdateAttendanceRequestDto dto) {
         UpdateAttendanceResponseDto data = null;
 
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Assignment assignment = assignmentRepository.findByDriverIdAndStatus(driver.getId(), AssignmentStatus.ACTIVE)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        BigDecimal updatedVehicleMileageMileage = vehicleService.updateVehicleMileage(userPrincipal, assignment.getVehicle().getId(), dto.getVehicleMileage());
 
         Attendance attendance = attendanceRepository.findOpenAttendanceForUpdate(driver.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.NO_OPEN_ATTENDANCE));
@@ -77,6 +89,8 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .driverId(savedAttendance.getDriver().getId())
                 .workStart(DateUtils.format(savedAttendance.getWorkStart()))
                 .workEnd(DateUtils.format(savedAttendance.getWorkEnd()))
+                .openFlag(savedAttendance.getOpenFlag())
+                .vehicleMileage(updatedVehicleMileageMileage)
                 .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
                 .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();

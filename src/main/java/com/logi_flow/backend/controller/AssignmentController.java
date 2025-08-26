@@ -83,7 +83,7 @@ public class AssignmentController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId
     ) {
-       ResponseDto<?> response = assignmentService.deleteAssignment(userPrincipal, assignmentId);
+       ResponseDto<Void> response = assignmentService.deleteAssignment(userPrincipal, assignmentId);
        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }
