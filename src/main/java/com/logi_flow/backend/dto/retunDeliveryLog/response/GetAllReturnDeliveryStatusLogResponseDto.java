@@ -1,10 +1,9 @@
-package com.logi_flow.backend.dto.returnDelivery.response;
+package com.logi_flow.backend.dto.retunDeliveryLog.response;
 
+import com.logi_flow.backend.common.enums.DeliveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -13,8 +12,8 @@ public class GetAllReturnDeliveryStatusLogResponseDto {
     private Long id;
     private Long returnDeliveryId;
     private String username;
-    private String type;
-    private String prevStatus;
-    private String newStatus;
-    private LocalDateTime createdAt;
+    private String changeReason;
+    private DeliveryStatus prevStatus;
+    private DeliveryStatus newStatus;
+    private String createdAt;
 }
