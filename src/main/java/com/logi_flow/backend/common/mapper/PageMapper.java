@@ -17,8 +17,7 @@ public final class PageMapper {
                 page.isLast(),
                 page.hasNext(),
                 page.hasPrevious(),
-                sort,
-                null
+                sort
         );
     }
 }

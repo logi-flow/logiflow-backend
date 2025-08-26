@@ -24,8 +24,8 @@ import java.util.List;
 public class DriverDeductionController {
     private final DriverDeductionService driverDeductionService;
 
-    private final static String DEDUCTION_API = "/{payrollId}/deduction";
-    private final static String DEDUCTION_ID_API = "/{payrollId}/deduction/{deductionId}";
+    private final static String DEDUCTION_API = "/{payrollId}/deductions";
+    private final static String DEDUCTION_ID_API = "/{payrollId}/deductions/{deductionId}";
 
     @PostMapping(DEDUCTION_API)
     public ResponseEntity<ResponseDto<CreateDriverDeductionResponseDto>> createDriverDeduction(
