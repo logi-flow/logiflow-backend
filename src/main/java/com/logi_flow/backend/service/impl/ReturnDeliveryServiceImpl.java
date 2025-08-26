@@ -61,9 +61,9 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         }
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (!customer.getId().equals(delivery.getCustomer().getId())) {
             throw new AccessDeniedException("해당 배송에 대한 접근 권한이 없습니다.");
@@ -187,9 +187,9 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     @Override
     public Page<GetAllReturnDeliveryResponseDto> getMyReturnDeliveries(UserPrincipal userPrincipal, int page, int size, String sort) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Page<GetAllReturnDeliveryResponseDto> responseDtos = null;
 
@@ -207,9 +207,9 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (!returnDelivery.getDelivery().getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -267,7 +267,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         Customer customer = returnDelivery.getDelivery().getCustomer();
 
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -432,7 +432,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     @Transactional
     public ResponseDto<Void> deleteReturnDelivery(UserPrincipal userPrincipal, Long returnDeliveryId) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (!user.getRole().getName().equals(UserRole.ADMIN)) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);

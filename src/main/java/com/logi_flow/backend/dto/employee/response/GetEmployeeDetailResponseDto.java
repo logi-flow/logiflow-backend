@@ -1,6 +1,7 @@
 package com.logi_flow.backend.dto.employee.response;
 
 import com.logi_flow.backend.common.enums.employee.Department;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import com.logi_flow.backend.common.enums.employee.Position;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public class GetEmployeeDetailResponseDto {
     private Long id;
     private Long userId;
     private String name;
+    private EmployeeStatus status;
     private String identityNumberMasked;
     private String phoneNumber;
     private String email;

@@ -4,8 +4,6 @@ import com.logi_flow.backend.common.enums.AllocationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "allocations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -1,6 +1,8 @@
 package com.logi_flow.backend.entity;
 
+import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import com.logi_flow.backend.common.enums.employee.Department;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import com.logi_flow.backend.common.enums.employee.Position;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +27,10 @@ public class Employee extends BaseTime {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EmployeeStatus status = EmployeeStatus.WORKING;
 
     @Column(name = "identity_number", nullable = false, unique = true)
     private String identityNumber;

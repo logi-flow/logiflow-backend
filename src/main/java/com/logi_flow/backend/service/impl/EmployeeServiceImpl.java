@@ -2,6 +2,8 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.TableRef;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
 import com.logi_flow.backend.common.util.DateUtils;
@@ -12,12 +14,11 @@ import com.logi_flow.backend.dto.customer.response.GetAllCustomerResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
+import com.logi_flow.backend.dto.employee.request.UpdateEmployeeStatusRequestDto;
 import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.entity.*;
-import com.logi_flow.backend.repository.EmployeeRepository;
-import com.logi_flow.backend.repository.EmployeeUpdateLogRepository;
-import com.logi_flow.backend.repository.RoleRepository;
-import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.EmployeeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmployeeUpdateLogRepository employeeUpdateLogRepository;
+    private final EmployeeStatusLogRepository employeeStatusLogRepository;
+    private final DeleteLogService deleteLogService;
 
     @Override
     public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto) {
@@ -90,6 +93,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .userId(employee.getUser().getId())
                 .username(employee.getUser().getUsername())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .identityNumberMasked(identityNumberMasked)
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getUser().getEmail())
@@ -147,6 +151,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .identityNumberMasked(identityNumberMasked)
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getUser().getEmail())
@@ -180,6 +185,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .identityNumberMasked(identityNumberMasked)
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getUser().getEmail())
@@ -272,6 +278,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .identityNumberMasked(identityNumberMasked)
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getUser().getEmail())
@@ -283,6 +290,55 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .companyJoin(employee.getCompanyJoin())
                 .createdAt(DateUtils.format(employee.getCreatedAt()))
                 .updatedAt(DateUtils.format(employee.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
+    @Override
+    public ResponseDto<UpdateEmployeeStatusResponseDto> updateEmployeeStatus(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeStatusRequestDto dto) {
+        UpdateEmployeeStatusResponseDto data = null;
+
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        EmployeeStatus prevStatus = employee.getStatus();
+
+        if (dto.getStatus() != prevStatus) {
+            employee.setStatus(dto.getStatus());
+        }
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        EmployeeStatusLog employeeStatusLog = EmployeeStatusLog.builder()
+                .employee(employee)
+                .user(user)
+                .changedByUsername(username)
+                .changeReason(dto.getChangedReason())
+                .prevStatus(prevStatus)
+                .newStatus(updatedEmployee.getStatus())
+                .build();
+
+        employeeStatusLogRepository.save(employeeStatusLog);
+
+        data = UpdateEmployeeStatusResponseDto.builder()
+                .id(updatedEmployee.getId())
+                .status(updatedEmployee.getStatus())
+                .changedBy(user.getId())
+                .changedByUsername(username)
+                .changedReason(employeeStatusLog.getChangeReason())
+                .prevStatus(prevStatus)
+                .newStatus(updatedEmployee.getStatus())
+                .createdAt(DateUtils.format(updatedEmployee.getCreatedAt()))
+                .updatedAt(DateUtils.format(updatedEmployee.getUpdatedAt()))
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
@@ -319,6 +375,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .identityNumber(employee.getIdentityNumber())
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getUser().getEmail())
@@ -337,7 +394,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long employeeId) {
-        return null;
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (employee.getStatus() == EmployeeStatus.RETIRED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        employee.setStatus(EmployeeStatus.RETIRED);
+        employeeRepository.save(employee);
+
+        deleteLogService.createLog(TableRef.EMPLOYEE, employeeId, user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private String toInitials(String name) {
@@ -400,6 +472,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
                 .name(employee.getName())
+                .status(employee.getStatus())
                 .department(employee.getDepartment())
                 .position(employee.getPosition())
                 .companyJoin(employee.getCompanyJoin())

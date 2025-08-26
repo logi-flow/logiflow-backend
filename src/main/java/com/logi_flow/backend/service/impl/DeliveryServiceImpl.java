@@ -17,6 +17,7 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DeliveryService;
 import jakarta.persistence.EntityNotFoundException;
@@ -52,6 +53,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
     private final DeliveryStatusLogRepository deliveryStatusLogRepository;
     private final DeleteLogService deleteLogService;
+
+    private final AlertService alertService;
 
     @Override
     @Transactional
@@ -529,6 +532,11 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         deliveryStatusLogRepository.save(deliveryStatusLog);
 
+        // 배송 상태 수정에 알림 넣음
+        String alertMessage = "배송 # " + deliveryId + " 상태가 '" + deliveryStatusLog.getNewStatus() + "'로 변경되었습니다.";
+        alertService.sendToUser(delivery.getCustomer().getUser().getId(), alertMessage);
+
+
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
                 .contractId(updatedDelivery.getContract().getId())
@@ -694,8 +702,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 if (row == null) continue;
 
                 String username = userPrincipal.getUsername();
-                User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
-                Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+                User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+                Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
                 Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
                 Delivery delivery = Delivery.builder()

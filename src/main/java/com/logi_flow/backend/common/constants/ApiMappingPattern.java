@@ -21,5 +21,8 @@ public interface ApiMappingPattern {
     String ALLOWANCE_API = "/api/v1/allowance-types";
     String DEDUCTION_API = "/api/v1/deduction-types";
     String PAYROLL_API = "/api/v1/payrolls";
+
+    String RETURN_DELIVERY_LOG_API = RETURN_DELIVERY_API + "/logs";
+    String DELIVERY_LOG_API = DELIVERY_API + "/logs";
 }
 
