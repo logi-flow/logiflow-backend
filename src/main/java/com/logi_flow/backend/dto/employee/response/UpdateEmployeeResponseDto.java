@@ -2,6 +2,7 @@ package com.logi_flow.backend.dto.employee.response;
 
 import com.logi_flow.backend.common.constants.Regex;
 import com.logi_flow.backend.common.enums.employee.Department;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import com.logi_flow.backend.common.enums.employee.Position;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ public class UpdateEmployeeResponseDto {
     private Long id;
     private Long userId;
     private String name;
+    private EmployeeStatus status;
     private String identityNumberMasked;
     private String phoneNumber;
     private String email;

@@ -12,6 +12,7 @@ public class GetAllCollectionSiteResponseDto {
     private Long customerId;
     private String name;
     private String zipcode;
+    private String phoneNumber;
     private String address;
     private String addressDetail;
     private String createdAt;
