@@ -17,6 +17,7 @@ import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DeliveryService;
 import jakarta.persistence.EntityNotFoundException;
@@ -52,6 +53,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
     private final DeliveryStatusLogRepository deliveryStatusLogRepository;
     private final DeleteLogService deleteLogService;
+
+    private final AlertService alertService;
 
     @Override
     @Transactional
@@ -528,6 +531,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .build();
 
         deliveryStatusLogRepository.save(deliveryStatusLog);
+
+        // 배송 상태 수정에 알림 넣음
+        String alertMessage = "배송 # " + deliveryId + " 상태가 '" + deliveryStatusLog.getNewStatus() + "'로 변경되었습니다.";
+        alertService.sendToUser(delivery.getCustomer().getUser().getId(), alertMessage);
+
 
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
