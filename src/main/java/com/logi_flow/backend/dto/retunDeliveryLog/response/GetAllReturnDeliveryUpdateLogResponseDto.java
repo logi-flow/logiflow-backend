@@ -1,10 +1,8 @@
-package com.logi_flow.backend.dto.returnDelivery.response;
+package com.logi_flow.backend.dto.retunDeliveryLog.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -16,5 +14,5 @@ public class GetAllReturnDeliveryUpdateLogResponseDto {
     private String type;
     private String prevData;
     private String newData;
-    private LocalDateTime createdAt;
+    private String createdAt;
 }
