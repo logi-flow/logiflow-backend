@@ -1,29 +1,29 @@
 package com.logi_flow.backend.entity;
 
-import com.logi_flow.backend.common.enums.driver.VehicleStatus;
-import com.logi_flow.backend.common.enums.user.UserStatus;
+import com.logi_flow.backend.common.enums.CustomerStatus;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "user_status_logs")
+@Table(name = "employees_status_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Builder
-public class UserStatusLog extends BaseTimeLog {
+public class EmployeeStatusLog extends BaseTimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by")
-    private User changedBy;
+    private User user;
 
     @Column(name = "changed_by_username", nullable = false)
     private String changedByUsername;
@@ -33,9 +33,9 @@ public class UserStatusLog extends BaseTimeLog {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prev_status", nullable = false)
-    private UserStatus prevStatus;
+    private EmployeeStatus prevStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false)
-    private UserStatus newStatus;
+    private EmployeeStatus newStatus;
 }

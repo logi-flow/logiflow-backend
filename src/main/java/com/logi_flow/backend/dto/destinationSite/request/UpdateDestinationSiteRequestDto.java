@@ -17,6 +17,10 @@ public class UpdateDestinationSiteRequestDto {
     @Pattern(regexp = Regex.ZIPCODE, message = "우편 번호는 5자리 숫자여야 합니다.")
     private String zipCode;
 
+    @NotBlank(message = "휴대폰 번호는 필수 항목입니다.")
+    @Pattern(regexp = Regex.PHONE_NUMBER, message = "휴대폰 번호는 000-0000-0000 형식이어야 합니다.")
+    private String phoneNumber;
+
     @NotBlank(message = "도착지 주소는 필수 항목입니다.")
     @Pattern(regexp = Regex.ADDRESS, message = "주소 형식이 올바르지 않습니다.")
     private String address;

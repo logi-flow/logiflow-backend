@@ -5,9 +5,12 @@ import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
+import com.logi_flow.backend.dto.customer.response.UpdateCustomerStatusResponseDto;
 import com.logi_flow.backend.dto.employee.request.CreateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeAdminRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
+import com.logi_flow.backend.dto.employee.request.UpdateEmployeeStatusRequestDto;
 import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -27,6 +30,7 @@ public class EmployeeController {
 
     private static final String EMPLOYEE_MY_INFO_API = "/me";
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
+    private static final String EMPLOYEE_STATUS_API = "/{employeeId}/status";
 
     @PostMapping
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
@@ -63,6 +67,17 @@ public class EmployeeController {
         ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(userPrincipal, employeeId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
+
+    @PutMapping(EMPLOYEE_STATUS_API)
+    public ResponseEntity<ResponseDto<UpdateEmployeeStatusResponseDto>> updateEmployeeStatus(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long employeeId,
+            @Valid @RequestBody UpdateEmployeeStatusRequestDto dto
+    ){
+        ResponseDto<UpdateEmployeeStatusResponseDto> response = employeeService.updateEmployeeStatus(userPrincipal, employeeId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
 
     @GetMapping
     public ResponseEntity<ResponseDto<PageDto<GetAllEmployeeResponseDto>>> getAllEmployee(
