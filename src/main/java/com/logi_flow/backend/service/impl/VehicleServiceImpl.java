@@ -187,7 +187,7 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         if (mileage != null && !vehicle.getMileage().equals(mileage)) {
-            String prevData = String.valueOf(mileage);
+            String prevData = String.valueOf(vehicle.getMileage());
             vehicle.setMileage(mileage);
             createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
