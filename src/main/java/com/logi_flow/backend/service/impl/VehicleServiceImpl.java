@@ -104,7 +104,7 @@ public class VehicleServiceImpl implements VehicleService {
             createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
         if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName())) {
-            String prevData = vehicle.getModelName()
+            String prevData = vehicle.getModelName();
             vehicle.setModelName(dto.getModelName());
             createUpdateLog(vehicle, user, "model_name", prevData, String.valueOf(vehicle.getModelName()));
         }
