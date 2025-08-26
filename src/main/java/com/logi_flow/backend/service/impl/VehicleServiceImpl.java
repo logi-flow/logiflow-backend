@@ -31,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -174,6 +176,25 @@ public class VehicleServiceImpl implements VehicleService {
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
+    @Override
+    public BigDecimal updateVehicleMileage(UserPrincipal userPrincipal, Long vehicleId, BigDecimal mileage) {
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (mileage != null && !vehicle.getMileage().equals(mileage)) {
+            String prevData = String.valueOf(mileage);
+            vehicle.setMileage(mileage);
+            createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
+        }
+
+        vehicleRepository.save(vehicle);
+
+        return vehicle.getMileage();
     }
 
     @Override

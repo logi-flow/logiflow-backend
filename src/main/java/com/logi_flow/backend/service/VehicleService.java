@@ -12,6 +12,8 @@ import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
+
 public interface VehicleService {
     ResponseDto<CreateVehicleResponseDto> createVehicle(@Valid CreateVehicleRequestDto dto);
 
@@ -24,4 +26,6 @@ public interface VehicleService {
     ResponseDto<Void> deleteVehicle(UserPrincipal userPrincipal, Long vehicleId);
 
     ResponseDto<UpdateVehicleResponseDto> updateVehicleStatus(UserPrincipal userPrincipal, Long vehicleId, @Valid UpdateVehicleStatusRequestDto dto);
+
+    BigDecimal updateVehicleMileage(UserPrincipal userPrincipal, Long vehicleId, BigDecimal mileage);
 }

@@ -5,8 +5,10 @@ import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.attendance.request.UpdateAttendanceRequestDto;
 import com.logi_flow.backend.dto.attendance.response.*;
 import com.logi_flow.backend.service.AttendanceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,9 +38,10 @@ public class AttendanceController {
 
     @PutMapping(CHECK_OUT_API)
     public ResponseEntity<ResponseDto<UpdateAttendanceResponseDto>> checkOutAttendance(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @Valid @RequestBody UpdateAttendanceRequestDto dto
     ) {
-        ResponseDto<UpdateAttendanceResponseDto> response = attendanceService.checkOutAttendance(userPrincipal);
+        ResponseDto<UpdateAttendanceResponseDto> response = attendanceService.checkOutAttendance(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
