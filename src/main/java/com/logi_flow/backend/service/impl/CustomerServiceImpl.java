@@ -18,7 +18,6 @@ import com.logi_flow.backend.repository.CustomerStatusLogRepository;
 import com.logi_flow.backend.repository.CustomerUpdateLogRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.service.CustomerService;
-import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
