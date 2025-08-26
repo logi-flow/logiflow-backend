@@ -17,7 +17,6 @@ import com.logi_flow.backend.dto.allowanceType.response.GetAllowanceTypeDetailRe
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import com.logi_flow.backend.entity.AllowanceType;
 import com.logi_flow.backend.entity.AllowanceTypeUpdateLog;
-import com.logi_flow.backend.entity.DriverAllowance;
 import com.logi_flow.backend.entity.User;
 import com.logi_flow.backend.repository.AllowanceTypeRepository;
 import com.logi_flow.backend.repository.AllowanceTypeUpdateLogRepository;

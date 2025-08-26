@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,5 +23,4 @@ public class PageDto<T> {
     private boolean hasPrevious;
 
     private String sort;
-    private Map<String, Object> filters;
 }

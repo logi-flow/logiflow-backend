@@ -24,8 +24,8 @@ import java.util.List;
 public class DriverAllowanceController {
     private final DriverAllowanceService driverAllowanceService;
 
-    private final static String ALLOWANCE_API = "/{payrollId}/allowance";
-    private final static String ALLOWANCE_ID_API = "/{payrollId}/allowance/{allowanceId}";
+    private final static String ALLOWANCE_API = "/{payrollId}/allowances";
+    private final static String ALLOWANCE_ID_API = "/{payrollId}/allowances/{allowanceId}";
 
     @PostMapping(ALLOWANCE_API)
     public ResponseEntity<ResponseDto<CreateDriverAllowanceResponseDto>> createDriverAllowance(
