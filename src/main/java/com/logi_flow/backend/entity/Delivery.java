@@ -46,20 +46,9 @@ public class Delivery extends BaseTime {
     @Column(name = "status", nullable = false)
     private DeliveryStatus status = DeliveryStatus.REQUESTED;
 
-    @Column(name = "pickup_name", nullable = false)
-    private String pickupName;
-
-    @Column(name = "pickup_phone", nullable = false)
-    private String pickupPhone;
-
-    @Column(name = "pickup_zipcode", nullable = false)
-    private String pickupZipCode;
-
-    @Column(name = "pickup_address", nullable = false)
-    private String pickupAddress;
-
-    @Column(name = "pickup_address_detail")
-    private String pickupAddressDetail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "collection_site_id", nullable = false)
+    private CollectionSite collectionSite;
 
     @Column(name = "recipient_name", nullable = false)
     private String recipientName;

@@ -21,15 +21,8 @@ public class UpdateDeliveryRequestDto {
 
     private String message;
 
-    @NotBlank(message = "수거지 이름은 필수 항목입니다.")
-    private String pickupName;
-    @NotBlank(message = "수거지 번호는 필수 항목입니다.")
-    private String pickupPhone;
-    @NotBlank(message = "수거지 우편번호는 필수 항목입니다.")
-    private String pickupZipcode;
-    @NotBlank(message = "수거지 주소는 필수 항목입니다.")
-    private String pickupAddress;
-    private String pickupAddressDetail;
+    @NotNull(message = "수거지 아이디는 필수 항목입니다.")
+    private Long collectionSiteId;
 
     @NotBlank(message = "수령인 이름은 필수 항목입니다.")
     private String recipientName;

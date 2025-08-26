@@ -50,6 +50,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final DeleteLogService deleteLogService;
+    private final DestinationSiteRepository destinationSiteRepository;
 
     @Override
     @Transactional
@@ -82,6 +83,8 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             throw new IllegalArgumentException("계약 상태가 승인이 아님");
         }
 
+        DestinationSite destinationSite = destinationSiteRepository.findById(dto.getDestinationSiteId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
         ReturnDelivery newReturnDelivery = ReturnDelivery.builder()
             .delivery(delivery)
             .requestDate(dto.getRequestDate())
@@ -89,14 +92,10 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(DeliveryStatus.REQUESTED)
             .pickupName(dto.getPickupName())
             .pickupPhone(dto.getPickupPhone())
-            .pickupZipCode(dto.getPickupZipcode())
+            .pickupZipcode(dto.getPickupZipcode())
             .pickupAddress(dto.getPickupAddress())
             .pickupAddressDetail(dto.getPickupAddressDetail())
-            .recipientName(dto.getRecipientName())
-            .recipientPhone(dto.getRecipientPhone())
-            .recipientZipcode(dto.getRecipientZipcode())
-            .recipientAddress(dto.getRecipientAddress())
-            .recipientAddressDetail(dto.getRecipientAddressDetail())
+            .destinationSite(destinationSite)
             .finalFee(0)
             .overWeightFee(0)
             .overParcelFee(0)
@@ -117,14 +116,14 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(newReturnDelivery.getStatus())
             .pickupName(newReturnDelivery.getPickupName())
             .pickupPhone(newReturnDelivery.getPickupPhone())
-            .pickupZipcode(newReturnDelivery.getPickupZipCode())
+            .pickupZipcode(newReturnDelivery.getPickupZipcode())
             .pickupAddress(newReturnDelivery.getPickupAddress())
             .pickupAddressDetail(newReturnDelivery.getPickupAddressDetail())
-            .recipientName(newReturnDelivery.getRecipientName())
-            .recipientPhone(newReturnDelivery.getRecipientPhone())
-            .recipientZipcode(newReturnDelivery.getRecipientZipcode())
-            .recipientAddress(newReturnDelivery.getRecipientAddress())
-            .recipientAddressDetail(newReturnDelivery.getRecipientAddressDetail())
+            .recipientName(newReturnDelivery.getDestinationSite().getName())
+            .recipientPhone(newReturnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(newReturnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(newReturnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(newReturnDelivery.getDestinationSite().getAddressDetail())
             .finalFee(newReturnDelivery.getFinalFee())
             .overWeightFee(newReturnDelivery.getOverWeightFee())
             .overParcelFee(newReturnDelivery.getOverParcelFee())
@@ -164,14 +163,14 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
             .pickupPhone(returnDelivery.getPickupPhone())
-            .pickupZipcode(returnDelivery.getPickupZipCode())
+            .pickupZipcode(returnDelivery.getPickupZipcode())
             .pickupAddress(returnDelivery.getPickupAddress())
             .pickupAddressDetail(returnDelivery.getPickupAddressDetail())
-            .recipientName(returnDelivery.getRecipientName())
-            .recipientPhone(returnDelivery.getRecipientPhone())
-            .recipientZipcode(returnDelivery.getRecipientZipcode())
-            .recipientAddress(returnDelivery.getRecipientAddress())
-            .recipientAddressDetail(returnDelivery.getRecipientAddressDetail())
+            .recipientName(returnDelivery.getDestinationSite().getName())
+            .recipientPhone(returnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(returnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(returnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(returnDelivery.getDestinationSite().getAddressDetail())
             .finalFee(returnDelivery.getFinalFee())
             .overWeightFee(returnDelivery.getOverWeightFee())
             .overParcelFee(returnDelivery.getOverParcelFee())
@@ -223,37 +222,38 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         updateAndLogAllFields(returnDelivery, dto, user, username, logs);
 
-        ReturnDelivery updateDelivery = returnDeliveryRepository.save(returnDelivery);
+        ReturnDelivery updateReturnDelivery = returnDeliveryRepository.save(returnDelivery);
 
         if (!logs.isEmpty()) {
             returnDeliveryUpdateLogRepository.saveAll(logs);
         }
 
         UpdateReturnDeliveryResponseDto responseDto = UpdateReturnDeliveryResponseDto.builder()
-            .id(updateDelivery.getId())
-            .customerId(updateDelivery.getDelivery().getCustomer().getId())
-            .requestDate(updateDelivery.getRequestDate())
-            .item(updateDelivery.getDelivery().getItem())
-            .weight(updateDelivery.getDelivery().getWeight())
-            .reason(updateDelivery.getReason())
-            .status(updateDelivery.getStatus())
-            .pickupName(updateDelivery.getPickupName())
-            .pickupPhone(updateDelivery.getPickupPhone())
-            .pickupZipcode(updateDelivery.getPickupZipCode())
-            .pickupAddress(updateDelivery.getPickupAddress())
-            .pickupAddressDetail(updateDelivery.getPickupAddressDetail())
-            .recipientName(updateDelivery.getRecipientName())
-            .recipientPhone(updateDelivery.getRecipientPhone())
-            .recipientZipcode(updateDelivery.getRecipientZipcode())
-            .recipientAddress(updateDelivery.getRecipientAddress())
-            .recipientAddressDetail(updateDelivery.getRecipientAddressDetail())
-            .finalFee(updateDelivery.getFinalFee())
-            .overWeightFee(updateDelivery.getOverWeightFee())
-            .overParcelFee(updateDelivery.getOverParcelFee())
-            .isOverWeight(updateDelivery.isOverWeight())
-            .isOverParcel(updateDelivery.isOverParcel())
-            .createdAt(DateUtils.format(updateDelivery.getCreatedAt()))
-            .updatedAt(DateUtils.format(updateDelivery.getUpdatedAt()))
+            .id(updateReturnDelivery.getId())
+            .customerId(updateReturnDelivery.getDelivery().getCustomer().getId())
+            .customerName(updateReturnDelivery.getDelivery().getCustomer().getName())
+            .requestDate(updateReturnDelivery.getRequestDate())
+            .item(updateReturnDelivery.getDelivery().getItem())
+            .weight(updateReturnDelivery.getDelivery().getWeight())
+            .reason(updateReturnDelivery.getReason())
+            .status(updateReturnDelivery.getStatus())
+            .pickupName(updateReturnDelivery.getPickupName())
+            .pickupPhone(updateReturnDelivery.getPickupPhone())
+            .pickupZipcode(updateReturnDelivery.getPickupZipcode())
+            .pickupAddress(updateReturnDelivery.getPickupAddress())
+            .pickupAddressDetail(updateReturnDelivery.getPickupAddressDetail())
+            .recipientName(updateReturnDelivery.getDestinationSite().getName())
+            .recipientPhone(updateReturnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(updateReturnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(updateReturnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(updateReturnDelivery.getDestinationSite().getAddressDetail())
+            .finalFee(updateReturnDelivery.getFinalFee())
+            .overWeightFee(updateReturnDelivery.getOverWeightFee())
+            .overParcelFee(updateReturnDelivery.getOverParcelFee())
+            .isOverWeight(updateReturnDelivery.isOverWeight())
+            .isOverParcel(updateReturnDelivery.isOverParcel())
+            .createdAt(DateUtils.format(updateReturnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(updateReturnDelivery.getUpdatedAt()))
             .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
@@ -277,7 +277,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         if (dto.getStatus() != returnDelivery.getStatus()) {
             returnDelivery.setStatus(dto.getStatus());
-        } else  {
+        } else {
             return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
         }
 
@@ -408,14 +408,14 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(updatedReturnDelivery.getStatus())
             .pickupName(updatedReturnDelivery.getPickupName())
             .pickupPhone(updatedReturnDelivery.getPickupPhone())
-            .pickupZipcode(updatedReturnDelivery.getPickupZipCode())
+            .pickupZipcode(updatedReturnDelivery.getPickupZipcode())
             .pickupAddress(updatedReturnDelivery.getPickupAddress())
             .pickupAddressDetail(updatedReturnDelivery.getPickupAddressDetail())
-            .recipientName(updatedReturnDelivery.getRecipientName())
-            .recipientPhone(updatedReturnDelivery.getRecipientPhone())
-            .recipientZipcode(updatedReturnDelivery.getRecipientZipcode())
-            .recipientAddress(updatedReturnDelivery.getRecipientAddress())
-            .recipientAddressDetail(updatedReturnDelivery.getRecipientAddressDetail())
+            .recipientName(updatedReturnDelivery.getDestinationSite().getName())
+            .recipientPhone(updatedReturnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(updatedReturnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(updatedReturnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(updatedReturnDelivery.getDestinationSite().getAddressDetail())
             .finalFee(updatedReturnDelivery.getFinalFee())
             .overWeightFee(updatedReturnDelivery.getOverWeightFee())
             .overParcelFee(updatedReturnDelivery.getOverParcelFee())
@@ -474,7 +474,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .reason(returnDelivery.getReason())
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
-            .recipientName(returnDelivery.getRecipientName())
+            .recipientName(returnDelivery.getDestinationSite().getName())
             .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
             .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
@@ -485,7 +485,29 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             field.setAccessible(true);
 
             try {
-                String getterName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+                String fieldName = field.getName();
+
+                if ("destinationSiteId".equals(fieldName)) {
+                    Long newSiteId = dto.getDestinationSiteId();
+                    Long oldSiteId = returnDelivery.getDestinationSite().getId();
+
+                    if (newSiteId != null && !newSiteId.equals(oldSiteId)) {
+                        logs.add(buildReturnDeliveryLog(
+                            returnDelivery,
+                            user,
+                            username,
+                            "destinationSiteId",
+                            String.valueOf(oldSiteId),
+                            String.valueOf(newSiteId)
+                        ));
+
+                        DestinationSite newSite = destinationSiteRepository.findById(newSiteId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+                        returnDelivery.setDestinationSite(newSite);
+                    }
+                    return;
+                }
+                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                 Method getter = dto.getClass().getMethod(getterName);
                 Object newValue = getter.invoke(dto);
 
@@ -493,7 +515,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
                     String setterName = "set" + getterName.substring(3);
                     Method setter = returnDelivery.getClass().getMethod(setterName, field.getType());
 
-                    logs.add(buildReturnDeliveryLog(returnDelivery, user, username, field.getName(), String.valueOf(returnDelivery.getClass().getMethod(getterName).invoke(returnDelivery)), String.valueOf(newValue)));
+                    logs.add(buildReturnDeliveryLog(returnDelivery, user, username, fieldName, String.valueOf(returnDelivery.getClass().getMethod(getterName).invoke(returnDelivery)), String.valueOf(newValue)));
 
                     setter.invoke(returnDelivery, newValue);
                 }
@@ -524,7 +546,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .reason(returnDelivery.getReason())
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
-            .recipientName(returnDelivery.getRecipientName())
+            .recipientName(returnDelivery.getDestinationSite().getName())
             .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
             .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
