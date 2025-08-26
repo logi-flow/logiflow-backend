@@ -28,13 +28,6 @@ public class UpdateReturnDeliveryRequestDto {
     private String pickupAddress;
     private String pickupAddressDetail;
 
-    @NotBlank(message = "수령인 이름은 필수 항목입니다.")
-    private String recipientName;
-    @NotBlank(message = "수령인 번호는 필수 항목입니다.")
-    private String recipientPhone;
-    @NotBlank(message = "수령인 우편번호는 필수 항목입니다.")
-    private String recipientZipcode;
-    @NotBlank(message = "수령인 주소는 필수 항목입니다.")
-    private String recipientAddress;
-    private String recipientAddressDetail;
+    @NotNull(message = "도착지 아이디는 필수 항목입니다.")
+    private Long destinationSiteId;
 }

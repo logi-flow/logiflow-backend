@@ -49,6 +49,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final CustomerRepository customerRepository;
     private final ContractRepository contractRepository;
     private final DeliveryRepository deliveryRepository;
+    private final CollectionSiteRepository collectionSiteRepository;
 
     private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
     private final DeliveryStatusLogRepository deliveryStatusLogRepository;
@@ -77,6 +78,8 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new IllegalArgumentException("계약 상태가 승인이 아님");
         }
 
+        CollectionSite collectionSite = collectionSiteRepository.findById(dto.getCollectionSiteId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
         Delivery newDelivery = Delivery.builder()
                 .contract(contract)
                 .customer(customer)
@@ -86,11 +89,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(dto.getMessage())
                 .isHidden(false)
                 .status(dto.getStatus())
-                .pickupName(dto.getPickupName())
-                .pickupPhone(dto.getPickupPhone())
-                .pickupZipCode(dto.getPickupZipcode())
-                .pickupAddress(dto.getPickupAddress())
-                .pickupAddressDetail(dto.getPickupAddressDetail())
+                .collectionSite(collectionSite)
                 .recipientName(dto.getRecipientName())
                 .recipientPhone(dto.getRecipientPhone())
                 .recipientZipcode(dto.getRecipientZipcode())
@@ -115,11 +114,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(newDelivery.getMessage())
                 .isHidden(newDelivery.isHidden())
                 .status(newDelivery.getStatus())
-                .pickupName(newDelivery.getPickupName())
-                .pickupPhone(newDelivery.getPickupPhone())
-                .pickupZipcode(newDelivery.getPickupZipCode())
-                .pickupAddress(newDelivery.getPickupAddress())
-                .pickupAddressDetail(newDelivery.getPickupAddressDetail())
+                .pickupName(newDelivery.getCollectionSite().getName())
+                .pickupPhone(newDelivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(newDelivery.getCollectionSite().getZipCode())
+                .pickupAddress(newDelivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(newDelivery.getCollectionSite().getAddressDetail())
                 .recipientName(newDelivery.getRecipientName())
                 .recipientPhone(newDelivery.getRecipientPhone())
                 .recipientZipcode(newDelivery.getRecipientZipcode())
@@ -164,11 +163,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(delivery.getMessage())
                 .isHidden(delivery.isHidden())
                 .status(delivery.getStatus())
-                .pickupName(delivery.getPickupName())
-                .pickupPhone(delivery.getPickupPhone())
-                .pickupZipcode(delivery.getPickupZipCode())
-                .pickupAddress(delivery.getPickupAddress())
-                .pickupAddressDetail(delivery.getPickupAddressDetail())
+                .pickupName(delivery.getCollectionSite().getName())
+                .pickupPhone(delivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(delivery.getCollectionSite().getZipCode())
+                .pickupAddress(delivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(delivery.getCollectionSite().getAddressDetail())
                 .recipientName(delivery.getRecipientName())
                 .recipientPhone(delivery.getRecipientPhone())
                 .recipientZipcode(delivery.getRecipientZipcode())
@@ -247,11 +246,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(updatedDelivery.getMessage())
                 .isHidden(updatedDelivery.isHidden())
                 .status(updatedDelivery.getStatus())
-                .pickupName(updatedDelivery.getPickupName())
-                .pickupPhone(updatedDelivery.getPickupPhone())
-                .pickupZipcode(updatedDelivery.getPickupZipCode())
-                .pickupAddress(updatedDelivery.getPickupAddress())
-                .pickupAddressDetail(updatedDelivery.getPickupAddressDetail())
+                .pickupName(updatedDelivery.getCollectionSite().getName())
+                .pickupPhone(updatedDelivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(updatedDelivery.getCollectionSite().getZipCode())
+                .pickupAddress(updatedDelivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(updatedDelivery.getCollectionSite().getAddressDetail())
                 .recipientName(updatedDelivery.getRecipientName())
                 .recipientPhone(updatedDelivery.getRecipientPhone())
                 .recipientZipcode(updatedDelivery.getRecipientZipcode())
@@ -278,6 +277,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        CollectionSite collectionSite = collectionSiteRepository.findById(dto.getCollectionSiteId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         if(!delivery.getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
@@ -311,29 +312,9 @@ public class DeliveryServiceImpl implements DeliveryService {
             delivery.setMessage(dto.getMessage());
         }
 
-        if(!Objects.equals(dto.getPickupName(), delivery.getPickupName())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_name", delivery.getPickupName(), dto.getPickupName()));
-            delivery.setPickupName(dto.getPickupName());
-        }
-
-        if(!Objects.equals(dto.getPickupPhone(), delivery.getPickupPhone())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_phone", delivery.getPickupPhone(), dto.getPickupPhone()));
-            delivery.setPickupPhone(dto.getPickupPhone());
-        }
-
-        if(!Objects.equals(dto.getPickupZipcode(), delivery.getPickupZipCode())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_zipcode", delivery.getPickupZipCode(), dto.getPickupZipcode()));
-            delivery.setPickupZipCode(dto.getPickupZipcode());
-        }
-
-        if(!Objects.equals(dto.getPickupAddress(), delivery.getPickupAddress())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address", delivery.getPickupAddress(), dto.getPickupAddress()));
-            delivery.setPickupAddress(dto.getPickupAddress());
-        }
-
-        if(dto.getPickupAddressDetail() != null && !Objects.equals(dto.getPickupAddressDetail(), delivery.getPickupAddressDetail())) {
-            logs.add(buildDeliveryLog(delivery, user, username, "pickup_address_detail", dto.getPickupAddressDetail(), dto.getPickupAddressDetail()));
-            delivery.setPickupAddressDetail(dto.getPickupAddressDetail());
+        if(!Objects.equals(collectionSite.getId(), delivery.getCollectionSite().getId())) {
+            logs.add(buildDeliveryLog(delivery, user, username, "collection_site_id", String.valueOf(delivery.getCollectionSite().getId()), String.valueOf(collectionSite.getId())));
+            delivery.setCollectionSite(collectionSite);
         }
 
         if(!Objects.equals(dto.getRecipientName(), delivery.getRecipientName())) {
@@ -348,7 +329,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(!Objects.equals(dto.getRecipientZipcode(), delivery.getRecipientZipcode())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_zipcode", delivery.getRecipientZipcode(), dto.getRecipientZipcode()));
-            delivery.setPickupZipCode(dto.getRecipientZipcode());
+            delivery.setRecipientZipcode(dto.getRecipientZipcode());
         }
 
         if(!Objects.equals(dto.getRecipientAddress(), delivery.getRecipientAddress())) {
@@ -358,7 +339,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         if(dto.getRecipientAddressDetail() != null && !Objects.equals(dto.getRecipientAddressDetail(), delivery.getRecipientAddressDetail())) {
             logs.add(buildDeliveryLog(delivery, user, username, "recipient_address_detail", dto.getRecipientAddressDetail(), dto.getRecipientAddressDetail()));
-            delivery.setPickupAddressDetail(dto.getRecipientAddressDetail());
+            delivery.setRecipientAddressDetail(dto.getRecipientAddressDetail());
         }
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -377,11 +358,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(updatedDelivery.getMessage())
                 .isHidden(updatedDelivery.isHidden())
                 .status(updatedDelivery.getStatus())
-                .pickupName(updatedDelivery.getPickupName())
-                .pickupPhone(updatedDelivery.getPickupPhone())
-                .pickupZipcode(updatedDelivery.getPickupZipCode())
-                .pickupAddress(updatedDelivery.getPickupAddress())
-                .pickupAddressDetail(updatedDelivery.getPickupAddressDetail())
+                .pickupName(updatedDelivery.getCollectionSite().getName())
+                .pickupPhone(updatedDelivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(updatedDelivery.getCollectionSite().getZipCode())
+                .pickupAddress(updatedDelivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(updatedDelivery.getCollectionSite().getAddressDetail())
                 .recipientName(updatedDelivery.getRecipientName())
                 .recipientPhone(updatedDelivery.getRecipientPhone())
                 .recipientZipcode(updatedDelivery.getRecipientZipcode())
@@ -547,11 +528,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(updatedDelivery.getMessage())
                 .isHidden(updatedDelivery.isHidden())
                 .status(updatedDelivery.getStatus())
-                .pickupName(updatedDelivery.getPickupName())
-                .pickupPhone(updatedDelivery.getPickupPhone())
-                .pickupZipcode(updatedDelivery.getPickupZipCode())
-                .pickupAddress(updatedDelivery.getPickupAddress())
-                .pickupAddressDetail(updatedDelivery.getPickupAddressDetail())
+                .pickupName(updatedDelivery.getCollectionSite().getName())
+                .pickupPhone(updatedDelivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(updatedDelivery.getCollectionSite().getZipCode())
+                .pickupAddress(updatedDelivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(updatedDelivery.getCollectionSite().getAddressDetail())
                 .recipientName(updatedDelivery.getRecipientName())
                 .recipientPhone(updatedDelivery.getRecipientPhone())
                 .recipientZipcode(updatedDelivery.getRecipientZipcode())
@@ -614,7 +595,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(delivery.getMessage())
                 .isHidden(delivery.isHidden())
                 .status(delivery.getStatus())
-                .pickupName(delivery.getPickupName())
+                .pickupName(delivery.getCollectionSite().getName())
                 .recipientName(delivery.getRecipientName())
                 .createdAt(DateUtils.format(delivery.getCreatedAt()))
                 .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
@@ -631,13 +612,13 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(delivery.getMessage())
                 .isHidden(delivery.isHidden())
                 .status(delivery.getStatus())
-                .pickupName(delivery.getPickupName())
+                .pickupName(delivery.getCollectionSite().getName())
                 .recipientName(delivery.getRecipientName())
                 .createdAt(DateUtils.format(delivery.getCreatedAt()))
                 .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build();
     }
-  
+
     private DeliveryUpdateLog buildDeliveryLog(Delivery delivery, User user, String username, String type, String prevData, String newData) {
         return DeliveryUpdateLog.builder()
                 .delivery(delivery)
@@ -667,11 +648,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .message(delivery.getMessage())
                 .isHidden(delivery.isHidden())
                 .status(delivery.getStatus())
-                .pickupName(delivery.getPickupName())
-                .pickupPhone(delivery.getPickupPhone())
-                .pickupZipcode(delivery.getPickupZipCode())
-                .pickupAddress(delivery.getPickupAddress())
-                .pickupAddressDetail(delivery.getPickupAddressDetail())
+                .pickupName(delivery.getCollectionSite().getName())
+                .pickupPhone(delivery.getCollectionSite().getPhoneNumber())
+                .pickupZipcode(delivery.getCollectionSite().getZipCode())
+                .pickupAddress(delivery.getCollectionSite().getAddress())
+                .pickupAddressDetail(delivery.getCollectionSite().getAddressDetail())
                 .recipientName(delivery.getRecipientName())
                 .recipientPhone(delivery.getRecipientPhone())
                 .recipientZipcode(delivery.getRecipientZipcode())
@@ -706,6 +687,9 @@ public class DeliveryServiceImpl implements DeliveryService {
                 Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
                 Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+                String phoneNumber = getStringCellValue(row.getCell(5));
+                CollectionSite collectionSite = collectionSiteRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
                 Delivery delivery = Delivery.builder()
                     .contract(contract)
                     .customer(customer)
@@ -715,16 +699,12 @@ public class DeliveryServiceImpl implements DeliveryService {
                     .message(getStringCellValue(row.getCell(3)))
                     .isHidden(getBooleanCellValue(row, 4))
                     .status(DeliveryStatus.REQUESTED)
-                    .pickupName(getStringCellValue(row.getCell(5)))
-                    .pickupPhone(getStringCellValue(row.getCell(6)))
-                    .pickupZipCode(getStringCellValue(row.getCell(7)))
-                    .pickupAddress(getStringCellValue(row.getCell(8)))
-                    .pickupAddressDetail(getStringCellValue(row.getCell(9)))
-                    .recipientName(getStringCellValue(row.getCell(10)))
-                    .recipientPhone(getStringCellValue(row.getCell(11)))
-                    .recipientZipcode(getStringCellValue(row.getCell(12)))
-                    .recipientAddress(getStringCellValue(row.getCell(13)))
-                    .recipientAddressDetail(getStringCellValue(row.getCell(14)))
+                    .collectionSite(collectionSite)
+                    .recipientName(getStringCellValue(row.getCell(6)))
+                    .recipientPhone(getStringCellValue(row.getCell(7)))
+                    .recipientZipcode(getStringCellValue(row.getCell(8)))
+                    .recipientAddress(getStringCellValue(row.getCell(9)))
+                    .recipientAddressDetail(getStringCellValue(row.getCell(10)))
                     .finalFee(0)
                     .overWeightFee(0)
                     .overParcelFee(0)

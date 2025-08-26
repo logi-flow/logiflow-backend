@@ -40,7 +40,7 @@ public class ReturnDelivery extends BaseTime {
     private String pickupPhone;
 
     @Column(name = "pickup_zipcode", nullable = false)
-    private String pickupZipCode;
+    private String pickupZipcode;
 
     @Column(name = "pickup_address", nullable = false)
     private String pickupAddress;
@@ -48,20 +48,9 @@ public class ReturnDelivery extends BaseTime {
     @Column(name = "pickup_address_detail")
     private String pickupAddressDetail;
 
-    @Column(name = "recipient_name", nullable = false)
-    private String recipientName;
-
-    @Column(name = "recipient_phone", nullable = false)
-    private String recipientPhone;
-
-    @Column(name = "recipient_zipcode", nullable = false)
-    private String recipientZipcode;
-
-    @Column(name = "recipient_address", nullable = false)
-    private String recipientAddress;
-
-    @Column(name = "recipient_address_detail")
-    private String recipientAddressDetail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_site_id", nullable = false)
+    private DestinationSite destinationSite;
 
     @Column(name = "final_fee", nullable = false)
     private int finalFee;
