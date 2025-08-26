@@ -32,4 +32,7 @@ public class User extends BaseTime {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private UserStatus status;
+
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword = false;
 }

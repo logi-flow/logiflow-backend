@@ -1,5 +1,6 @@
 package com.logi_flow.backend.service;
 
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.auth.request.*;
 import com.logi_flow.backend.dto.auth.response.*;
@@ -33,6 +34,8 @@ public interface AuthService {
     ResponseDto<PasswordResetSendEmailResponseDto> verifyEmail(String token);
 
     boolean checkPassword(User user, String password);
+
+    ResponseDto<FirstPasswordChangeResponseDto> firstChange(@Valid FirstPasswordChangeRequestDto dto);
 
     boolean checkEmail(String email);
 }
