@@ -19,6 +19,7 @@ public interface ResponseMessage {
 
     String NOT_CORRECT_PASSWORD = "비밀번호가 일치하지 않습니다.";
     String NOT_MATCH_PASSWORD = "비밀번호 확인이 일치하지 않습니다.";
+    String PASSWORD_CHANGE_REQUIRED = "비밀번호 변경이 필요합니다.";
     String NOT_MATCH = "아이디 또는 비밀번호가 일치하지 않습니다.";
     String NOT_MATCH_INFORMATION = "찾을려는 아이디의 정보가 일치하지 않습니다.";
     String INTERNAL_SERVER_ERROR = "서버 오류가 발생했습니다.";

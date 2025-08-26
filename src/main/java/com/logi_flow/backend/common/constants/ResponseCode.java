@@ -14,6 +14,7 @@ public interface ResponseCode {
     String ALREADY_EXISTS = "AX";
     String NOT_CORRECT_PASSWORD = "NMP";
     String NOT_MATCH_PASSWORD = "NMP";
+    String PASSWORD_CHANGE_REQUIRED = "PCR";
     String NOT_MATCH = "NM";
     String NOT_MATCH_INFORMATION = "NMI";
     String INTERNAL_SERVER_ERROR = "ISE";

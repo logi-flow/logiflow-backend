@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class LoginResponseDto {
+    private boolean mustChangePassword;
     private String token;
     private long exprTime;
     private Long id;

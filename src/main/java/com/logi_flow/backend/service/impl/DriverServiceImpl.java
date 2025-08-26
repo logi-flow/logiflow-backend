@@ -68,6 +68,7 @@ public class DriverServiceImpl implements DriverService {
                 .password(encodedPassword)
                 .email(dto.getEmail())
                 .status(UserStatus.ACTIVE)
+                .mustChangePassword(true)
                 .build();
 
         userRepository.save(newUser);

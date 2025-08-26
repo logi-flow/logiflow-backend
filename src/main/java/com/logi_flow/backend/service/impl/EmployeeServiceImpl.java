@@ -67,6 +67,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .password(encodePassword)
                 .email(dto.getEmail())
                 .status(UserStatus.ACTIVE)
+                .mustChangePassword(true)
                 .build();
 
         userRepository.save(user);
@@ -75,6 +76,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .user(user)
                 .name(dto.getName())
                 .identityNumber(dto.getIdentityNumber())
+                .status(EmployeeStatus.WORKING)
                 .phoneNumber(dto.getPhoneNumber())
                 .zipcode(dto.getZipcode())
                 .address(dto.getAddress())

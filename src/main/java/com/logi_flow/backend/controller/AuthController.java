@@ -1,6 +1,7 @@
 package com.logi_flow.backend.controller;
 
 import com.logi_flow.backend.common.constants.ApiMappingPattern;
+import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.auth.request.*;
 import com.logi_flow.backend.dto.auth.response.*;
@@ -30,6 +31,7 @@ public class AuthController {
     private static final String CUSTOMER_RESET_PASSWORD_API = "/password/reset/customers";
     private static final String USER_RESET_PASSWORD_API = "/password/reset/users";
     private static final String RESET_PASSWORD_API = "/password/reset";
+    private static final String MUST_CHANGE_PASSWORD_API = "/password/first-change";
     private static final String VERIFY_EMAIL_API = "/email/verify";
 
     @PostMapping(SIGNUP_API)
@@ -118,6 +120,14 @@ public class AuthController {
             @Valid @RequestBody PasswordResetRequestDto dto
     ) {
         ResponseDto<PasswordResetSendEmailResponseDto> response = authService.resetPassword(token, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PostMapping(MUST_CHANGE_PASSWORD_API)
+    public ResponseEntity<ResponseDto<FirstPasswordChangeResponseDto>> firstChange(
+            @Valid @RequestBody FirstPasswordChangeRequestDto dto
+    ) {
+        ResponseDto<FirstPasswordChangeResponseDto> response = authService.firstChange(dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 

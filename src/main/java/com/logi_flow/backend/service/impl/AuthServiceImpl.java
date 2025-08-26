@@ -23,6 +23,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,6 +142,20 @@ public class AuthServiceImpl implements AuthService {
 
         if (!checkPassword(user, dto.getPassword())) {
             return ResponseDto.fail(ResponseCode.NOT_CORRECT_PASSWORD, ResponseMessage.NOT_CORRECT_PASSWORD);
+        }
+
+        if (user.isMustChangePassword()) {
+            data = LoginResponseDto.builder()
+                    .mustChangePassword(true)
+                    .token(null)
+                    .id(user.getId())
+                    .role(user.getRole().getName())
+                    .username(user.getUsername())
+                    .name(user.getUsername())
+                    .createdAt(DateUtils.format(user.getCreatedAt()))
+                    .updatedAt(DateUtils.format(user.getUpdatedAt()))
+                    .build();
+            return ResponseDto.success(ResponseCode.PASSWORD_CHANGE_REQUIRED, ResponseMessage.PASSWORD_CHANGE_REQUIRED, data);
         }
 
         try {
@@ -437,6 +452,34 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean checkPassword(User user, String password) {
         return bCryptPasswordEncoder.matches(password, user.getPassword());
+    }
+
+    @Override
+    public ResponseDto<FirstPasswordChangeResponseDto> firstChange(FirstPasswordChangeRequestDto dto) {
+        FirstPasswordChangeResponseDto data = null;
+
+        User user = userRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if (!user.isMustChangePassword()) {
+            return ResponseDto.fail(ResponseCode.FAILED, "이미 비밀번호를 변경하였습니다.");
+        }
+
+        if (!passwordEncoder.matches(dto.getPrevPassword(), user.getPassword())) {
+            return ResponseDto.fail(ResponseCode.NOT_MATCH_PASSWORD, ResponseMessage.NOT_MATCH_PASSWORD);
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
+
+        data = FirstPasswordChangeResponseDto.builder()
+                .username(user.getUsername())
+                .createdAt(DateUtils.format(user.getCreatedAt()))
+                .updatedAt(DateUtils.format(user.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     @Override
