@@ -10,7 +10,7 @@ import lombok.Getter;
 @Builder
 public class VehicleStatusLogResponseDto {
     private Long id;
-    private Long vehicleId;
+    private String vehicleNumber;
     private String changedByUsername;
     private String changeReason;
     private VehicleStatus prevStatus;

@@ -11,4 +11,6 @@ public interface DriverLicenseService {
     ResponseDto<CreateDriverLicenseResponseDto> createDriverLicense(Long driverId, CreateDriverLicenseRequestDto dto);
 
     ResponseDto<UpdateDriverLicenseResponseDto> updateDriverLicense(UserPrincipal userPrincipal, Long driverId, Long licenseId, UpdateDriverLicenseRequestDto dto);
+
+    void noticeExpiredDate();
 }

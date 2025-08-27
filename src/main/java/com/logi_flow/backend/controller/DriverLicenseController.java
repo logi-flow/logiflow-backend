@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class DriverLicenseController {
 
 
     @PostMapping(CREATE_LICENSE_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<ResponseDto<CreateDriverLicenseResponseDto>> createDriverLicense(
             @PathVariable Long driverId,
             @Valid @RequestBody CreateDriverLicenseRequestDto dto
@@ -36,6 +38,7 @@ public class DriverLicenseController {
     }
 
     @PutMapping(UPDATE_LICENSE_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<ResponseDto<UpdateDriverLicenseResponseDto>> updateDriverLicense(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,

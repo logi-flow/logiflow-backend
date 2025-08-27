@@ -51,7 +51,8 @@ public class AssignmentLogServiceImpl implements AssignmentLogService {
     private AssignmentStatusLogResponseDto toAssignmentStatusLogResponseDto(AssignmentStatusLog assignmentStatusLog) {
         return AssignmentStatusLogResponseDto.builder()
                 .id(assignmentStatusLog.getId())
-                .assignmentId(assignmentStatusLog.getAssignment().getId())
+                .driverName(assignmentStatusLog.getAssignment().getDriver().getName())
+                .vehicleNumber(assignmentStatusLog.getAssignment().getVehicle().getVehicleNumber())
                 .changedByUsername(assignmentStatusLog.getChangedByUsername())
                 .changeReason(assignmentStatusLog.getChangeReason())
                 .prevStatus(assignmentStatusLog.getPrevStatus())
@@ -63,7 +64,8 @@ public class AssignmentLogServiceImpl implements AssignmentLogService {
     private AssignmentUpdateLogResponseDto toAssignmentUpdateLogResponseDto(AssignmentUpdateLog assignmentUpdateLog) {
         return AssignmentUpdateLogResponseDto.builder()
                 .id(assignmentUpdateLog.getId())
-                .AssignmentId(assignmentUpdateLog.getAssignment().getId())
+                .driverName(assignmentUpdateLog.getAssignment().getDriver().getName())
+                .vehicleNumber(assignmentUpdateLog.getAssignment().getVehicle().getVehicleNumber())
                 .changedByUsername(assignmentUpdateLog.getChangedByUsername())
                 .type(assignmentUpdateLog.getType())
                 .prevData(assignmentUpdateLog.getPrevData())

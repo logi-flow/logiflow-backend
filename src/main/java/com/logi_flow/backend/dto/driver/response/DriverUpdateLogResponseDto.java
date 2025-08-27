@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class DriverUpdateLogResponseDto {
     private Long id;
-    private Long driverId;
+    private String username;
     private String changedByUsername;
     private String type;
     private String prevData;
