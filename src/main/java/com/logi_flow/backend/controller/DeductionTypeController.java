@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class DeductionTypeController {
     private static final String DEDUCTION_TYPE_ID_API = "/{deductionTypeId}";
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDeductionTypeResponseDto>> createDeductionType(
             @Valid @RequestBody CreateDeductionTypeRequestDto dto
     ) {
@@ -37,6 +39,7 @@ public class DeductionTypeController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeductionTypeResponseDto>>> getAllDeductionType(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -48,6 +51,7 @@ public class DeductionTypeController {
     }
 
     @GetMapping(DEDUCTION_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetDeductionTypeDetailResponseDto>> getDeductionTypeDetail(
             @PathVariable Long deductionTypeId
     ) {
@@ -56,6 +60,7 @@ public class DeductionTypeController {
     }
 
     @PutMapping(DEDUCTION_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDeductionTypeResponseDto>> updateDeductionType(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long deductionTypeId,
@@ -66,6 +71,7 @@ public class DeductionTypeController {
     }
 
     @DeleteMapping(DEDUCTION_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDeductionType(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long deductionTypeId

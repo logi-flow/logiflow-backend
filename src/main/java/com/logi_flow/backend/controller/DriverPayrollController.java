@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class DriverPayrollController {
     private final static String MY_PAYROLL_PAYROLL_ID_API = MY_PAYROLL_API + PAYROLL_ID_API;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverPayrollResponseDto>> createDriverPayroll(
             @RequestBody CreateDriverPayrollRequestDto dto
     ) {
@@ -40,6 +42,7 @@ public class DriverPayrollController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getAllDriverPayroll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -51,6 +54,7 @@ public class DriverPayrollController {
     }
 
     @GetMapping(PAYROLL_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetDriverPayrollDetailResponseDto>> getDriverPayrollDetail(
             @PathVariable Long payrollId
     ) {
@@ -59,6 +63,7 @@ public class DriverPayrollController {
     }
 
     @GetMapping(MY_PAYROLL_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getMyPayrolls(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -71,6 +76,7 @@ public class DriverPayrollController {
     }
 
     @GetMapping(MY_PAYROLL_PAYROLL_ID_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<GetDriverPayrollDetailResponseDto>> getMyPayrollDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId
@@ -80,6 +86,7 @@ public class DriverPayrollController {
     }
 
     @PutMapping(UPDATE_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverPayrollStatusResponseDto>> updateDriverPayrollStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
@@ -90,6 +97,7 @@ public class DriverPayrollController {
     }
 
     @PutMapping(PAYROLL_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverPayrollResponseDto>> updateDriverPayroll(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
@@ -100,6 +108,7 @@ public class DriverPayrollController {
     }
 
     @DeleteMapping(PAYROLL_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverPayroll(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId
