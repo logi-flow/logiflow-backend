@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class VehicleUpdateLogResponseDto {
     private Long id;
-    private Long vehicleId;
+    private String vehicleNumber;
     private String changedByUsername;
     private String type;
     private String prevData;

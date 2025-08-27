@@ -52,7 +52,7 @@ public class VehicleLogServiceImpl implements VehicleLogService {
     private VehicleStatusLogResponseDto toVehicleStatusLogResponseDto(VehicleStatusLog vehicleStatusLog) {
         return VehicleStatusLogResponseDto.builder()
                 .id(vehicleStatusLog.getId())
-                .vehicleId(vehicleStatusLog.getVehicle().getId())
+                .vehicleNumber(vehicleStatusLog.getVehicle().getVehicleNumber())
                 .changedByUsername(vehicleStatusLog.getChangedByUsername())
                 .changeReason(vehicleStatusLog.getChangeReason())
                 .prevStatus(vehicleStatusLog.getPrevStatus())
@@ -64,7 +64,7 @@ public class VehicleLogServiceImpl implements VehicleLogService {
     private VehicleUpdateLogResponseDto toVehicleUpdateLogResponseDto(VehicleUpdateLog vehicleUpdateLog) {
         return VehicleUpdateLogResponseDto.builder()
                 .id(vehicleUpdateLog.getId())
-                .vehicleId(vehicleUpdateLog.getVehicle().getId())
+                .vehicleNumber(vehicleUpdateLog.getVehicle().getVehicleNumber())
                 .changedByUsername(vehicleUpdateLog.getChangedByUsername())
                 .type(vehicleUpdateLog.getType())
                 .prevData(vehicleUpdateLog.getPrevData())
