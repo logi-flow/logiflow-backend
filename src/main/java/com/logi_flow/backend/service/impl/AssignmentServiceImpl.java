@@ -81,6 +81,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                     });
         }
 
+        if (driver.getDriverLicense() == null) {
+            throw new IllegalArgumentException(ResponseMessage.CHECK_LICENSE);
+        }
+
         Assignment newAssignment = Assignment.builder()
                 .driver(driver)
                 .vehicle(vehicle)
