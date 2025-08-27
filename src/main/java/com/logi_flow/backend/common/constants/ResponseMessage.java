@@ -37,5 +37,6 @@ public interface ResponseMessage {
     String NOT_DELETE_USED_TYPE = "확정된 급여대장에 사용된 항목은 삭제할 수 없습니다.";
     String NOT_OWN_PAYROLL = "본인의 급여대장이 아닙니다.";
 
+    String INVALID_STATE = "잘못된 상태입니다.";
     String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
 }

@@ -2,6 +2,7 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.AllocationStatus;
 import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import com.logi_flow.backend.common.enums.TableRef;
@@ -20,6 +21,7 @@ import com.logi_flow.backend.dto.returnDelivery.response.GetReturnDeliveryDetail
 import com.logi_flow.backend.dto.returnDelivery.response.UpdateReturnDeliveryResponseDto;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.ReturnDeliveryService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +30,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,11 +52,21 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     private final UserRepository userRepository;
     private final DeleteLogService deleteLogService;
     private final DestinationSiteRepository destinationSiteRepository;
+    private final RoleRepository roleRepository;
+    private final AllocationRepository allocationRepository;
+
+    private final AlertService alertService;
 
     @Override
     @Transactional
     public ResponseDto<CreateReturnDeliveryResponseDto> createReturnDelivery(Long deliveryId, CreateReturnDeliveryRequestDto dto, UserPrincipal userPrincipal) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        Allocation allocation = allocationRepository.findByDeliveryId(delivery.getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (!allocation.getStatus().equals(AllocationStatus.IN_PROGRESS) && !allocation.getStatus().equals(AllocationStatus.COMPLETED)) {
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+        }
 
         if (returnDeliveryRepository.existsByDeliveryId(delivery.getId())) {
             throw new IllegalArgumentException("이미 반품 신청이 되어있습니다.");
@@ -105,6 +116,16 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         returnDeliveryRepository.save(newReturnDelivery);
 
+        String alertMessage = "새로운 반품 배송이 동록되었습니다.";
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+        if (allocationManagers.isEmpty()) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+
         CreateReturnDeliveryResponseDto responseDto = CreateReturnDeliveryResponseDto.builder()
             .id(newReturnDelivery.getId())
             .customerId(newReturnDelivery.getDelivery().getCustomer().getId())
@@ -152,33 +173,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     public ResponseDto<GetReturnDeliveryDetailResponseDto> getReturnDelivery(Long returnDeliveryId) {
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        GetReturnDeliveryDetailResponseDto responseDto = GetReturnDeliveryDetailResponseDto.builder()
-            .id(returnDelivery.getId())
-            .customerId(returnDelivery.getDelivery().getCustomer().getId())
-            .customerName(returnDelivery.getDelivery().getCustomer().getName())
-            .requestDate(returnDelivery.getRequestDate())
-            .item(returnDelivery.getDelivery().getItem())
-            .weight(returnDelivery.getDelivery().getWeight())
-            .reason(returnDelivery.getReason())
-            .status(returnDelivery.getStatus())
-            .pickupName(returnDelivery.getPickupName())
-            .pickupPhone(returnDelivery.getPickupPhone())
-            .pickupZipcode(returnDelivery.getPickupZipcode())
-            .pickupAddress(returnDelivery.getPickupAddress())
-            .pickupAddressDetail(returnDelivery.getPickupAddressDetail())
-            .recipientName(returnDelivery.getDestinationSite().getName())
-            .recipientPhone(returnDelivery.getDestinationSite().getPhoneNumber())
-            .recipientZipcode(returnDelivery.getDestinationSite().getZipCode())
-            .recipientAddress(returnDelivery.getDestinationSite().getAddress())
-            .recipientAddressDetail(returnDelivery.getDestinationSite().getAddressDetail())
-            .finalFee(returnDelivery.getFinalFee())
-            .overWeightFee(returnDelivery.getOverWeightFee())
-            .overParcelFee(returnDelivery.getOverParcelFee())
-            .isOverWeight(returnDelivery.isOverWeight())
-            .isOverParcel(returnDelivery.isOverParcel())
-            .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
-            .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
-            .build();
+        GetReturnDeliveryDetailResponseDto responseDto = toGetReturnDeliveryDetailResponseDto(returnDelivery);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
     }
@@ -211,7 +206,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if (!returnDelivery.getDelivery().getCustomer().getId().equals(customer.getId())) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+            return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
         }
 
         if (!returnDelivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
@@ -228,33 +223,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             returnDeliveryUpdateLogRepository.saveAll(logs);
         }
 
-        UpdateReturnDeliveryResponseDto responseDto = UpdateReturnDeliveryResponseDto.builder()
-            .id(updateReturnDelivery.getId())
-            .customerId(updateReturnDelivery.getDelivery().getCustomer().getId())
-            .customerName(updateReturnDelivery.getDelivery().getCustomer().getName())
-            .requestDate(updateReturnDelivery.getRequestDate())
-            .item(updateReturnDelivery.getDelivery().getItem())
-            .weight(updateReturnDelivery.getDelivery().getWeight())
-            .reason(updateReturnDelivery.getReason())
-            .status(updateReturnDelivery.getStatus())
-            .pickupName(updateReturnDelivery.getPickupName())
-            .pickupPhone(updateReturnDelivery.getPickupPhone())
-            .pickupZipcode(updateReturnDelivery.getPickupZipcode())
-            .pickupAddress(updateReturnDelivery.getPickupAddress())
-            .pickupAddressDetail(updateReturnDelivery.getPickupAddressDetail())
-            .recipientName(updateReturnDelivery.getDestinationSite().getName())
-            .recipientPhone(updateReturnDelivery.getDestinationSite().getPhoneNumber())
-            .recipientZipcode(updateReturnDelivery.getDestinationSite().getZipCode())
-            .recipientAddress(updateReturnDelivery.getDestinationSite().getAddress())
-            .recipientAddressDetail(updateReturnDelivery.getDestinationSite().getAddressDetail())
-            .finalFee(updateReturnDelivery.getFinalFee())
-            .overWeightFee(updateReturnDelivery.getOverWeightFee())
-            .overParcelFee(updateReturnDelivery.getOverParcelFee())
-            .isOverWeight(updateReturnDelivery.isOverWeight())
-            .isOverParcel(updateReturnDelivery.isOverParcel())
-            .createdAt(DateUtils.format(updateReturnDelivery.getCreatedAt()))
-            .updatedAt(DateUtils.format(updateReturnDelivery.getUpdatedAt()))
-            .build();
+        UpdateReturnDeliveryResponseDto responseDto = toUpdateReturnDeliveryResponseDto(updateReturnDelivery);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
     }
@@ -274,14 +243,32 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         }
 
         DeliveryStatus prevStatus = returnDelivery.getStatus();
+        if (prevStatus == DeliveryStatus.DELETED || dto.getStatus() == DeliveryStatus.DELETED) {
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+        }
 
         if (dto.getStatus() != returnDelivery.getStatus()) {
+            if (dto.getStatus() == DeliveryStatus.CANCELLED) {
+                return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
+            }
+
+            if (returnDelivery.getStatus() == DeliveryStatus.REJECTED || returnDelivery.getStatus() == DeliveryStatus.ASSIGNED) {
+                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+            }
+
+            if (dto.getStatus() == DeliveryStatus.ASSIGNED) {
+                if (returnDelivery.getStatus() != DeliveryStatus.RECEIPTED) {
+                    return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+                }
+
+            }
+
             returnDelivery.setStatus(dto.getStatus());
         } else {
             return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
         }
 
-        if (returnDelivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
+        if (returnDelivery.getStatus().equals(DeliveryStatus.RECEIPTED)) {
             int prevOverWeightFee = returnDelivery.getOverWeightFee();
             boolean prevIsOverWeight = returnDelivery.isOverWeight();
 
@@ -386,6 +373,16 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         customerRepository.save(customer);
         ReturnDelivery updatedReturnDelivery = returnDeliveryRepository.save(returnDelivery);
 
+        String statusText = switch (updatedReturnDelivery.getStatus()) {
+            case REJECTED -> "거절";
+            case ASSIGNED -> "승인";
+            case RECEIPTED -> "접수";
+            default -> "변경";
+        };
+
+        String alertMessage = "반품 배송 번호 " + updatedReturnDelivery.getId() + "가 " + statusText + "되었습니다.";
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
+
         ReturnDeliveryStatusLog returnDeliveryStatusLog = ReturnDeliveryStatusLog.builder()
             .returnDelivery(returnDelivery)
             .user(user)
@@ -397,33 +394,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         returnDeliveryStatusLogRepository.save(returnDeliveryStatusLog);
 
-        UpdateReturnDeliveryResponseDto responseDto = UpdateReturnDeliveryResponseDto.builder()
-            .id(updatedReturnDelivery.getId())
-            .customerId(updatedReturnDelivery.getDelivery().getCustomer().getId())
-            .customerName(updatedReturnDelivery.getDelivery().getCustomer().getName())
-            .requestDate(updatedReturnDelivery.getRequestDate())
-            .item(updatedReturnDelivery.getDelivery().getItem())
-            .weight(updatedReturnDelivery.getDelivery().getWeight())
-            .reason(updatedReturnDelivery.getReason())
-            .status(updatedReturnDelivery.getStatus())
-            .pickupName(updatedReturnDelivery.getPickupName())
-            .pickupPhone(updatedReturnDelivery.getPickupPhone())
-            .pickupZipcode(updatedReturnDelivery.getPickupZipcode())
-            .pickupAddress(updatedReturnDelivery.getPickupAddress())
-            .pickupAddressDetail(updatedReturnDelivery.getPickupAddressDetail())
-            .recipientName(updatedReturnDelivery.getDestinationSite().getName())
-            .recipientPhone(updatedReturnDelivery.getDestinationSite().getPhoneNumber())
-            .recipientZipcode(updatedReturnDelivery.getDestinationSite().getZipCode())
-            .recipientAddress(updatedReturnDelivery.getDestinationSite().getAddress())
-            .recipientAddressDetail(updatedReturnDelivery.getDestinationSite().getAddressDetail())
-            .finalFee(updatedReturnDelivery.getFinalFee())
-            .overWeightFee(updatedReturnDelivery.getOverWeightFee())
-            .overParcelFee(updatedReturnDelivery.getOverParcelFee())
-            .isOverWeight(updatedReturnDelivery.isOverWeight())
-            .isOverParcel(updatedReturnDelivery.isOverParcel())
-            .createdAt(DateUtils.format(updatedReturnDelivery.getCreatedAt()))
-            .updatedAt(DateUtils.format(updatedReturnDelivery.getUpdatedAt()))
-            .build();
+        UpdateReturnDeliveryResponseDto responseDto = toUpdateReturnDeliveryResponseDto(updatedReturnDelivery);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
     }
@@ -439,6 +410,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         }
 
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        Customer customer = customerRepository.findById(returnDelivery.getDelivery().getCustomer().getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         if (returnDelivery.getStatus() == DeliveryStatus.DELETED) {
             return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
@@ -446,6 +418,9 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         returnDelivery.setStatus(DeliveryStatus.DELETED);
         returnDeliveryRepository.save(returnDelivery);
+
+        String alertMessage = "반품 배송이 삭제되었습니다.";
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
 
         deleteLogService.createLog(TableRef.RETURN_DELIVERY, returnDeliveryId, user);
 
@@ -461,6 +436,59 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         data = returnDeliveries.map(this::toGetAllWaitingDeliveryResponseDto);
         return data;
+    }
+
+    @Override
+    @Transactional
+    public ResponseDto<UpdateReturnDeliveryResponseDto> updateReturnDeliveryStatusCancel(Long returnDeliveryId, UpdateReturnDeliveryStatusRequestDto dto, UserPrincipal userPrincipal) {
+        ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        Customer customer = returnDelivery.getDelivery().getCustomer();
+
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if (!customer.getUser().getId().equals(user.getId())) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        DeliveryStatus prevStatus = returnDelivery.getStatus();
+        System.out.println(prevStatus);
+        if (prevStatus.equals(DeliveryStatus.REQUESTED)) {
+            if (dto.getStatus() == DeliveryStatus.CANCELLED) {
+                returnDelivery.setStatus(dto.getStatus());
+            } else {
+                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+            }
+        } else {
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+        }
+
+        ReturnDelivery updatedReturnDelivery = returnDeliveryRepository.save(returnDelivery);
+
+        String alertMessage = "반품 배송 번호 " + updatedReturnDelivery.getId() + "가 신청 취소되었습니다.";
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+        if (allocationManagers.isEmpty()) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+
+        ReturnDeliveryStatusLog returnDeliveryStatusLog = ReturnDeliveryStatusLog.builder()
+            .returnDelivery(returnDelivery)
+            .user(user)
+            .changedByUsername(username)
+            .changeReason(dto.getChangeReason())
+            .prevStatus(prevStatus)
+            .newStatus(updatedReturnDelivery.getStatus())
+            .build();
+
+        returnDeliveryStatusLogRepository.save(returnDeliveryStatusLog);
+
+        UpdateReturnDeliveryResponseDto responseDto = toUpdateReturnDeliveryResponseDto(updatedReturnDelivery);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
     }
 
     private GetAllReturnDeliveryResponseDto toGetAllDeliveryResponseDto(ReturnDelivery returnDelivery) {
@@ -547,6 +575,66 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .status(returnDelivery.getStatus())
             .pickupName(returnDelivery.getPickupName())
             .recipientName(returnDelivery.getDestinationSite().getName())
+            .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
+            .build();
+    }
+
+    private UpdateReturnDeliveryResponseDto toUpdateReturnDeliveryResponseDto(ReturnDelivery updatedReturnDelivery) {
+        return UpdateReturnDeliveryResponseDto.builder()
+            .id(updatedReturnDelivery.getId())
+            .customerId(updatedReturnDelivery.getDelivery().getCustomer().getId())
+            .customerName(updatedReturnDelivery.getDelivery().getCustomer().getName())
+            .requestDate(updatedReturnDelivery.getRequestDate())
+            .item(updatedReturnDelivery.getDelivery().getItem())
+            .weight(updatedReturnDelivery.getDelivery().getWeight())
+            .reason(updatedReturnDelivery.getReason())
+            .status(updatedReturnDelivery.getStatus())
+            .pickupName(updatedReturnDelivery.getPickupName())
+            .pickupPhone(updatedReturnDelivery.getPickupPhone())
+            .pickupZipcode(updatedReturnDelivery.getPickupZipcode())
+            .pickupAddress(updatedReturnDelivery.getPickupAddress())
+            .pickupAddressDetail(updatedReturnDelivery.getPickupAddressDetail())
+            .recipientName(updatedReturnDelivery.getDestinationSite().getName())
+            .recipientPhone(updatedReturnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(updatedReturnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(updatedReturnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(updatedReturnDelivery.getDestinationSite().getAddressDetail())
+            .finalFee(updatedReturnDelivery.getFinalFee())
+            .overWeightFee(updatedReturnDelivery.getOverWeightFee())
+            .overParcelFee(updatedReturnDelivery.getOverParcelFee())
+            .isOverWeight(updatedReturnDelivery.isOverWeight())
+            .isOverParcel(updatedReturnDelivery.isOverParcel())
+            .createdAt(DateUtils.format(updatedReturnDelivery.getCreatedAt()))
+            .updatedAt(DateUtils.format(updatedReturnDelivery.getUpdatedAt()))
+            .build();
+    }
+
+    private GetReturnDeliveryDetailResponseDto toGetReturnDeliveryDetailResponseDto(ReturnDelivery returnDelivery) {
+        return GetReturnDeliveryDetailResponseDto.builder()
+            .id(returnDelivery.getId())
+            .customerId(returnDelivery.getDelivery().getCustomer().getId())
+            .customerName(returnDelivery.getDelivery().getCustomer().getName())
+            .requestDate(returnDelivery.getRequestDate())
+            .item(returnDelivery.getDelivery().getItem())
+            .weight(returnDelivery.getDelivery().getWeight())
+            .reason(returnDelivery.getReason())
+            .status(returnDelivery.getStatus())
+            .pickupName(returnDelivery.getPickupName())
+            .pickupPhone(returnDelivery.getPickupPhone())
+            .pickupZipcode(returnDelivery.getPickupZipcode())
+            .pickupAddress(returnDelivery.getPickupAddress())
+            .pickupAddressDetail(returnDelivery.getPickupAddressDetail())
+            .recipientName(returnDelivery.getDestinationSite().getName())
+            .recipientPhone(returnDelivery.getDestinationSite().getPhoneNumber())
+            .recipientZipcode(returnDelivery.getDestinationSite().getZipCode())
+            .recipientAddress(returnDelivery.getDestinationSite().getAddress())
+            .recipientAddressDetail(returnDelivery.getDestinationSite().getAddressDetail())
+            .finalFee(returnDelivery.getFinalFee())
+            .overWeightFee(returnDelivery.getOverWeightFee())
+            .overParcelFee(returnDelivery.getOverParcelFee())
+            .isOverWeight(returnDelivery.isOverWeight())
+            .isOverParcel(returnDelivery.isOverParcel())
             .createdAt(DateUtils.format(returnDelivery.getCreatedAt()))
             .updatedAt(DateUtils.format(returnDelivery.getUpdatedAt()))
             .build();
