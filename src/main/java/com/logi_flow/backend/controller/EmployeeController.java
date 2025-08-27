@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,9 +36,10 @@ public class EmployeeController {
     @PostMapping
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestBody CreateEmployeeRequestDto dto
+            @Valid @RequestPart(value = "dto") CreateEmployeeRequestDto dto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ){
-        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, dto);
+        ResponseDto<CreateEmployeeResponseDto> response = employeeService.createEmployee(userPrincipal, dto, profileImage);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
@@ -62,9 +64,10 @@ public class EmployeeController {
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployeeAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId,
-            @Valid @RequestBody UpdateEmployeeAdminRequestDto dto
+            @Valid @RequestPart(value = "dto") UpdateEmployeeAdminRequestDto dto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ){
-        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(userPrincipal, employeeId, dto);
+        ResponseDto<UpdateEmployeeResponseDto> response = employeeService.updateEmployeeAdmin(userPrincipal, employeeId, dto, profileImage);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
