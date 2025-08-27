@@ -50,6 +50,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final ContractRepository contractRepository;
     private final DeliveryRepository deliveryRepository;
     private final CollectionSiteRepository collectionSiteRepository;
+    private final RoleRepository roleRepository;
 
     private final DeliveryUpdateLogRepository deliveryUpdateLogRepository;
     private final DeliveryStatusLogRepository deliveryStatusLogRepository;
@@ -713,6 +714,18 @@ public class DeliveryServiceImpl implements DeliveryService {
                     .build();
 
                 deliveryRepository.save(delivery);
+
+
+                String alertMessage = "새로운 배송이 동록되었습니다.";
+                Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+                List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+                if (allocationManagers.isEmpty()) {
+                    throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+                }
+
+                allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+
                 savedDeliveries.add(delivery);
             }
         } catch (Exception e) {
