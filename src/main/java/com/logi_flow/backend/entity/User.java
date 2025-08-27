@@ -35,4 +35,12 @@ public class User extends BaseTime {
 
     @Column(name = "must_change_password", nullable = false)
     private boolean mustChangePassword = false;
+
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "profile_image_id")
+    private UploadFile profileImage;
 }

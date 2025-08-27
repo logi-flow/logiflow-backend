@@ -29,7 +29,6 @@ public class UserController {
     private static final String USER_ID_API = "/{userId}";
     private static final String USER_STATUS_API = "/{userId}/status";
     private static final String USER_ROLE_API = "/{userId}/roles";
-    private static final String PROFILE_IMAGE_API = "/profile-image";
 
     @GetMapping
     public ResponseEntity<ResponseDto<PageDto<GetAllUserResponseDto>>> getAllUser(

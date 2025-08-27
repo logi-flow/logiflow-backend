@@ -50,6 +50,7 @@ public class CollectionSiteServiceImpl implements CollectionSiteService {
                 .customer(customer)
                 .name(dto.getName())
                 .zipCode(dto.getZipCode())
+                .phoneNumber(dto.getPhoneNumber())
                 .address(dto.getAddress())
                 .addressDetail(dto.getAddressDetail())
                 .build();

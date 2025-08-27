@@ -15,6 +15,7 @@ import com.logi_flow.backend.provider.JwtProvider;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.AuthService;
 import com.logi_flow.backend.service.MailService;
+import com.logi_flow.backend.service.UploadFileService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -48,10 +50,11 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final UploadFileService uploadFileService;
 
     @Override
     @Transactional
-    public ResponseDto<CustomerSignUpResponseDto> signup(CustomerSignUpRequestDto dto) {
+    public ResponseDto<CustomerSignUpResponseDto> signup(CustomerSignUpRequestDto dto, MultipartFile profileImage) {
         CustomerSignUpResponseDto data = null;
 
         String username = dto.getUsername().trim();
@@ -94,6 +97,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            user.setProfileImage(uploadFileService.uploadProfile(profileImage, user.getId()));
+        }
 
         Customer customer = Customer.builder()
                 .user(user)
