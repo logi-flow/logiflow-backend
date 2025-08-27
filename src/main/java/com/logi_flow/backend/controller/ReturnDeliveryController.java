@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,12 +31,14 @@ public class ReturnDeliveryController {
     private final ReturnDeliveryService returnDeliveryService;
 
     @PostMapping("/{deliveryId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<CreateReturnDeliveryResponseDto>> createReturnDelivery(@PathVariable Long deliveryId, @Valid @RequestBody CreateReturnDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<CreateReturnDeliveryResponseDto> response = returnDeliveryService.createReturnDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryResponseDto>>> getAllReturnDelivery(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
@@ -47,12 +50,14 @@ public class ReturnDeliveryController {
     }
 
     @GetMapping("/{returnDeliveryId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<GetReturnDeliveryDetailResponseDto>> getReturnDelivery(@PathVariable Long returnDeliveryId) {
         ResponseDto<GetReturnDeliveryDetailResponseDto> response = returnDeliveryService.getReturnDelivery(returnDeliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryResponseDto>>> getMyReturnDeliveries(
         @AuthenticationPrincipal UserPrincipal userPrincipal,
         @RequestParam(defaultValue = "0") int page,
@@ -65,24 +70,28 @@ public class ReturnDeliveryController {
     }
 
     @PutMapping("/{returnDeliveryId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDelivery(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDelivery(returnDeliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @PutMapping("/{returnDeliveryId}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatus(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryStatus(returnDeliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping("/{returnDeliveryId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteReturnDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long returnDeliveryId) {
         ResponseDto<Void> response = returnDeliveryService.deleteReturnDelivery(userPrincipal, returnDeliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping("/waiting")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingReturnDeliveryResponseDto>>> getAllWaitingDelivery(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
@@ -94,6 +103,7 @@ public class ReturnDeliveryController {
     }
 
     @PutMapping("/{returnDeliveryId}/status/me")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatusCancel(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryStatusCancel(returnDeliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
