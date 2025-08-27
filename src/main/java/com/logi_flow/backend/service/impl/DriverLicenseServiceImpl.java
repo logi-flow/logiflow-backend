@@ -17,11 +17,15 @@ import com.logi_flow.backend.repository.DriverLicenseLogRepository;
 import com.logi_flow.backend.repository.DriverLicenseRepository;
 import com.logi_flow.backend.repository.DriverRepository;
 import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DriverLicenseService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -32,6 +36,7 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
     private final DriverRepository driverRepository;
     private final DriverLicenseLogRepository driverLicenseLogRepository;
     private final UserRepository userRepository;
+    private final AlertService alertService;
 
     @Override
     public ResponseDto<CreateDriverLicenseResponseDto> createDriverLicense(Long driverId, CreateDriverLicenseRequestDto dto) {
@@ -74,7 +79,7 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
         DriverLicense driverLicense = driverLicenseRepository.findById(licenseId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if (driverLicense.getDriver().getId().equals(driver.getId())) {
+        if (!driverLicense.getDriver().getId().equals(driver.getId())) {
             return ResponseDto.fail(ResponseCode.FAILED, ResponseMessage.FAILED);
         }
 
@@ -102,6 +107,22 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
+    @Override
+    public void noticeExpiredDate() {
+        LocalDate today = LocalDate.now();
+        LocalDate oneMonthLater = today.plusMonths(1);
+
+        List<DriverLicense> expLicenses = driverLicenseRepository.findByExpiredDateBetween(today, oneMonthLater);
+
+        for (DriverLicense driverLicense : expLicenses) {
+            Driver driver = driverLicense.getDriver();
+            if (driver != null) {
+                String alertMessage = "운전면허증 만료일이 1달 남았습니다. 확인해주세요!";
+                alertService.sendToUser(driver.getUser().getId(), alertMessage);
+            }
+        }
     }
 
     private void createUpdateLog(DriverLicense driverLicense, User user, String type, String prevData, String newData) {
