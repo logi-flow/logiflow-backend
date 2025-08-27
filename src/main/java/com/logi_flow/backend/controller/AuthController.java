@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,9 +37,10 @@ public class AuthController {
 
     @PostMapping(SIGNUP_API)
     public ResponseEntity<ResponseDto<CustomerSignUpResponseDto>> signup(
-            @Valid @RequestBody CustomerSignUpRequestDto dto
+            @Valid @RequestPart(value = "dto") CustomerSignUpRequestDto dto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
-        ResponseDto<CustomerSignUpResponseDto> response = authService.signup(dto);
+        ResponseDto<CustomerSignUpResponseDto> response = authService.signup(dto, profileImage);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

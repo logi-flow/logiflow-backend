@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class DriverAllowanceController {
     private final static String ALLOWANCE_ID_API = "/{payrollId}/allowances/{allowanceId}";
 
     @PostMapping(ALLOWANCE_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverAllowanceResponseDto>> createDriverAllowance(
             @PathVariable Long payrollId,
             @Valid @RequestBody CreateDriverAllowanceRequestDto dto
@@ -37,6 +39,7 @@ public class DriverAllowanceController {
     }
 
     @GetMapping(ALLOWANCE_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<GetDriverAllowanceDetailResponseDto>>> getDriverAllowance(
             @PathVariable Long payrollId
     ) {
@@ -45,6 +48,7 @@ public class DriverAllowanceController {
     }
 
     @PutMapping(ALLOWANCE_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<UpdateDriverAllowanceResponseDto>>> updateDriverAllowance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
@@ -55,6 +59,7 @@ public class DriverAllowanceController {
     }
 
     @DeleteMapping(ALLOWANCE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverAllowance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,

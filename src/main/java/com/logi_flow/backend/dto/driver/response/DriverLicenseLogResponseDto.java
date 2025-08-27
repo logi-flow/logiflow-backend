@@ -9,8 +9,8 @@ import lombok.Getter;
 @Builder
 public class DriverLicenseLogResponseDto {
     private Long id;
-    private Long licenseId;
     private String driverName;
+    private String licenseNumber;
     private String changedByUsername;
     private String type;
     private String prevData;

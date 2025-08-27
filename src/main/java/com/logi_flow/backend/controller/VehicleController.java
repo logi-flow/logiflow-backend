@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class VehicleController {
     private static final String UPDATE_STATUS_API = VEHICLE_ID_API + "/status";
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateVehicleResponseDto>> createVehicle(
             @Valid @RequestBody CreateVehicleRequestDto dto
     ) {
@@ -40,6 +42,7 @@ public class VehicleController {
     }
 
     @PutMapping(VEHICLE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateVehicleResponseDto>> updateVehicle(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long vehicleId,
@@ -50,6 +53,7 @@ public class VehicleController {
     }
 
     @PutMapping(UPDATE_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateVehicleResponseDto>> updateVehicleStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long vehicleId,
@@ -60,6 +64,7 @@ public class VehicleController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllVehicleResponseDto>>> getAllVehicle(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -71,6 +76,7 @@ public class VehicleController {
     }
 
     @GetMapping(VEHICLE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetVehicleDetailResponseDto>> getVehicleDetail(
             @PathVariable Long vehicleId
     ) {
@@ -79,6 +85,7 @@ public class VehicleController {
     }
 
     @DeleteMapping(VEHICLE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteVehicle(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long vehicleId

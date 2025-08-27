@@ -10,7 +10,8 @@ import lombok.Getter;
 @Builder
 public class AssignmentStatusLogResponseDto {
     private Long id;
-    private Long assignmentId;
+    private String driverName;
+    private String vehicleNumber;
     private String changedByUsername;
     private String changeReason;
     private AssignmentStatus prevStatus;

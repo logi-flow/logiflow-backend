@@ -7,9 +7,10 @@ import com.logi_flow.backend.dto.auth.response.*;
 import com.logi_flow.backend.entity.User;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface AuthService {
-    ResponseDto<CustomerSignUpResponseDto> signup(@Valid CustomerSignUpRequestDto dto);
+    ResponseDto<CustomerSignUpResponseDto> signup(@Valid CustomerSignUpRequestDto dto,  MultipartFile profileImage);
 
     ResponseDto<LoginResponseDto> login(@Valid LoginRequestDto dto);
 

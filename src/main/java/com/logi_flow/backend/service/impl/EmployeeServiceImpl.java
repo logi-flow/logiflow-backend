@@ -19,6 +19,7 @@ import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.EmployeeService;
+import com.logi_flow.backend.service.UploadFileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -40,9 +42,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeUpdateLogRepository employeeUpdateLogRepository;
     private final EmployeeStatusLogRepository employeeStatusLogRepository;
     private final DeleteLogService deleteLogService;
+    private final UploadFileService uploadFileService;
 
     @Override
-    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto) {
+    public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto, MultipartFile profileImage) {
         CreateEmployeeResponseDto data = null;
 
         if (employeeRepository.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
@@ -71,6 +74,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         userRepository.save(user);
 
+        if (profileImage != null && !profileImage.isEmpty()) {
+            user.setProfileImage(uploadFileService.uploadProfile(profileImage, user.getId()));
+        }
+
         Employee employee = Employee.builder()
                 .user(user)
                 .name(dto.getName())
@@ -87,7 +94,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeRepository.save(employee);
 
-        String identityNumberMasked = dto.getIdentityNumber().substring(0,6) + "*******";
+        String identityNumberMasked = dto.getIdentityNumber().substring(0,6) + "-*******";
 
         data = CreateEmployeeResponseDto.builder()
                 .id(employee.getId())
@@ -146,7 +153,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.save(employee);
         employeeUpdateLogRepository.saveAll(logs);
 
-        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "*******";
+        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "-*******";
 
         data = UpdateEmployeeResponseDto.builder()
                 .id(employee.getId())
@@ -180,7 +187,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "*******";
+        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "-*******";
 
         data = GetEmployeeDetailResponseDto.builder()
                 .id(employee.getId())
@@ -204,7 +211,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeAdminRequestDto dto) {
+    public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeAdminRequestDto dto, MultipartFile profileImage) {
         UpdateEmployeeResponseDto data = null;
 
         String username = userPrincipal.getUsername();
@@ -273,7 +280,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.save(employee);
         employeeUpdateLogRepository.saveAll(logs);
 
-        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "*******";
+        if (profileImage != null && !profileImage.isEmpty()) {
+            user.setProfileImage(uploadFileService.uploadProfile(profileImage, user.getId()));
+        }
+
+        String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "-*******";
 
         data = UpdateEmployeeResponseDto.builder()
                 .id(employee.getId())

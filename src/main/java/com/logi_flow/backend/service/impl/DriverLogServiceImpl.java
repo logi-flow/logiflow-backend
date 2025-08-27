@@ -51,7 +51,7 @@ public class DriverLogServiceImpl implements DriverLogService {
     private DriverStatusLogResponseDto toDriverStatusLogResponseDto(DriverStatusLog driverStatusLog) {
         return DriverStatusLogResponseDto.builder()
                 .id(driverStatusLog.getId())
-                .driverId(driverStatusLog.getDriver().getId())
+                .username(driverStatusLog.getDriver().getUser().getUsername())
                 .changedByUsername(driverStatusLog.getChangedByUsername())
                 .changeReason(driverStatusLog.getChangeReason())
                 .prevStatus(driverStatusLog.getPrevStatus())
@@ -63,7 +63,7 @@ public class DriverLogServiceImpl implements DriverLogService {
     private DriverUpdateLogResponseDto toDriverUpdateLogResponseDto(DriverUpdateLog driverUpdateLog) {
         return DriverUpdateLogResponseDto.builder()
                 .id(driverUpdateLog.getId())
-                .driverId(driverUpdateLog.getDriver().getId())
+                .username(driverUpdateLog.getDriver().getUser().getUsername())
                 .changedByUsername(driverUpdateLog.getChangedByUsername())
                 .type(driverUpdateLog.getType())
                 .prevData(driverUpdateLog.getPrevData())

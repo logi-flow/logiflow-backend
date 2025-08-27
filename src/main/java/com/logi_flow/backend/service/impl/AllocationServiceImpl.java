@@ -14,6 +14,7 @@ import com.logi_flow.backend.dto.allocation.response.CreateAllocationResponseDto
 import com.logi_flow.backend.dto.allocation.response.UpdateAllocationResponseDto;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.AllocationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     private final AllocationUpdateLogRepository allocationUpdateLogRepository;
     private final AllocationStatusLogRepository allocationStatusLogRepository;
+
+    private final AlertService alertService;
 
     @Override
     public ResponseDto<CreateAllocationResponseDto> createAllocation(CreateAllocationRequestDto dto, UserPrincipal userPrincipal) {
@@ -66,6 +69,19 @@ public class AllocationServiceImpl implements AllocationService {
                 .build();
 
         scheduleRepository.save(newSchedule);
+
+        String alertMessage;
+        Long sendUserId;
+
+        if (delivery != null) {
+            alertMessage = "주문번호 #" + delivery.getId() + " 배차가 완료되었습니다.";
+            sendUserId = delivery.getCustomer().getUser().getId();
+        } else {
+            alertMessage = "반품 주문번호 #" + returnDelivery.getId() + " 배차가 완료되었습니다.";
+            sendUserId = returnDelivery.getDelivery().getCustomer().getUser().getId();
+        }
+
+        alertService.sendToUser(sendUserId, alertMessage);
 
         CreateAllocationResponseDto data = CreateAllocationResponseDto.builder()
                 .id(newAllocation.getId())
@@ -138,6 +154,19 @@ public class AllocationServiceImpl implements AllocationService {
             allocationUpdateLogRepository.saveAll(logs);
         }
 
+        String alertMessage;
+        Long sendUserId;
+
+        if (updatedAllocation.getDelivery() != null) {
+            alertMessage = "주문번호 #" + updatedAllocation.getDelivery().getId() + " 배차 정보가 수정되었습니다.";
+            sendUserId = updatedAllocation.getDelivery().getCustomer().getUser().getId();
+        } else {
+            alertMessage = "반품 주문번호 #" + updatedAllocation.getReturnDelivery().getId() + " 배차 정보가 수정되었습니다.";
+            sendUserId = updatedAllocation.getReturnDelivery().getDelivery().getCustomer().getUser().getId();
+        }
+
+        alertService.sendToUser(sendUserId, alertMessage);
+
         UpdateAllocationResponseDto data = UpdateAllocationResponseDto.builder()
                 .id(updatedAllocation.getId())
                 .deliveryId(updatedAllocation.getDelivery() != null ? updatedAllocation.getDelivery().getId() : null)
@@ -181,6 +210,19 @@ public class AllocationServiceImpl implements AllocationService {
                 .build();
 
         allocationStatusLogRepository.save(allocationStatusLog);
+
+        String alertMessage;
+        Long sendUserId;
+
+        if (updatedAllocation.getDelivery() != null) {
+            alertMessage = "주문번호 #" + updatedAllocation.getDelivery().getId() + " 배차 상태가 업데이트 되었습니다.";
+            sendUserId = updatedAllocation.getDelivery().getCustomer().getUser().getId();
+        } else {
+            alertMessage = "반품 주문번호 #" + updatedAllocation.getReturnDelivery().getId() + " 배차 상태가 업데이트 되었습니다.";
+            sendUserId = updatedAllocation.getReturnDelivery().getDelivery().getCustomer().getUser().getId();
+        }
+
+        alertService.sendToUser(sendUserId, alertMessage);
 
         UpdateAllocationResponseDto data = UpdateAllocationResponseDto.builder()
                 .id(updatedAllocation.getId())

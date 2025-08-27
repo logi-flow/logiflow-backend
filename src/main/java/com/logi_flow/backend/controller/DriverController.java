@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class DriverController {
     private static final String UPDATE_PAY_API = DRIVER_ID_API + "/pay";
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverResponseDto>> createDriver(
             @Valid @RequestBody CreateDriverRequestDto dto
     ) {
@@ -37,6 +39,7 @@ public class DriverController {
     }
 
     @PutMapping(MY_INFO_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriver(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateDriverRequestDto dto
@@ -46,6 +49,7 @@ public class DriverController {
     }
 
     @PutMapping(DRIVER_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriverByAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
@@ -56,6 +60,7 @@ public class DriverController {
     }
 
     @PutMapping(UPDATE_PAY_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGE')")
     public ResponseEntity<ResponseDto<UpdateDriverPayResponseDto>> updateDriverPay(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
@@ -66,6 +71,7 @@ public class DriverController {
     }
 
     @PutMapping(UPDATE_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriverStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId,
@@ -76,6 +82,7 @@ public class DriverController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverResponseDto>>> getAllDriver(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -87,6 +94,7 @@ public class DriverController {
     }
 
     @GetMapping(DRIVER_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetDriverDetailResponseDto>> getDriverDetail(
             @PathVariable Long driverId
     ) {

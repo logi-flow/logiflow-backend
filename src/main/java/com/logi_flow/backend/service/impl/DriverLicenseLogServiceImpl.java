@@ -35,8 +35,8 @@ public class DriverLicenseLogServiceImpl implements DriverLicenseLogService {
     private DriverLicenseLogResponseDto toDriverLicenseLogResponseDto(DriverLicenseLog driverLicenseLog) {
         return DriverLicenseLogResponseDto.builder()
                 .id(driverLicenseLog.getId())
-                .licenseId(driverLicenseLog.getDriverLicense().getId())
                 .driverName(driverLicenseLog.getDriverLicense().getDriver().getName())
+                .licenseNumber(driverLicenseLog.getDriverLicense().getDriverNumber())
                 .changedByUsername(driverLicenseLog.getChangedByUsername())
                 .type(driverLicenseLog.getType())
                 .prevData(driverLicenseLog.getPrevData())

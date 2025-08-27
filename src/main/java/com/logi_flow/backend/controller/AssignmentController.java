@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class AssignmentController {
     private static final String ASSIGNMENT_STATUS_API = "/{assignmentId}/status";
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateAssignmentResponseDto>> createAssignment(
             @Valid @RequestBody CreateAssignmentRequestDto dto
     ) {
@@ -40,6 +42,7 @@ public class AssignmentController {
     }
 
     @PutMapping(ASSIGNMENT_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignment(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId,
@@ -50,6 +53,7 @@ public class AssignmentController {
     }
 
     @PutMapping(ASSIGNMENT_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignmentStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId,
@@ -60,6 +64,7 @@ public class AssignmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllAssignmentResponseDto>>> getAllAssignment(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -71,6 +76,7 @@ public class AssignmentController {
     }
 
     @GetMapping(ASSIGNMENT_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetAssignmentDetailResponseDto>> getAssignmentDetail(
             @PathVariable Long assignmentId
     ) {
@@ -79,6 +85,7 @@ public class AssignmentController {
     }
 
     @DeleteMapping(ASSIGNMENT_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteAssignment(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long assignmentId

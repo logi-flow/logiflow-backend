@@ -38,4 +38,5 @@ public interface ResponseMessage {
     String NOT_OWN_PAYROLL = "본인의 급여대장이 아닙니다.";
 
     String INVALID_STATE = "잘못된 상태입니다.";
+    String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
 }

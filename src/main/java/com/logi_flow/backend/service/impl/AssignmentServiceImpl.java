@@ -18,6 +18,7 @@ import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponse
 import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.AssignmentService;
 import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
@@ -44,6 +45,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final VehicleStatusLogRepository vehicleStatusLogRepository;
     private final AssignmentUpdateLogRepository assignmentUpdateLogRepository;
     private final DeleteLogService deleteLogService;
+    private final AlertService alertService;
 
     @Override
     public ResponseDto<CreateAssignmentResponseDto> createAssignment(CreateAssignmentRequestDto dto) {
@@ -79,6 +81,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                     });
         }
 
+        if (driver.getDriverLicense() == null) {
+            throw new IllegalArgumentException(ResponseMessage.CHECK_LICENSE);
+        }
+
         Assignment newAssignment = Assignment.builder()
                 .driver(driver)
                 .vehicle(vehicle)
@@ -99,6 +105,9 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .createdAt(DateUtils.format(newAssignment.getCreatedAt()))
                 .updatedAt(DateUtils.format(newAssignment.getUpdatedAt()))
                 .build();
+
+        String alertMessage = "배정 정보가 생성되었습니다. 확인해주세요.";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -135,6 +144,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .createdAt(DateUtils.format(assignment.getCreatedAt()))
                 .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
+
+        Driver driver = assignment.getDriver();
+        String alertMessage = "배정 정보가 변경되었습니다 확인해주세요.";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -179,6 +192,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .createdAt(DateUtils.format(assignment.getCreatedAt()))
                 .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
+
+        Driver driver = assignment.getDriver();
+        String alertMessage = "배정 상태 정보가 변경되었습니다 확인해주세요.";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -286,6 +303,11 @@ public class AssignmentServiceImpl implements AssignmentService {
                             .build();
 
                     vehicleStatusLogRepository.save(vehicleStatusLog);
+
+                    Driver driver = assignment.getDriver();
+
+                    String alertMessage = "배정 정보가 변경되었습니다 확인해주세요.";
+                    alertService.sendToUser(driver.getUser().getId(), alertMessage);
                 });
     }
 
