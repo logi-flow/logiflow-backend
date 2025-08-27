@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class DriverDeductionController {
     private final static String DEDUCTION_ID_API = "/{payrollId}/deductions/{deductionId}";
 
     @PostMapping(DEDUCTION_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverDeductionResponseDto>> createDriverDeduction(
             @PathVariable Long payrollId,
             @Valid @RequestBody CreateDriverDeductionRequestDto dto
@@ -37,6 +39,7 @@ public class DriverDeductionController {
     }
 
     @GetMapping(DEDUCTION_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<GetDriverDeductionDetailResponseDto>>> getDriverDeduction(
             @PathVariable Long payrollId
     ) {
@@ -45,6 +48,7 @@ public class DriverDeductionController {
     }
 
     @PutMapping(DEDUCTION_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<UpdateDriverDeductionResponseDto>>> updateDriverDeduction(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
@@ -55,6 +59,7 @@ public class DriverDeductionController {
     }
 
     @DeleteMapping(DEDUCTION_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverDeduction(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long payrollId,
