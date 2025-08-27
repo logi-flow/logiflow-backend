@@ -14,6 +14,7 @@ import com.logi_flow.backend.dto.driver.request.*;
 import com.logi_flow.backend.dto.driver.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DriverService;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,6 +38,7 @@ public class DriverServiceImpl implements DriverService {
     private final DriverStatusLogRepository driverStatusLogRepository;
     private final DriverUpdateLogRepository driverUpdateLogRepository;
     private final DeleteLogService deleteLogService;
+    private final AlertService alertService;
 
     @Override
     public ResponseDto<CreateDriverResponseDto> createDriver(CreateDriverRequestDto dto) {
@@ -216,6 +218,9 @@ public class DriverServiceImpl implements DriverService {
                 .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
 
+        String alertMessage = "기사 #" + driverId + "님의 월급이" + driver.getPay() + "로 변경되었습니다!";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -268,6 +273,9 @@ public class DriverServiceImpl implements DriverService {
                 .createdAt(DateUtils.format(driver.getCreatedAt()))
                 .updatedAt(DateUtils.format(driver.getUpdatedAt()))
                 .build();
+
+        String alertMessage = "기사 #" + driverId + "님의 정보가 변경되었습니다. 확인해주세요!";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }

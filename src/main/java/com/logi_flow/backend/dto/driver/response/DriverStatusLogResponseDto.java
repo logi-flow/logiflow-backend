@@ -10,7 +10,7 @@ import lombok.Getter;
 @Builder
 public class DriverStatusLogResponseDto {
     private Long id;
-    private Long driverId;
+    private String username;
     private String changedByUsername;
     private String changeReason;
     private DriverStatus prevStatus;

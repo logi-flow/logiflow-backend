@@ -9,7 +9,8 @@ import lombok.Getter;
 @Builder
 public class AssignmentUpdateLogResponseDto {
     private Long id;
-    private Long AssignmentId;
+    private String driverName;
+    private String vehicleNumber;
     private String changedByUsername;
     private String type;
     private String prevData;
