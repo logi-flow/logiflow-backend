@@ -141,6 +141,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
 
+        Driver driver = assignment.getDriver();
+        String alertMessage = "배정 정보가 변경되었습니다 확인해주세요.";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -184,6 +188,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .createdAt(DateUtils.format(assignment.getCreatedAt()))
                 .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
                 .build();
+
+        Driver driver = assignment.getDriver();
+        String alertMessage = "배정 상태 정보가 변경되었습니다 확인해주세요.";
+        alertService.sendToUser(driver.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
