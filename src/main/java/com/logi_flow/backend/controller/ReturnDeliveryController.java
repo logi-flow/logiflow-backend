@@ -92,4 +92,10 @@ public class ReturnDeliveryController {
         PageDto<GetAllWaitingReturnDeliveryResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
+
+    @PutMapping("/{returnDeliveryId}/status/me")
+    public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatusCancel(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryStatusCancel(returnDeliveryId, dto, userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
 }

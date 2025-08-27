@@ -29,4 +29,6 @@ public interface ReturnDeliveryService {
     ResponseDto<Void> deleteReturnDelivery(UserPrincipal userPrincipal, Long returnDeliveryId);
 
     Page<GetAllWaitingReturnDeliveryResponseDto> getAllWaitingReturnDelivery(int page, int size, String sort);
+
+    ResponseDto<UpdateReturnDeliveryResponseDto> updateReturnDeliveryStatusCancel(Long returnDeliveryId, @Valid UpdateReturnDeliveryStatusRequestDto dto, UserPrincipal userPrincipal);
 }
