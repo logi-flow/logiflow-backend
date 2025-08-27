@@ -16,6 +16,7 @@ import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollStatus
 import com.logi_flow.backend.dto.driverPayroll.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.DriverPayrollService;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,6 +46,7 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
     private final DriverPayrollStatusLogRepository driverPayrollStatusLogRepository;
     private final DriverPayrollUpdateLogRepository driverPayrollUpdateLogRepository;
     private final DeleteLogService deleteLogService;
+    private final AlertService alertService;
     private final DriverPayrollMapper driverPayrollMapper;
 
     @Override
@@ -180,6 +182,14 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         DriverPayroll updatedDriverPayroll = driverPayrollRepository.save(savedDriverPayroll);
 
         createStatusLog(user, updatedDriverPayroll, dto.getChangeReason(), prevStatus);
+
+        String alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정되었습니다. 확인해 주세요.";
+
+        if (updatedDriverPayroll.getStatus().equals(DriverPayrollStatus.CREATED)) {
+            alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정 취소되었습니다. 잠시 후 확인해 주세요.";
+        }
+
+        alertService.sendToUser(updatedDriverPayroll.getDriver().getUser().getId(), alertMessage);
 
         data = UpdateDriverPayrollStatusResponseDto.builder()
                 .id(updatedDriverPayroll.getId())
