@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class AllowanceTypeController {
     private static final String ALLOWANCE_TYPE_ID_API = "/{allowanceTypeId}";
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateAllowanceTypeResponseDto>> createAllowanceType(
             @Valid @RequestBody CreateAllowanceTypeRequestDto dto
     ) {
@@ -37,6 +39,7 @@ public class AllowanceTypeController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllAllowanceTypeResponseDto>>> getAllAllowanceType(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -48,6 +51,7 @@ public class AllowanceTypeController {
     }
 
     @GetMapping(ALLOWANCE_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetAllowanceTypeDetailResponseDto>> getAllowanceTypeDetail(
             @PathVariable Long allowanceTypeId
     ) {
@@ -56,6 +60,7 @@ public class AllowanceTypeController {
     }
 
     @PutMapping(ALLOWANCE_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAllowanceTypeResponseDto>> updateAllowanceType(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long allowanceTypeId,
@@ -66,6 +71,7 @@ public class AllowanceTypeController {
     }
 
     @DeleteMapping(ALLOWANCE_TYPE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteAllowanceType(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long allowanceTypeId

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,6 +109,7 @@ public class DeliveryController {
 
 
     @PostMapping("/upload")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);

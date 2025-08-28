@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class AttendanceController {
     private static final String MY_ATTENDANCE_LIST_API = "/me/list";
 
     @PostMapping(CHECK_IN_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<CreateAttendanceResponseDto>> checkInAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -37,6 +39,7 @@ public class AttendanceController {
     }
 
     @PutMapping(CHECK_OUT_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<UpdateAttendanceResponseDto>> checkOutAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateAttendanceRequestDto dto
@@ -46,6 +49,7 @@ public class AttendanceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllAttendanceResponseDto>>> getAllAttendance(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -57,6 +61,7 @@ public class AttendanceController {
     }
 
     @GetMapping(GET_DETAILS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetAttendanceDetailResponseDto>> getAttendanceDetail(
             @PathVariable Long attendanceId
     ) {
@@ -65,6 +70,7 @@ public class AttendanceController {
     }
 
     @GetMapping(MY_ATTENDANCE_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<GetMyAttendanceDetailResponseDto>> getMyAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -73,6 +79,7 @@ public class AttendanceController {
     }
 
     @GetMapping(MY_ATTENDANCE_LIST_API)
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllMyAttendanceResponseDto>>> getAllMyAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,

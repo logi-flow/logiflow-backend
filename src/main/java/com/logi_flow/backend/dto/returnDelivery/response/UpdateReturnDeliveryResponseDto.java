@@ -20,6 +20,7 @@ public class UpdateReturnDeliveryResponseDto {
     private String item;
     private BigDecimal weight;
     private String reason;
+    private boolean isHidden;
     private DeliveryStatus status;
 
     private String pickupName;

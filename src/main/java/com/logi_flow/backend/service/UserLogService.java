@@ -3,7 +3,9 @@ package com.logi_flow.backend.service;
 import com.logi_flow.backend.dto.userLog.response.GetUserRoleLogResponseDto;
 import com.logi_flow.backend.dto.userLog.response.GetUserStatusLogResponseDto;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface UserLogService {
     Page<GetUserStatusLogResponseDto> getUserStatusLogs(int page, int size, String sort);
 

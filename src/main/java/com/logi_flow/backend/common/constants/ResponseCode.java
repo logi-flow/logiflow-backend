@@ -27,4 +27,8 @@ public interface ResponseCode {
     String ALREADY_DELETED = "AD";
     String LOCK_PAYROLL_CONFIRMED = "LPC";
     String NOT_DELETE_USED_TYPE = "NDT";
+
+    String FORBIDDEN = "FB";
+    String INVALID_STATE = "IST";
+    String ACTION_TOO_EARLY = "ATE";
 }
