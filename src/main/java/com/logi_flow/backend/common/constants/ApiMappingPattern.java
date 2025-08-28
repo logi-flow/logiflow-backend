@@ -25,5 +25,7 @@ public interface ApiMappingPattern {
 
     String RETURN_DELIVERY_LOG_API = RETURN_DELIVERY_API + "/logs";
     String DELIVERY_LOG_API = DELIVERY_API + "/logs";
+
+    String STATS_API = "/api/v1/stats";
 }
 
