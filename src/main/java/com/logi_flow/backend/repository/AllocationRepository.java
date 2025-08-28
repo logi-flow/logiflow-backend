@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface AllocationRepository extends JpaRepository<Allocation, Long> {
     Optional<Allocation> findByDeliveryId(Long id);
+
+    Optional<Allocation> findByReturnDeliveryId(Long id);
 }

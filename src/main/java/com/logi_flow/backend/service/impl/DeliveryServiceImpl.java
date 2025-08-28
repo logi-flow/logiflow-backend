@@ -715,19 +715,19 @@ public class DeliveryServiceImpl implements DeliveryService {
 
                 deliveryRepository.save(delivery);
 
-
-                String alertMessage = "새로운 배송이 동록되었습니다.";
-                Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-                List<User> allocationManagers = userRepository.findByRoleId(role.getId());
-
-                if (allocationManagers.isEmpty()) {
-                    throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
-                }
-
-                allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
-
                 savedDeliveries.add(delivery);
             }
+
+            String alertMessage = "새로운 대량의 배송이 동록되었습니다.";
+            Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+            List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+            if (allocationManagers.isEmpty()) {
+                throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+            }
+
+            allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+
         } catch (Exception e) {
             throw new RuntimeException("엑셀 처리 실패: " + e.getMessage(), e);
         }
