@@ -38,7 +38,7 @@ public class ReturnDeliveryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryResponseDto>>> getAllReturnDelivery(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
@@ -50,7 +50,7 @@ public class ReturnDeliveryController {
     }
 
     @GetMapping("/{returnDeliveryId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<GetReturnDeliveryDetailResponseDto>> getReturnDelivery(@PathVariable Long returnDeliveryId) {
         ResponseDto<GetReturnDeliveryDetailResponseDto> response = returnDeliveryService.getReturnDelivery(returnDeliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
@@ -77,21 +77,21 @@ public class ReturnDeliveryController {
     }
 
     @PutMapping("/{returnDeliveryId}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatus(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryStatus(returnDeliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @DeleteMapping("/{returnDeliveryId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteReturnDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long returnDeliveryId) {
         ResponseDto<Void> response = returnDeliveryService.deleteReturnDelivery(userPrincipal, returnDeliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @GetMapping("/waiting")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingReturnDeliveryResponseDto>>> getAllWaitingDelivery(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,

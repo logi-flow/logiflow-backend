@@ -24,7 +24,7 @@ public class ReturnDeliveryLogController {
     private final ReturnDeliveryLogService returnDeliveryLogService;
 
     @GetMapping("/update")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryUpdateLogResponseDto>>> getAllReturnDeliveryUpdateLogs(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
@@ -36,7 +36,7 @@ public class ReturnDeliveryLogController {
     }
 
     @GetMapping("/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryStatusLogResponseDto>>> getAllReturnDeliveryStatusLogs(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
