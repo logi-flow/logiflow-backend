@@ -40,4 +40,6 @@ public interface ResponseMessage {
     String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
     String INVALID_STATE = "잘못된 상태입니다.";
     String ACTION_TOO_EARLY = "7일이 경과하지 않아 요청을 처리할 수 없습니다.";
+
+    String INVALID_DATE_RANGE = "조회 시작 일자는 종료 일자보다 이전이어야 합니다.";
 }
