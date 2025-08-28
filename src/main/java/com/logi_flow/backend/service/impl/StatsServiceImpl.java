@@ -42,20 +42,20 @@ public class StatsServiceImpl implements StatsService {
 
         while (!cursor.isAfter(toDate)) {
             LocalDate start = cursor.atDay(1);
-            LocalDate end = cursor.atEndOfMonth();
+            LocalDate end = cursor.plusMonths(1).atDay(1);
 
-            int newHires = Math.toIntExact(
-                    driverRepository.countByCompanyJoinBetween(start, end)
+            int joins = Math.toIntExact(
+                    driverRepository.countByCompanyJoinGreaterThanEqualAndCompanyJoinLessThan(start, end)
             );
 
-            int leavers = Math.toIntExact(
-                    driverStatusLogRepository.countByNewStatusAndCreatedAtBetween(DriverStatus.RETIRED, start.atStartOfDay(), end.atTime(23, 59, 59))
+            int leaves = Math.toIntExact(
+                    driverStatusLogRepository.countByNewStatusAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(DriverStatus.RETIRED, start.atStartOfDay(), end.atStartOfDay())
             );
 
             points.add(DriverJoinLeavePoint.builder()
                     .yearMonth(DateUtils.yearMonthFormat(cursor))
-                    .newHires(newHires)
-                    .leavers(leavers)
+                    .joins(joins)
+                    .leaves(leaves)
                     .build()
             );
 
