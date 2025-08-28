@@ -30,4 +30,5 @@ public interface ResponseCode {
 
     String FORBIDDEN = "FB";
     String INVALID_STATE = "IST";
+    String ACTION_TOO_EARLY = "ATE";
 }

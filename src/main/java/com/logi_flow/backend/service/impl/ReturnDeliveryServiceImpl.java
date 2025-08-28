@@ -11,6 +11,7 @@ import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
+import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.GetAllWaitingReturnDeliveryResponseDto;
 import com.logi_flow.backend.dto.returnDelivery.request.CreateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryRequestDto;
@@ -35,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,6 +103,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .delivery(delivery)
             .requestDate(dto.getRequestDate())
             .reason(dto.getReason())
+            .isHidden(false)
             .status(DeliveryStatus.REQUESTED)
             .pickupName(dto.getPickupName())
             .pickupPhone(dto.getPickupPhone())
@@ -134,6 +138,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .item(newReturnDelivery.getDelivery().getItem())
             .weight(newReturnDelivery.getDelivery().getWeight())
             .reason(newReturnDelivery.getReason())
+            .isHidden(newReturnDelivery.isHidden())
             .status(newReturnDelivery.getStatus())
             .pickupName(newReturnDelivery.getPickupName())
             .pickupPhone(newReturnDelivery.getPickupPhone())
@@ -188,7 +193,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         Page<GetAllReturnDeliveryResponseDto> responseDtos = null;
 
         Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
-        Page<ReturnDelivery> returnDeliveries = returnDeliveryRepository.findByDeliveryCustomer(customer, pageable);
+        Page<ReturnDelivery> returnDeliveries = returnDeliveryRepository.findByDeliveryCustomerAndIsHiddenFalse(customer, pageable);
 
         responseDtos = returnDeliveries.map(this::toGetAllDeliveryResponseDto);
 
@@ -237,10 +242,6 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if (!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         DeliveryStatus prevStatus = returnDelivery.getStatus();
         if (prevStatus == DeliveryStatus.DELETED || dto.getStatus() == DeliveryStatus.DELETED) {
@@ -405,12 +406,12 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if (!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         Customer customer = customerRepository.findById(returnDelivery.getDelivery().getCustomer().getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if(!returnDelivery.isHidden()) {
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+        }
 
         if (returnDelivery.getStatus() == DeliveryStatus.DELETED) {
             return ResponseDto.fail(ResponseCode.ALREADY_DELETED, ResponseMessage.ALREADY_DELETED);
@@ -419,7 +420,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         returnDelivery.setStatus(DeliveryStatus.DELETED);
         returnDeliveryRepository.save(returnDelivery);
 
-        String alertMessage = "반품 배송이 삭제되었습니다.";
+        String alertMessage = "반품 배송 " + returnDelivery.getId() + "이 삭제되었습니다.";
         alertService.sendToUser(customer.getUser().getId(), alertMessage);
 
         deleteLogService.createLog(TableRef.RETURN_DELIVERY, returnDeliveryId, user);
@@ -489,6 +490,59 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         UpdateReturnDeliveryResponseDto responseDto = toUpdateReturnDeliveryResponseDto(updatedReturnDelivery);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto);
+    }
+
+    @Override
+    @Transactional
+    public ResponseDto<UpdateReturnDeliveryResponseDto> updateReturnDeliveryIsHidden(Long returnDeliveryId, UpdateIsHiddenRequestDto dto, UserPrincipal userPrincipal) {
+        ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if(!returnDelivery.getDelivery().getCustomer().getId().equals(customer.getId())) {
+            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        }
+
+        Allocation allocation = allocationRepository.findByReturnDeliveryId(returnDelivery.getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (!LocalDateTime.now().isAfter(allocation.getUpdatedAt().plusDays(7))) {
+            return ResponseDto.fail(ResponseCode.ACTION_TOO_EARLY, ResponseMessage.ACTION_TOO_EARLY);
+        }
+
+        boolean prevIsHidden = returnDelivery.isHidden();
+
+        if (dto.getIsHidden() != null && !dto.getIsHidden().equals(returnDelivery.isHidden())) {
+            returnDelivery.setHidden(dto.getIsHidden());
+        }
+
+        ReturnDelivery updatedReturnDelivery = returnDeliveryRepository.save(returnDelivery);
+
+        ReturnDeliveryUpdateLog returnDeliveryUpdateLog = ReturnDeliveryUpdateLog.builder()
+            .returnDelivery(returnDelivery)
+            .user(user)
+            .changedByUsername(username)
+            .type("is_hidden")
+            .prevData(prevIsHidden ? "true" : "false")
+            .newData(updatedReturnDelivery.isHidden() ? "true" : "false")
+            .build();
+
+        returnDeliveryUpdateLogRepository.save(returnDeliveryUpdateLog);
+
+        Role role = roleRepository.findByName(UserRole.ADMIN).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> adminUser = userRepository.findByRoleId(role.getId());
+        String alertMessage = "반품 번호 " + returnDelivery.getId() + "가 숨김 처리되었습니다.";
+        if (adminUser.isEmpty()) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        adminUser.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+
+        UpdateReturnDeliveryResponseDto data = toUpdateReturnDeliveryResponseDto(updatedReturnDelivery);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
     private GetAllReturnDeliveryResponseDto toGetAllDeliveryResponseDto(ReturnDelivery returnDelivery) {
@@ -589,6 +643,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .item(updatedReturnDelivery.getDelivery().getItem())
             .weight(updatedReturnDelivery.getDelivery().getWeight())
             .reason(updatedReturnDelivery.getReason())
+            .isHidden(updatedReturnDelivery.isHidden())
             .status(updatedReturnDelivery.getStatus())
             .pickupName(updatedReturnDelivery.getPickupName())
             .pickupPhone(updatedReturnDelivery.getPickupPhone())
