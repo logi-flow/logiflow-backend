@@ -25,10 +25,11 @@ public class ContractController {
 
     private final ContractService contractService;
 
+    private static final String CREATE_CONTRACT_API = "/{customerId}";
     private static final String CONTRACT_API = "/{contractId}";
     private static final String CONTRACT_STATUS_API = "/{contractId}/status";
 
-    @PostMapping("/{customerId}")
+    @PostMapping(CREATE_CONTRACT_API)
     public ResponseEntity<ResponseDto<CreateContractResponseDto>> createContract(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId,

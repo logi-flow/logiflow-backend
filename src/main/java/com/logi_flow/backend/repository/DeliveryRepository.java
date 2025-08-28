@@ -9,14 +9,15 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
-    Page<Delivery> findByCustomerId(Long id, Pageable pageable);
 
     @Query("""
     SELECT d
     FROM Delivery d
     LEFT JOIN Allocation a ON a.delivery = d
     WHERE a.id IS NULL
+    AND d.status = 'ASSIGNED'
     """)
     Page<Delivery> findAllWaitingDelivery(Pageable pageable);
 
+    Page<Delivery> findByCustomerIdAndIsHiddenFalse(Long id, Pageable pageable);
 }
