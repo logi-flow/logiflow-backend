@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 
 @Repository
 public interface DriverStatusLogRepository extends JpaRepository<DriverStatusLog, Long> {
-    long countByNewStatusAndCreatedAtBetween(DriverStatus driverStatus, LocalDateTime start, LocalDateTime end);
+    long countByNewStatusAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(DriverStatus driverStatus, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 }

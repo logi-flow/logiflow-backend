@@ -14,5 +14,5 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     Optional<Driver> findByNameAndPhoneNumber(String name, String phoneNumber);
     Optional<Driver> findByUserId(Long userId);
     Optional<Driver> findByUser(User user);
-    long countByCompanyJoinBetween(LocalDate start, LocalDate end);
+    long countByCompanyJoinGreaterThanEqualAndCompanyJoinLessThan(LocalDate start, LocalDate end);
 }

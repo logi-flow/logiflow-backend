@@ -9,6 +9,6 @@ import lombok.Getter;
 @Builder
 public class DriverJoinLeavePoint {
     private String yearMonth;
-    private int newHires;
-    private int leavers;
+    private int joins;
+    private int leaves;
 }
