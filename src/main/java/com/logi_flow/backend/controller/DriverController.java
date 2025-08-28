@@ -8,6 +8,8 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.request.*;
 import com.logi_flow.backend.dto.driver.response.*;
 import com.logi_flow.backend.service.DriverService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "기사 관리", description = "기사(Driver) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.DRIVER_API)
@@ -29,6 +32,7 @@ public class DriverController {
     private static final String UPDATE_STATUS_API = DRIVER_ID_API + "/status";
     private static final String UPDATE_PAY_API = DRIVER_ID_API + "/pay";
 
+    @Operation(summary = "신규 기사 생성", description = "새로운 기사 정보를 입력하면 아이디 생성")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverResponseDto>> createDriver(

@@ -14,6 +14,7 @@ public class CreateAssignmentRequestDto {
     @NotNull(message = "차량 ID는 필수 항목입니다.")
     private Long vehicleId;
 
+    @NotNull(message = "주 차량 설정은 필수 항목입니다.")
     private Boolean isPrimary;
 
     @NotNull(message = "상태는 필수 항목입니다.")

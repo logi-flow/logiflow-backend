@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -31,9 +32,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final AllocationRepository allocationRepository;
     private final AllocationStatusLogRepository allocationStatusLogRepository;
     private final DriverRepository driverRepository;
-    // 스케쥴은 배차 만들면 자동생성
 
     @Override
+    @Transactional
     public ResponseDto<UpdateScheduleResponseDto> updateSchedule(UserPrincipal userPrincipal, Long scheduleId, UpdateScheduleRequestDto dto) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));

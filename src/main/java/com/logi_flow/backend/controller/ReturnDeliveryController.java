@@ -5,7 +5,7 @@ import com.logi_flow.backend.common.mapper.PageMapper;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
-import com.logi_flow.backend.dto.delivery.response.GetAllWaitingDeliveryResponseDto;
+import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.GetAllWaitingReturnDeliveryResponseDto;
 import com.logi_flow.backend.dto.returnDelivery.request.CreateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryRequestDto;
@@ -84,7 +84,7 @@ public class ReturnDeliveryController {
     }
 
     @DeleteMapping("/{returnDeliveryId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ResponseDto<Void>> deleteReturnDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long returnDeliveryId) {
         ResponseDto<Void> response = returnDeliveryService.deleteReturnDelivery(userPrincipal, returnDeliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
@@ -102,10 +102,17 @@ public class ReturnDeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping("/{returnDeliveryId}/status/me")
+    @PutMapping("/{returnDeliveryId}/cancel")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatusCancel(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryStatusCancel(returnDeliveryId, dto, userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @PutMapping("/{returnDeliveryId}/is-hidden")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
+    public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryIsHidden(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<UpdateReturnDeliveryResponseDto> response = returnDeliveryService.updateReturnDeliveryIsHidden(returnDeliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 }
