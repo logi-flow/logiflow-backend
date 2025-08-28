@@ -84,13 +84,18 @@ public class DeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @PutMapping("/{deliveryId}/cancel")
+    public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> cancelDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.cancelDelivery(deliveryId, dto, userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
     @DeleteMapping("/{deliveryId}")
     public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
          ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 
-    // 배차 대기 목록 조회
     @GetMapping("/waiting")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
