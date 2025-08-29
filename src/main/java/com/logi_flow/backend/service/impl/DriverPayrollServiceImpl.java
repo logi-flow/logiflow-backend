@@ -156,6 +156,17 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
+        DriverPayroll payroll = driverPayrollRepository.findById(payrollId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (!payroll.getDriver().getId().equals(driver.getId())) {
+            throw new AccessDeniedException(ResponseMessage.NOT_OWN_PAYROLL);
+        }
+
+        if (payroll.getStatus() != DriverPayrollStatus.CONFIRMED) {
+            throw new AccessDeniedException(ResponseMessage.CONFIRMED_PAYROLL_ACCESSIBLE);
+        }
+
         data = driverPayrollMapper.getDriverPayrollDetail(payrollId);
 
         if (data == null) {

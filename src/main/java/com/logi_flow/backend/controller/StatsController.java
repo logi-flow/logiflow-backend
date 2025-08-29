@@ -4,6 +4,8 @@ import com.logi_flow.backend.common.constants.ApiMappingPattern;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.stats.driverJoinLeave.response.GetDriverJoinLeaveResponseDto;
 import com.logi_flow.backend.service.StatsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.YearMonth;
 
+@Tag(name = "통계 관리", description = "통계 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.STATS_API)
@@ -24,6 +27,7 @@ public class StatsController {
 
     private final static String DRIVER_JOIN_LEAVE_API = "/drivers/join-leave";
 
+    @Operation(summary = "기사 입퇴사 통계", description = "월별 기사의 입·퇴사자 통계")
     @GetMapping(DRIVER_JOIN_LEAVE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetDriverJoinLeaveResponseDto>> getDriverJoinLeave(

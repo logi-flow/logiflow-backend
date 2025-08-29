@@ -183,11 +183,11 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
 
             DriverAllowance updatedDriverAllowance = driverAllowanceRepository.save(driverAllowance);
 
-            if (!logs.isEmpty()) {
-                driverAllowanceUpdateLogRepository.saveAll(logs);
-            }
-
             data.add(toUpdateDriverAllowanceResponseDto(updatedDriverAllowance));
+        }
+
+        if (!logs.isEmpty()) {
+            driverAllowanceUpdateLogRepository.saveAll(logs);
         }
 
         int totalAllowance = driverAllowanceRepository.sumAmountByDriverPayrollId(payrollId);

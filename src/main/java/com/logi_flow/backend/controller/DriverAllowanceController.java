@@ -9,6 +9,8 @@ import com.logi_flow.backend.dto.driverAllowance.response.CreateDriverAllowanceR
 import com.logi_flow.backend.dto.driverAllowance.response.GetDriverAllowanceDetailResponseDto;
 import com.logi_flow.backend.dto.driverAllowance.response.UpdateDriverAllowanceResponseDto;
 import com.logi_flow.backend.service.DriverAllowanceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "수당 내역 관리", description = "기사 급여대장 수당 내역 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -28,6 +31,7 @@ public class DriverAllowanceController {
     private final static String ALLOWANCE_API = "/{payrollId}/allowances";
     private final static String ALLOWANCE_ID_API = "/{payrollId}/allowances/{allowanceId}";
 
+    @Operation(summary = "수당 내역 생성", description = "특정 급여대장에 수당 내역 등록")
     @PostMapping(ALLOWANCE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverAllowanceResponseDto>> createDriverAllowance(
@@ -38,6 +42,7 @@ public class DriverAllowanceController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "수당 내역 상세 조회", description = "특정 급여대장에 속한 모든 수당 내역 조회")
     @GetMapping(ALLOWANCE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<GetDriverAllowanceDetailResponseDto>>> getDriverAllowance(
@@ -47,6 +52,7 @@ public class DriverAllowanceController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "수당 내역 수정", description = "특정 급여대장의 수당 내역 일괄 수정")
     @PutMapping(ALLOWANCE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<UpdateDriverAllowanceResponseDto>>> updateDriverAllowance(
@@ -54,10 +60,17 @@ public class DriverAllowanceController {
             @PathVariable Long payrollId,
             @Valid @RequestBody UpdateDriverAllowanceRequestDto dto
     ) {
-        ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
-        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+        try {
+            ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
+            return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+
+        }  catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.toResponseEntity(HttpStatus.BAD_REQUEST,null);
+        }
     }
 
+    @Operation(summary = "수당 내역 삭제", description = "특정 급여대장 내의 수당 내역의 상태를 삭제로 변경")
     @DeleteMapping(ALLOWANCE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverAllowance(
