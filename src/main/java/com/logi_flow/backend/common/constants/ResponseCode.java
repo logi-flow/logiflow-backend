@@ -4,6 +4,12 @@ public interface ResponseCode {
     String SUCCESS = "SU";
     String FAILED = "FA";
 
+    String INVALID_INPUT = "IV";
+    String VALIDATION_FAIL = "VF";
+    String RESOURCE_NOT_FOUND = "RNF";
+    String DATA_INTEGRITY_VIOLATION = "DIV";
+    String NO_PERMISSION = "NP";
+
     String TOKEN_EXPIRED = "TE";
     String INVALID_TOKEN = "IT";
     String MISSING_TOKEN = "MT";
