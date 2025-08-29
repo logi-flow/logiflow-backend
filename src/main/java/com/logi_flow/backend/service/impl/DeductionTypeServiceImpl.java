@@ -32,6 +32,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -130,26 +132,31 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DeductionType savedDeductionType = getDeductionType(deductionTypeId);
+        List<DeductionTypeUpdateLog> logs = new ArrayList<>();
 
         if (!dto.getName().equals(savedDeductionType.getName())) {
             String prevData = savedDeductionType.getName();
             savedDeductionType.setName(dto.getName());
-            createUpdateLog(user, savedDeductionType, "name", prevData, savedDeductionType.getName());
+            logs.add(createUpdateLog(user, savedDeductionType, "name", prevData, savedDeductionType.getName()));
         }
 
         if (!Objects.equals(dto.getDescription(), savedDeductionType.getDescription())) {
             String prevData = savedDeductionType.getDescription();
             savedDeductionType.setDescription(dto.getDescription());
-            createUpdateLog(user, savedDeductionType, "description", prevData, savedDeductionType.getDescription());
+            logs.add(createUpdateLog(user, savedDeductionType, "description", prevData, savedDeductionType.getDescription()));
         }
 
         if (dto.isActive() != savedDeductionType.isActive()) {
             String prevData = String.valueOf(savedDeductionType.isActive());
             savedDeductionType.setActive(dto.isActive());
-            createUpdateLog(user, savedDeductionType, "is_active", prevData, String.valueOf(savedDeductionType.isActive()));
+            logs.add(createUpdateLog(user, savedDeductionType, "is_active", prevData, String.valueOf(savedDeductionType.isActive())));
         }
 
         DeductionType updatedDeductionType = deductionTypeRepository.save(savedDeductionType);
+
+        if (!logs.isEmpty()) {
+            deductionTypeUpdateLogRepository.saveAll(logs);
+        }
 
         data = UpdateDeductionTypeResponseDto.builder()
                 .id(updatedDeductionType.getId())
@@ -221,8 +228,8 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
                 .build();
     }
 
-    private void createUpdateLog(User user, DeductionType savedDeductionType, String type, String prevData, String newData) {
-        DeductionTypeUpdateLog deductionTypeUpdateLog = DeductionTypeUpdateLog.builder()
+    private DeductionTypeUpdateLog createUpdateLog(User user, DeductionType savedDeductionType, String type, String prevData, String newData) {
+        return DeductionTypeUpdateLog.builder()
                 .deductionType(savedDeductionType)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -230,7 +237,5 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        deductionTypeUpdateLogRepository.save(deductionTypeUpdateLog);
     }
 }

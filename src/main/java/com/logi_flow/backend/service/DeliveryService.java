@@ -33,4 +33,6 @@ public interface DeliveryService {
     ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId);
 
     ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal);
+
+    ResponseDto<UpdateDeliveryResponseDto> cancelDelivery(Long deliveryId, UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal);
 }
