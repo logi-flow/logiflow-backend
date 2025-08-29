@@ -42,4 +42,16 @@ public interface ResponseMessage {
     String ACTION_TOO_EARLY = "7일이 경과하지 않아 요청을 처리할 수 없습니다.";
 
     String INVALID_DATE_RANGE = "조회 시작 일자는 종료 일자보다 이전이어야 합니다.";
+
+    String PRECONDITION_FAILED = "상태가 COMPLETED 이고 완료 후 7일 경과해야 숨김처리 가능합니다.";
+    String INVALID_STATUS_FOR_DELIVERY_UPDATE = "배송 요청 상태에만 배송 수정 가능합니다.";
+    String DELIVERY_UPDATE_ALLOWED_ONLY_IN_REQUESTED_STATUS = "REQUESTED 상태에서는 CANCELLED 또는 RECEIPTED 로만 변경 가능합니다.";
+    String DELIVERY_UPDATE_ALLOWED_ONLY_IN_RECEIPTED_STATUS = "RECEIPTED 상태에서는 ASSIGNED 또는 REJECTED 로만 변경 가능합니다.";
+    String DELIVERY_DELETE_ALLOWED_ONLY_IN_REQUESTED_STATUS = "상태가 요청 상태일 때만 취소 가능합니다.";
+    String CUSTOMER_CANCEL_ONLY = "고객사는 취소만 가능합니다.";
+    String INVALID_DELIVERY_OR_RETURN_DELIVERY_ID = "유효한 deliveryId 또는 returnDeliveryId가 필요합니다.";
+    String ALLOWED_ONLY_IN_APPROVED_STATUS = "승인된 배송에서만 배차 등록이 가능합니다.";
+    String DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED = "deliveryId 와 returnDeliveryId 둘 중 하나만 입력해야합니다.";
+    String CONTRACT_STATUS_NOT_APPROVED = "계약 상태가 승인이 아닙니다.";
+    String INVALID_DATE_FOR_CREATE_DELIVERY = "계약기간에 포함되지 않습니다.";
 }

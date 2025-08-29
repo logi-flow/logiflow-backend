@@ -29,13 +29,22 @@ import java.util.List;
 public class DeliveryController {
     private final DeliveryService deliveryService;
 
+    private static final String DELIVERY_ID_API = "/{deliveryId}";
+    private static final String MY_DELIVERY_API = "/me";
+    private static final String IS_HIDDEN_API = DELIVERY_ID_API + "/isHidden";
+    private static final String DELIVERY_STATUS_API = DELIVERY_ID_API + "/status";
+    private static final String DELIVERY_CANCEL_API = DELIVERY_ID_API + "/cancel";
+    private static final String WAITING_DELIVERY_API = "/waiting";
+
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<CreateDeliveryResponseDto>> createDelivery(@Valid @RequestBody CreateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<CreateDeliveryResponseDto> response = deliveryService.createDelivery(dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -46,13 +55,15 @@ public class DeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @GetMapping("/{deliveryId}")
+    @GetMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<GetDeliveryDetailResponseDto>> getDelivery(@PathVariable Long deliveryId) {
         ResponseDto<GetDeliveryDetailResponseDto> response = deliveryService.getDelivery(deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @GetMapping("/me")
+    @GetMapping(MY_DELIVERY_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getMyDeliveries(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -65,38 +76,44 @@ public class DeliveryController {
     }
 
 
-    @PutMapping("/{deliveryId}/is-hidden")
+    @PutMapping(IS_HIDDEN_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryIsHidden(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
 
-    @PutMapping("/{deliveryId}")
+    @PutMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping("/{deliveryId}/status")
+    @PutMapping(DELIVERY_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryStatus(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryStatus(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @PutMapping("/{deliveryId}/cancel")
+    @PutMapping(DELIVERY_CANCEL_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> cancelDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.cancelDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @DeleteMapping("/{deliveryId}")
+    @DeleteMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
          ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 
-    @GetMapping("/waiting")
+    @GetMapping(WAITING_DELIVERY_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
