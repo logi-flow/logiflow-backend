@@ -60,14 +60,8 @@ public class DriverAllowanceController {
             @PathVariable Long payrollId,
             @Valid @RequestBody UpdateDriverAllowanceRequestDto dto
     ) {
-        try {
-            ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
-            return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-
-        }  catch (Exception e) {
-            e.printStackTrace();
-            return ResponseDto.toResponseEntity(HttpStatus.BAD_REQUEST,null);
-        }
+        ResponseDto<List<UpdateDriverAllowanceResponseDto>> response = driverAllowanceService.updateDriverAllowance(userPrincipal, payrollId, dto.getItems());
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "수당 내역 삭제", description = "특정 급여대장 내의 수당 내역의 상태를 삭제로 변경")
