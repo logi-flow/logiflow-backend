@@ -32,6 +32,7 @@ public class ContractController {
     private static final String CREATE_CONTRACT_API = "/{customerId}";
     private static final String CONTRACT_API = "/{contractId}";
     private static final String CONTRACT_STATUS_API = "/{contractId}/status";
+    private static final String MY_CONTRACT_API = "/me";
 
     @Operation(summary = "신규 계약 생성", description = "계약 정보를 입력하여 고객사에 계약서를 보냄")
     @PostMapping(CREATE_CONTRACT_API)
@@ -91,6 +92,20 @@ public class ContractController {
             @PathVariable Long contractId
     ) {
         ResponseDto<GetContractDetailResponseDto> response = contractService.getContractDetail(userPrincipal, contractId);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "고객사별 계약 전체 조회", description = "고객사별 계약 전체 목록 조회")
+    @GetMapping(MY_CONTRACT_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
+    public ResponseEntity<ResponseDto<PageDto<GetAllContractResponseDto>>> getMyContracts(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        Page<GetAllContractResponseDto> result = contractService.getMyContracts(userPrincipal, page, size, sort);
+        PageDto<GetAllContractResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
