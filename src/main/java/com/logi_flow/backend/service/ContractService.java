@@ -21,4 +21,6 @@ public interface ContractService {
     ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId);
 
     ResponseDto<Void> deleteContract(UserPrincipal userPrincipal, Long contractId);
+
+    Page<GetAllContractResponseDto> getMyContracts(UserPrincipal userPrincipal, int page, int size, String sort);
 }

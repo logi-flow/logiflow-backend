@@ -259,6 +259,23 @@ public class ContractServiceImpl implements ContractService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
+
+    @Override
+    public Page<GetAllContractResponseDto> getMyContracts(UserPrincipal userPrincipal, int page, int size, String sort) {
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Page<GetAllContractResponseDto> data = null;
+
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Contract> contracts = contractRepository.findByCustomerId(customer.getId(), pageable);
+
+        data = contracts.map(this::toGetAllContractResponseDto);
+
+        return data;
+    }
+
     @Override
     @Transactional
     public ResponseDto<Void> deleteContract(UserPrincipal userPrincipal, Long contractId) {
