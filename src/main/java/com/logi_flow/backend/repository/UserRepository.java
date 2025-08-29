@@ -1,5 +1,7 @@
 package com.logi_flow.backend.repository;
 
+import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.entity.Role;
 import com.logi_flow.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     List<User> findByRoleId(Long id);
+
+    List<User> findAllByRole_Name(UserRole name);
 }
