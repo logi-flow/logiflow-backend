@@ -11,6 +11,8 @@ import com.logi_flow.backend.dto.delivery.request.UpdateDeliveryStatusRequestDto
 import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
 import com.logi_flow.backend.dto.delivery.response.*;
 import com.logi_flow.backend.service.DeliveryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,18 +25,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Tag(name = "배송 관리", description = "배송(Delivery) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.DELIVERY_API)
 public class DeliveryController {
     private final DeliveryService deliveryService;
 
+    @Operation(summary = "신규 배송 생성", description = "새로운 배송 정보를 입력하면 배송 생성")
     @PostMapping
     public ResponseEntity<ResponseDto<CreateDeliveryResponseDto>> createDelivery(@Valid @RequestBody CreateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<CreateDeliveryResponseDto> response = deliveryService.createDelivery(dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "배송 전체 조회", description = "배송 정보를 전부 조회")
     @GetMapping
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
             @RequestParam(defaultValue = "0") int page,
@@ -46,12 +51,14 @@ public class DeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배송 단건 조회", description = "배송 단건에 대한 상세 조회")
     @GetMapping("/{deliveryId}")
     public ResponseEntity<ResponseDto<GetDeliveryDetailResponseDto>> getDelivery(@PathVariable Long deliveryId) {
         ResponseDto<GetDeliveryDetailResponseDto> response = deliveryService.getDelivery(deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "고객사 배송 조회", description = "고객사의 배송 정보를 전부 조회")
     @GetMapping("/me")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getMyDeliveries(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -64,38 +71,42 @@ public class DeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-
+    @Operation(summary = "배송 정보 숨김", description = "배송 정보를 숨김 처리")
     @PutMapping("/{deliveryId}/is-hidden")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryIsHidden(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-
+    @Operation(summary = "배송 정보 수정", description = "배송 정보를 수정")
     @PutMapping("/{deliveryId}")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배송 상태 수정", description = "배송 상태를 수정")
     @PutMapping("/{deliveryId}/status")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryStatus(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryStatus(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배송 취소", description = "배송 상태를 취소로 수정")
     @PutMapping("/{deliveryId}/cancel")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> cancelDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.cancelDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배송 삭제", description = "배송 정보를 삭제")
     @DeleteMapping("/{deliveryId}")
     public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
          ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 
+    @Operation(summary = "배차 가능 배송 조회", description = "배차 가능한 배송 정보를 조회")
     @GetMapping("/waiting")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
@@ -108,6 +119,7 @@ public class DeliveryController {
     }
 
 
+    @Operation(summary = "신규 대용량 배송 생성", description = "엑셀에 새로운 배송 정보들을 입력하고 업로드하면 새로운 배송 등록")
     @PostMapping("/upload")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
