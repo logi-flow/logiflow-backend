@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReturnDeliveryController {
     private final ReturnDeliveryService returnDeliveryService;
 
-    @Operation(summary = "신규 반품 배송 생성", description = "새로운 반품 배송 정보를 입력하면 아이디 생성")
+    @Operation(summary = "신규 반품 배송 생성", description = "새로운 반품 배송 정보를 입력하면 배송 생성")
     @PostMapping("/{deliveryId}")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<CreateReturnDeliveryResponseDto>> createReturnDelivery(@PathVariable Long deliveryId, @Valid @RequestBody CreateReturnDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -113,7 +113,7 @@ public class ReturnDeliveryController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @Operation(summary = "반품 배송 상태 취소", description = "반품 배송 상태를 취소로 수정")
+    @Operation(summary = "반품 배송 취소", description = "반품 배송 상태를 취소로 수정")
     @PutMapping("/{returnDeliveryId}/cancel")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateReturnDeliveryResponseDto>> updateReturnDeliveryStatusCancel(@PathVariable Long returnDeliveryId, @Valid @RequestBody UpdateReturnDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
