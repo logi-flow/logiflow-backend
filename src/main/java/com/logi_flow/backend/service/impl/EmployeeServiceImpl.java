@@ -17,6 +17,7 @@ import com.logi_flow.backend.dto.employee.request.UpdateEmployeeStatusRequestDto
 import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.EmployeeService;
 import com.logi_flow.backend.service.UploadFileService;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -43,8 +45,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeStatusLogRepository employeeStatusLogRepository;
     private final DeleteLogService deleteLogService;
     private final UploadFileService uploadFileService;
+    private final AlertService alertService;
 
     @Override
+    @Transactional
     public ResponseDto<CreateEmployeeResponseDto> createEmployee(UserPrincipal userPrincipal, CreateEmployeeRequestDto dto, MultipartFile profileImage) {
         CreateEmployeeResponseDto data = null;
 
@@ -94,6 +98,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeRepository.save(employee);
 
+        String alertMessage = "[계정 생성] 사내 계정이 생성되었습니다. 로그인 아이디: "
+                + user.getUsername() + "초기 비밀번호는 휴대폰 번호 뒤 4자리입니다. \n 초기 비밀번호를 꼭 변경해 주세요.";
+        alertService.sendToUser(employee.getUser().getId(), alertMessage);
+
         String identityNumberMasked = dto.getIdentityNumber().substring(0,6) + "-*******";
 
         data = CreateEmployeeResponseDto.builder()
@@ -118,6 +126,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateEmployeeResponseDto> updateEmployee(UserPrincipal userPrincipal, UpdateEmployeeRequestDto dto) {
         UpdateEmployeeResponseDto data = null;
 
@@ -177,6 +186,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetEmployeeDetailResponseDto> getEmployeeDetail(UserPrincipal userPrincipal) {
         GetEmployeeDetailResponseDto data = null;
 
@@ -211,6 +221,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateEmployeeResponseDto> updateEmployeeAdmin(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeAdminRequestDto dto, MultipartFile profileImage) {
         UpdateEmployeeResponseDto data = null;
 
@@ -267,21 +278,29 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setDepartment(dto.getDepartment());
         }
 
-        if (!Objects.equals(dto.getAddressDetail(), employee.getAddressDetail())) {
-            logs.add(buildUpdateLog(employee, user, username, "position", employee.getAddressDetail(), dto.getAddressDetail()));
-            employee.setAddressDetail(dto.getAddressDetail());
+        if (!Objects.equals(dto.getPosition(), employee.getPosition())) {
+            logs.add(buildUpdateLog(employee, user, username, "position", employee.getPosition().name(), dto.getPosition().name()));
+            employee.setPosition(dto.getPosition());
         }
 
-        if (!Objects.equals(dto.getAddressDetail(), employee.getAddressDetail())) {
-            logs.add(buildUpdateLog(employee, user, username, "company_join", employee.getAddressDetail(), dto.getAddressDetail()));
-            employee.setAddressDetail(dto.getAddressDetail());
+        if (!Objects.equals(dto.getCompanyJoin(), employee.getCompanyJoin())) {
+            logs.add(buildUpdateLog(employee, user, username, "company_join", employee.getCompanyJoin().toString(), dto.getCompanyJoin().toString()));
+            employee.setCompanyJoin(dto.getCompanyJoin());
         }
 
         employeeRepository.save(employee);
         employeeUpdateLogRepository.saveAll(logs);
 
+        if (!logs.isEmpty()) {
+            String alertMessage = "[관리자 수정] 프로필 정보가" + logs.size() + "건 변경되었습니다.";
+            alertService.sendToUser(employee.getUser().getId(), alertMessage);
+        }
+
         if (profileImage != null && !profileImage.isEmpty()) {
             user.setProfileImage(uploadFileService.uploadProfile(profileImage, user.getId()));
+
+            String alertMessage = "[프로필 이미지] 프로필 이미지가 변경되었습니다.";
+            alertService.sendToUser(employee.getUser().getId(), alertMessage);
         }
 
         String identityNumberMasked = employee.getIdentityNumber().substring(0,6) + "-*******";
@@ -308,6 +327,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateEmployeeStatusResponseDto> updateEmployeeStatus(UserPrincipal userPrincipal, Long employeeId, UpdateEmployeeStatusRequestDto dto) {
         UpdateEmployeeStatusResponseDto data = null;
 
@@ -341,6 +361,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeStatusLogRepository.save(employeeStatusLog);
 
+        String alertMessage = "[상태 변경] " + prevStatus + " → " + updatedEmployee.getStatus() +
+                (dto.getChangedReason() != null ? (" (사유: " + dto.getChangedReason() + ")") : "");
+        alertService.sendToUser(employee.getUser().getId(), alertMessage);
+
         data = UpdateEmployeeStatusResponseDto.builder()
                 .id(updatedEmployee.getId())
                 .status(updatedEmployee.getStatus())
@@ -357,6 +381,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllEmployeeResponseDto> data = null;
 
@@ -369,6 +394,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetEmployeeDetailAdminResponseDto> getEmployeeDetailAdmin(UserPrincipal userPrincipal, Long employeeId) {
         GetEmployeeDetailAdminResponseDto data = null;
 
@@ -405,6 +431,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long employeeId) {
         User user = userRepository.findByUsername(userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
@@ -420,6 +447,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.save(employee);
 
         deleteLogService.createLog(TableRef.EMPLOYEE, employeeId, user);
+
+        String alertMessage = "[퇴사 처리] 계정 상태가 RETIRED로 변경되었습니다.";
+        alertService.sendToUser(employee.getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }

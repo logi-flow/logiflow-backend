@@ -20,6 +20,7 @@ import com.logi_flow.backend.repository.RoleRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.repository.UserRoleLogRepository;
 import com.logi_flow.backend.repository.UserStatusLogRepository;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,8 +40,10 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserRoleLogRepository userRoleLogRepository;
     private final DeleteLogService deleteLogService;
+    private final AlertService alertService;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllUserResponseDto> getAllUser(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllUserResponseDto> data = null;
 
@@ -53,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetUserDetailResponseDto> getUserDetail(UserPrincipal userPrincipal, Long userId) {
         GetUserDetailResponseDto data = null;
 
@@ -79,8 +83,8 @@ public class UserServiceImpl implements UserService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public ResponseDto<UpdateUserStatusResponseDto> updateUserStatus(UserPrincipal userPrincipal, Long userId, UpdateUserStatusRequestDto dto) {
         UpdateUserStatusResponseDto data = null;
 
@@ -114,6 +118,10 @@ public class UserServiceImpl implements UserService {
 
         userStatusLogRepository.save(userStatusLog);
 
+        String alertMessage = "[상태 변경] " + prevStatus + " → " + updatedUser.getStatus() +
+                (dto.getChangedReason() != null ? (" (사유: " + dto.getChangedReason() + ")") : "");
+        alertService.sendToUser(user.getId(), alertMessage);
+
         data = UpdateUserStatusResponseDto.builder()
                 .id(updatedUser.getId())
                 .status(updatedUser.getStatus())
@@ -130,6 +138,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateUserRoleResponseDto> updateUserRole(UserPrincipal userPrincipal, Long userId, UpdateUserRoleRequestDto dto) {
         UpdateUserRoleResponseDto data = null;
 
@@ -165,6 +174,10 @@ public class UserServiceImpl implements UserService {
 
         userRoleLogRepository.save(userRoleLog);
 
+        String alertMessage = "[상태 변경] " + prevRole + " → " + updatedUser.getRole().getName() +
+                (dto.getChangedReason() != null ? (" (사유: " + dto.getChangedReason() + ")") : "");
+        alertService.sendToUser(user.getId(), alertMessage);
+
         data = UpdateUserRoleResponseDto.builder()
                 .id(updatedUser.getId())
                 .role(updatedUser.getRole().getName())
@@ -182,6 +195,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<?> deleteUser(UserPrincipal userPrincipal, Long userId) {
         String username = userPrincipal.getUsername();
         User loginUser = userRepository.findByUsername(username)
@@ -202,6 +216,9 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         deleteLogService.createLog(TableRef.USER, userId, loginUser);
+
+        String alertMessage = "[계정 삭제] 계정 상태가 DELETED로 변경되었습니다.";
+        alertService.sendToUser(user.getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
