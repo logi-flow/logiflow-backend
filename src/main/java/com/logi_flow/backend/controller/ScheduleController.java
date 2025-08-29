@@ -30,6 +30,7 @@ public class ScheduleController {
 
     private static final String SCHEDULE_ID_API = "/{scheduleId}";
     private static final String DRIVER_ID_API = "/drivers/{driverId}";
+    private static final String MY_SCHEDULE_API = "/me";
 
     @Operation(summary = "배차 스케줄 수정", description = "기사가 배송 정보, 상태를 입력하여 수정")
     @PutMapping(SCHEDULE_ID_API)
@@ -75,7 +76,7 @@ public class ScheduleController {
     }
 
     @Operation(summary = "기사 본인 배차 스케줄 전체 조회", description = "특정 기사 본인 배차 스케줄 전체 조회")
-    @GetMapping("/me")
+    @GetMapping(MY_SCHEDULE_API)
     @PreAuthorize("hasAnyRole('DRIVER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllScheduleResponseDto>>> getMySchedules(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -87,6 +88,5 @@ public class ScheduleController {
         PageDto<GetAllScheduleResponseDto> response = PageMapper.toPageDto(result, sort);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
-
 
 }
