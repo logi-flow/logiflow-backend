@@ -21,4 +21,6 @@ public interface CustomerService {
     Page<GetAllCustomerResponseDto> getAllCustomer(UserPrincipal userPrincipal, int page, int size, String sort);
 
     ResponseDto<GetCustomerDetailResponseDto> getCustomerDetailAdmin(UserPrincipal userPrincipal, Long customerId);
+
+    ResponseDto<Void> deleteCustomer(UserPrincipal userPrincipal);
 }

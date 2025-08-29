@@ -2,7 +2,11 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.ContractStatus;
+import com.logi_flow.backend.common.enums.CustomerStatus;
 import com.logi_flow.backend.common.enums.TableRef;
+import com.logi_flow.backend.common.enums.driver.DriverStatus;
+import com.logi_flow.backend.common.enums.employee.EmployeeStatus;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.enums.user.UserStatus;
 import com.logi_flow.backend.common.util.DateUtils;
@@ -16,10 +20,7 @@ import com.logi_flow.backend.dto.user.response.GetUserDetailResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.entity.*;
-import com.logi_flow.backend.repository.RoleRepository;
-import com.logi_flow.backend.repository.UserRepository;
-import com.logi_flow.backend.repository.UserRoleLogRepository;
-import com.logi_flow.backend.repository.UserStatusLogRepository;
+import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.DeleteLogService;
 import com.logi_flow.backend.service.UserService;
@@ -36,6 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
+    private final DriverRepository driverRepository;
+    private final CustomerRepository customerRepository;
+    private final ContractRepository contractRepository;
     private final UserStatusLogRepository userStatusLogRepository;
     private final RoleRepository roleRepository;
     private final UserRoleLogRepository userRoleLogRepository;
@@ -201,16 +206,47 @@ public class UserServiceImpl implements UserService {
         User loginUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!loginUser.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Customer cus= customerRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if (contractRepository.existsByCustomerAndStatus(cus, ContractStatus.APPROVED)) {
+            return ResponseDto.success(ResponseCode.FAILED, "진행중인 계약이 있어 삭제가 불가능합니다.");
+        }
 
         if (user.getStatus() == UserStatus.DELETED) {
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         }
+
+        employeeRepository.findByUser(user).ifPresent(employee -> {
+            if (employee.getStatus() != EmployeeStatus.RETIRED) {
+                employee.setStatus(EmployeeStatus.RETIRED);
+                employeeRepository.save(employee);
+                deleteLogService.createLog(TableRef.EMPLOYEE, employee.getId(), loginUser);
+                String alertMessage = "[퇴사 처리] 계정 상태가 RETIRED로 변경되었습니다.";
+                alertService.sendToUser(employee.getUser().getId(), alertMessage);
+            }
+        });
+
+        driverRepository.findByUser(user).ifPresent(driver -> {
+            if (driver.getStatus() != DriverStatus.RETIRED) {
+                driver.setStatus(DriverStatus.RETIRED);
+                driverRepository.save(driver);
+                deleteLogService.createLog(TableRef.DRIVER, driver.getId(), loginUser);
+                String alertMessage = "[퇴사 처리] 계정 상태가 RETIRED로 변경되었습니다.";
+                alertService.sendToUser(driver.getUser().getId(), alertMessage);
+            }
+        });
+
+        customerRepository.findByUser(user).ifPresent(customer -> {
+            if (customer.getStatus() != CustomerStatus.DELETED) {
+                customer.setStatus(CustomerStatus.DELETED);
+                customerRepository.save(customer);
+                deleteLogService.createLog(TableRef.CUSTOMER, customer.getId(), loginUser);
+            }
+        });
 
         user.setStatus(UserStatus.DELETED);
         userRepository.save(user);

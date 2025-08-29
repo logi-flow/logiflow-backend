@@ -26,7 +26,6 @@ public class AuthController {
     private static final String EXIST_ID_API = "/login-id/exist";
     private static final String EXIST_EMAIL_API = "/email/exist";
     private static final String EXIST_BUSINESS_NUMBER_API = "/business-number/exist";
-    private static final String LOGOUT_API = "/logout";
     private static final String CUSTOMER_FIND_ID_API = "/login-id/find/customers";
     private static final String USER_FIND_ID_API = "/login-id/find/users";
     private static final String CUSTOMER_RESET_PASSWORD_API = "/password/reset/customers";
@@ -74,14 +73,6 @@ public class AuthController {
     ) {
         ResponseDto<BusinessNumberCheckResponseDto> response = authService.checkBusinessNumberDuplicate(businessNumber);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @PostMapping(LOGOUT_API)
-    public ResponseEntity<ResponseDto<LogoutResponseDto>> logout(
-            HttpServletResponse response
-    ) {
-        ResponseDto<LogoutResponseDto> responseDto = authService.logout(response);
-        return ResponseDto.toResponseEntity(HttpStatus.OK, responseDto);
     }
 
     @PostMapping(CUSTOMER_FIND_ID_API)

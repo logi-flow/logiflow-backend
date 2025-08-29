@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class UserController {
     private static final String USER_ROLE_API = "/{userId}/roles";
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<PageDto<GetAllUserResponseDto>>> getAllUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -43,6 +45,7 @@ public class UserController {
     }
 
     @GetMapping(USER_ID_API)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<GetUserDetailResponseDto>> getUserDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId
@@ -52,6 +55,7 @@ public class UserController {
     }
 
     @PutMapping(USER_STATUS_API)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<UpdateUserStatusResponseDto>> updateUserStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId,
@@ -62,6 +66,7 @@ public class UserController {
     }
 
     @PutMapping(USER_ROLE_API)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<UpdateUserRoleResponseDto>> updateUserRole(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId,
@@ -72,6 +77,7 @@ public class UserController {
     }
 
     @DeleteMapping(USER_ID_API)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<?>> deleteUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long userId

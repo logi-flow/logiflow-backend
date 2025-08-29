@@ -14,6 +14,8 @@ import java.util.Optional;
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
     Optional<Contract> findByCustomerAndStatus(Customer customer, ContractStatus contractStatus);
+  
+    boolean existsByCustomerAndStatus(Customer customer, ContractStatus contractStatus);
 
     Page<Contract> findByCustomerId(Long id, Pageable pageable);
 }

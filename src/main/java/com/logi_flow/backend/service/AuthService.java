@@ -20,8 +20,6 @@ public interface AuthService {
 
     ResponseDto<BusinessNumberCheckResponseDto> checkBusinessNumberDuplicate(String businessNumber);
 
-    ResponseDto<LogoutResponseDto> logout(HttpServletResponse response);
-
     ResponseDto<CustomerLoginIdFindResponseDto> findCustomerLoginId(@Valid CustomerLoginIdFindRequestDto dto);
 
     ResponseDto<UserLoginIdFindResponseDto> findUserLoginId(@Valid UserLoginIdFindRequestDto dto);
