@@ -153,7 +153,10 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
         Map<Long, DriverAllowance> byId = allowances.stream().collect(Collectors.toMap(DriverAllowance::getId, a -> a));
 
         if (byId.size() != ids.size()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.RESOURCE_NOT_FOUND);
+            Set<Long> missing = new HashSet<>(ids);
+            missing.removeAll(byId.keySet());
+
+            throw new EntityNotFoundException(ResponseMessage.INVALID_ALLOWANCE_ID + " ID = " + missing);
         }
 
         List<DriverAllowanceUpdateLog> logs = new ArrayList<>();
@@ -183,11 +186,11 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
 
             DriverAllowance updatedDriverAllowance = driverAllowanceRepository.save(driverAllowance);
 
-            if (!logs.isEmpty()) {
-                driverAllowanceUpdateLogRepository.saveAll(logs);
-            }
-
             data.add(toUpdateDriverAllowanceResponseDto(updatedDriverAllowance));
+        }
+
+        if (!logs.isEmpty()) {
+            driverAllowanceUpdateLogRepository.saveAll(logs);
         }
 
         int totalAllowance = driverAllowanceRepository.sumAmountByDriverPayrollId(payrollId);

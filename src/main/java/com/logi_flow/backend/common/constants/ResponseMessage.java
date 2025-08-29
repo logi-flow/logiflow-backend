@@ -4,7 +4,10 @@ public interface ResponseMessage {
     String SUCCESS = "성공";
     String FAILED = "실패";
 
+    String INVALID_INPUT = "잘못된 입력값입니다.";
+    String VALIDATION_FAIL = "입력값이 유효하지 않습니다.";
     String NO_PERMISSION = "접근 권한 없음";
+    String DATA_INTEGRITY_VIOLATION = "데이터 무결성 오류가 발생했습니다.";
 
     String USER_ALREADY_EXISTS = "이미 존재하는 유저";
     String USER_NOT_FOUND = "유저를 찾을 수 없음";
@@ -38,6 +41,8 @@ public interface ResponseMessage {
     String LOCK_PAYROLL_CONFIRMED = "확정된 급여대장은 수정 및 삭제를 할 수 없습니다.";
     String NOT_DELETE_USED_TYPE = "확정된 급여대장에 사용된 항목은 삭제할 수 없습니다.";
     String NOT_OWN_PAYROLL = "본인의 급여대장이 아닙니다.";
+    String CONFIRMED_PAYROLL_ACCESSIBLE = "확정된 급여대장만 조회할 수 있습니다.";
+    String INVALID_ALLOWANCE_ID = "잘못된 수당 ID가 요청되었습니다.";
 
     String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
     String INVALID_STATE = "잘못된 상태입니다.";
@@ -59,4 +64,6 @@ public interface ResponseMessage {
     String DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED = "deliveryId 와 returnDeliveryId 둘 중 하나만 입력해야합니다.";
     String CONTRACT_STATUS_NOT_APPROVED = "계약 상태가 승인이 아닙니다.";
     String INVALID_DATE_FOR_CREATE_DELIVERY = "계약기간에 포함되지 않습니다.";
+
+    String OUT_OF_TIME = "만료일 기간이 맞지 않습니다.";
 }

@@ -122,18 +122,23 @@ public class AssignmentServiceImpl implements AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        AssignmentUpdateLog log = null;
+
         if (dto.getIsPrimary() != null && assignment.isPrimary() != dto.getIsPrimary()) {
             if (dto.getIsPrimary()) {
                 Driver driver = assignment.getDriver();
                 assignmentRepository.findByDriverAndIsPrimaryTrueAndStatus(driver, AssignmentStatus.ACTIVE)
                         .ifPresent(currentPrimary -> currentPrimary.setPrimary(false));
             }
-            String prevData = String.valueOf(assignment.isPrimary());
+            log = buildUpdateLog(assignment, user, "is_primary", String.valueOf(assignment.isPrimary()), String.valueOf(dto.getIsPrimary()));
             assignment.setPrimary(dto.getIsPrimary());
-            createUpdateLog(assignment, user, "is_primary", prevData, String.valueOf(assignment.isPrimary()));
         }
 
         assignmentRepository.save(assignment);
+
+        if (log != null) {
+            assignmentUpdateLogRepository.save(log);
+        }
 
         data = UpdateAssignmentResponseDto.builder()
                 .id(assignment.getId())
@@ -337,6 +342,32 @@ public class AssignmentServiceImpl implements AssignmentService {
                 });
     }
 
+    @Override
+    public ResponseDto<GetAssignmentDetailResponseDto> getMyAssignment(UserPrincipal userPrincipal) {
+        GetAssignmentDetailResponseDto data = null;
+
+        User user = userRepository.findByUsername(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Driver driver = driverRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Assignment assignment = assignmentRepository.findByDriverIdAndStatus(driver.getId(), AssignmentStatus.ACTIVE)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        data = GetAssignmentDetailResponseDto.builder()
+                .id(assignment.getId())
+                .driverId(assignment.getDriver().getId())
+                .vehicleIds(assignment.getVehicle().getId())
+                .isPrimary(assignment.isPrimary())
+                .status(assignment.getStatus())
+                .createdAt(DateUtils.format(assignment.getCreatedAt()))
+                .updatedAt(DateUtils.format(assignment.getUpdatedAt()))
+                .build();
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
     private GetAllAssignmentResponseDto toGetAllAssignmentResponseDto(Assignment assignment) {
         return GetAllAssignmentResponseDto.builder()
                 .id(assignment.getId())
@@ -349,8 +380,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
-    private void createUpdateLog(Assignment assignment, User user, String type, String prevData, String newData) {
-        AssignmentUpdateLog assignmentUpdateLog = AssignmentUpdateLog.builder()
+    private AssignmentUpdateLog buildUpdateLog(Assignment assignment, User user, String type, String prevData, String newData) {
+        return AssignmentUpdateLog.builder()
                 .assignment(assignment)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -358,7 +389,5 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        assignmentUpdateLogRepository.save(assignmentUpdateLog);
     }
 }

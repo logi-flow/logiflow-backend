@@ -9,6 +9,8 @@ import com.logi_flow.backend.dto.driverDeduction.response.CreateDriverDeductionR
 import com.logi_flow.backend.dto.driverDeduction.response.GetDriverDeductionDetailResponseDto;
 import com.logi_flow.backend.dto.driverDeduction.response.UpdateDriverDeductionResponseDto;
 import com.logi_flow.backend.service.DriverDeductionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "공제 내역 관리", description = "기사 급여대장 공제 내역 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -28,6 +31,7 @@ public class DriverDeductionController {
     private final static String DEDUCTION_API = "/{payrollId}/deductions";
     private final static String DEDUCTION_ID_API = "/{payrollId}/deductions/{deductionId}";
 
+    @Operation(summary = "공제 내역 생성", description = "특정 급여대장에 공제 내역 등록")
     @PostMapping(DEDUCTION_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverDeductionResponseDto>> createDriverDeduction(
@@ -38,6 +42,7 @@ public class DriverDeductionController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "공제 내역 상세 조회", description = "특정 급여대장에 속한 모든 공제 내역 조회")
     @GetMapping(DEDUCTION_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<GetDriverDeductionDetailResponseDto>>> getDriverDeduction(
@@ -47,6 +52,7 @@ public class DriverDeductionController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "공제 내역 수정", description = "특정 급여대장의 공제 내역 일괄 수정")
     @PutMapping(DEDUCTION_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<List<UpdateDriverDeductionResponseDto>>> updateDriverDeduction(
@@ -58,6 +64,7 @@ public class DriverDeductionController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "공제 내역 삭제", description = "특정 급여대장 내의 공제 내역의 상태를 삭제로 변경")
     @DeleteMapping(DEDUCTION_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverDeduction(

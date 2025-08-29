@@ -12,6 +12,8 @@ import com.logi_flow.backend.dto.allowanceType.response.GetAllAllowanceTypeRespo
 import com.logi_flow.backend.dto.allowanceType.response.GetAllowanceTypeDetailResponseDto;
 import com.logi_flow.backend.dto.allowanceType.response.UpdateAllowanceTypeResponseDto;
 import com.logi_flow.backend.service.AllowanceTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "수당 항목 관리", description = "수당 항목 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.ALLOWANCE_API)
@@ -29,6 +32,7 @@ public class AllowanceTypeController {
 
     private static final String ALLOWANCE_TYPE_ID_API = "/{allowanceTypeId}";
 
+    @Operation(summary = "수당 항목 생성", description = "수당 항목 등록")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateAllowanceTypeResponseDto>> createAllowanceType(
@@ -38,6 +42,7 @@ public class AllowanceTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "수당 항목 전체 조회", description = "전체 수당 항목 목록 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllAllowanceTypeResponseDto>>> getAllAllowanceType(
@@ -50,6 +55,7 @@ public class AllowanceTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "수당 항목 상세 조회", description = "특정 수당 항목의 상세 정보 조회")
     @GetMapping(ALLOWANCE_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetAllowanceTypeDetailResponseDto>> getAllowanceTypeDetail(
@@ -59,6 +65,7 @@ public class AllowanceTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "수당 항목 수정", description = "특정 수당 항목의 정보 수정")
     @PutMapping(ALLOWANCE_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAllowanceTypeResponseDto>> updateAllowanceType(
@@ -70,6 +77,7 @@ public class AllowanceTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "수당 항목 삭제", description = "특정 수당 항목의 상태를 삭제로 변경")
     @DeleteMapping(ALLOWANCE_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteAllowanceType(

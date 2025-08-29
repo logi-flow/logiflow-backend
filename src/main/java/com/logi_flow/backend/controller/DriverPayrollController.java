@@ -10,6 +10,8 @@ import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollReques
 import com.logi_flow.backend.dto.driverPayroll.request.UpdateDriverPayrollStatusRequestDto;
 import com.logi_flow.backend.dto.driverPayroll.response.*;
 import com.logi_flow.backend.service.DriverPayrollService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 
+@Tag(name = "DriverPayroll", description = "기사 급여대장 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -32,6 +35,7 @@ public class DriverPayrollController {
     private final static String MY_PAYROLL_API = "/me";
     private final static String MY_PAYROLL_PAYROLL_ID_API = MY_PAYROLL_API + PAYROLL_ID_API;
 
+    @Operation(summary = "급여대장 생성", description = "급여대장 생성")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverPayrollResponseDto>> createDriverPayroll(
@@ -41,6 +45,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "급여대장 전체 조회", description = "전체 급여대장 목록 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getAllDriverPayroll(
@@ -53,6 +58,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "급여대장 상세 조회", description = "특정 급여대장의 상세 정보 조회")
     @GetMapping(PAYROLL_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetDriverPayrollDetailResponseDto>> getDriverPayrollDetail(
@@ -62,6 +68,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "본인 급여대장 전체 조회", description = "기사 본인의 전체 급여대장 목록 조회")
     @GetMapping(MY_PAYROLL_API)
     @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getMyPayrolls(
@@ -75,6 +82,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "본인 급여대장 상세 조회", description = "기사 본인의 특정 급여대장의 상세 정보 조회")
     @GetMapping(MY_PAYROLL_PAYROLL_ID_API)
     @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<GetDriverPayrollDetailResponseDto>> getMyPayrollDetail(
@@ -85,6 +93,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "급여대장 상태 수정", description = "특정 급여대장의 상태 수정")
     @PutMapping(UPDATE_STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverPayrollStatusResponseDto>> updateDriverPayrollStatus(
@@ -96,6 +105,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "급여대장 수정", description = "특정 급여대장의 정보 수정")
     @PutMapping(PAYROLL_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverPayrollResponseDto>> updateDriverPayroll(
@@ -107,6 +117,7 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "급여대장 삭제", description = "특정 급여대장의 상태를 삭제로 변경")
     @DeleteMapping(PAYROLL_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDriverPayroll(

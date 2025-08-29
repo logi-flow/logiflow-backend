@@ -6,9 +6,10 @@ import com.logi_flow.backend.dto.driver.request.*;
 import com.logi_flow.backend.dto.driver.response.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface DriverService {
-    ResponseDto<CreateDriverResponseDto> createDriver(@Valid CreateDriverRequestDto dto);
+    ResponseDto<CreateDriverResponseDto> createDriver(@Valid CreateDriverRequestDto dto, MultipartFile profileImage);
 
     ResponseDto<UpdateDriverResponseDto> updateDriver(UserPrincipal userPrincipal, @Valid UpdateDriverRequestDto dto);
 
@@ -18,7 +19,7 @@ public interface DriverService {
 
     ResponseDto<GetDriverDetailResponseDto> getMyInfo(UserPrincipal userPrincipal);
 
-    ResponseDto<Void> deleteDriver(UserPrincipal userPrincipal, Long driverId);
+    ResponseDto<Void> retiredDriver(UserPrincipal userPrincipal, Long driverId);
 
     ResponseDto<UpdateDriverResponseDto> updateDriverStatus(UserPrincipal userPrincipal, Long driverId, @Valid UpdateDriverStatusRequestDto dto);
 
