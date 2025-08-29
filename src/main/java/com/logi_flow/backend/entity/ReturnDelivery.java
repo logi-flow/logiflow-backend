@@ -29,6 +29,9 @@ public class ReturnDelivery extends BaseTime {
     @Column(name = "reason", nullable = false)
     private String reason;
 
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DeliveryStatus status = DeliveryStatus.REQUESTED;

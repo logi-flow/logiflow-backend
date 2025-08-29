@@ -156,30 +156,36 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.RESOURCE_NOT_FOUND);
         }
 
+        List<DriverAllowanceUpdateLog> logs = new ArrayList<>();
+
         for (UpdateDriverAllowanceRequestDto.Item item : items) {
             DriverAllowance driverAllowance = byId.get(item.getId());
 
             if (item.getQuantity() != null && item.getQuantity().compareTo(driverAllowance.getQuantity()) != 0) {
                 String prevData = driverAllowance.getQuantity().toString();
                 driverAllowance.setQuantity(item.getQuantity());
-                createUpdateLog(user, driverAllowance, "quantity", prevData, item.getQuantity().toString());
+                logs.add(createUpdateLog(user, driverAllowance, "quantity", prevData, item.getQuantity().toString()));
             }
 
             if (item.getUnitPrice() != null && !Objects.equals(item.getUnitPrice(), driverAllowance.getUnitPrice())) {
                 String prevData = String.valueOf(driverAllowance.getUnitPrice());
                 driverAllowance.setUnitPrice(item.getUnitPrice());
-                createUpdateLog(user, driverAllowance, "unit_price", prevData, String.valueOf(item.getUnitPrice()));
+                logs.add(createUpdateLog(user, driverAllowance, "unit_price", prevData, String.valueOf(item.getUnitPrice())));
             }
 
             if (item.getMemo() != null && !Objects.equals(item.getMemo(), driverAllowance.getMemo())) {
                 String prevData = driverAllowance.getMemo();
                 driverAllowance.setMemo(item.getMemo());
-                createUpdateLog(user, driverAllowance, "memo", prevData, item.getMemo());
+                logs.add(createUpdateLog(user, driverAllowance, "memo", prevData, item.getMemo()));
             }
 
             driverAllowance.calculateAmount();
 
             DriverAllowance updatedDriverAllowance = driverAllowanceRepository.save(driverAllowance);
+
+            if (!logs.isEmpty()) {
+                driverAllowanceUpdateLogRepository.saveAll(logs);
+            }
 
             data.add(toUpdateDriverAllowanceResponseDto(updatedDriverAllowance));
         }
@@ -274,8 +280,8 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
                 .build();
     }
 
-    private void createUpdateLog(User user, DriverAllowance updatedDriverAllowance, String type, String prevData, String newData) {
-        DriverAllowanceUpdateLog driverAllowanceUpdateLog = DriverAllowanceUpdateLog.builder()
+    private DriverAllowanceUpdateLog createUpdateLog(User user, DriverAllowance updatedDriverAllowance, String type, String prevData, String newData) {
+        return DriverAllowanceUpdateLog.builder()
                 .driverAllowance(updatedDriverAllowance)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -283,7 +289,5 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        driverAllowanceUpdateLogRepository.save(driverAllowanceUpdateLog);
     }
 }

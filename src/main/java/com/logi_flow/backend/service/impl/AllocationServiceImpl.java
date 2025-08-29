@@ -3,7 +3,7 @@ package com.logi_flow.backend.service.impl;
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AllocationStatus;
-import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.enums.DeliveryStatus;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -19,6 +19,7 @@ import com.logi_flow.backend.service.AllocationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +41,35 @@ public class AllocationServiceImpl implements AllocationService {
     private final AlertService alertService;
 
     @Override
+    @Transactional
     public ResponseDto<CreateAllocationResponseDto> createAllocation(CreateAllocationRequestDto dto, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)){
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+        Delivery delivery = null;
+        ReturnDelivery returnDelivery = null;
+
+        if(dto.getDeliveryId() != null) {
+            delivery = deliveryRepository.findById(dto.getDeliveryId()).orElse(null);
+        } else if(dto.getReturnDeliveryId() != null) {
+            returnDelivery = returnDeliveryRepository.findById(dto.getReturnDeliveryId()).orElse(null);
         }
 
-        Delivery delivery = deliveryRepository.findById(dto.getDeliveryId()).orElse(null);
-        ReturnDelivery returnDelivery = (delivery == null) ? returnDeliveryRepository.findById(dto.getReturnDeliveryId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND)) : null;
+        if(delivery == null && returnDelivery == null){
+            throw new IllegalArgumentException(ResponseMessage.INVALID_DELIVERY_OR_RETURN_DELIVERY_ID);
+        }
+
+        if(delivery != null) {
+            if(!delivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
+                throw new IllegalArgumentException(ResponseMessage.ALLOWED_ONLY_IN_APPROVED_STATUS);
+            }
+        }
+
+        if(returnDelivery != null) {
+            if(!returnDelivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
+                throw new IllegalArgumentException(ResponseMessage.ALLOWED_ONLY_IN_APPROVED_STATUS);
+            }
+        }
 
         Assignment assignment = assignmentRepository.findById(dto.getAssignmentId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -87,7 +107,7 @@ public class AllocationServiceImpl implements AllocationService {
                 .id(newAllocation.getId())
                 .deliveryId(delivery != null ? delivery.getId() : null)
                 .returnDeliveryId(returnDelivery != null ? returnDelivery.getId() : null)
-                .assignmentId(newAllocation.getId())
+                .assignmentId(newAllocation.getAssignment().getId())
                 .districtName(newAllocation.getDistrictName())
                 .status(newAllocation.getStatus())
                 .createdAt(DateUtils.format(newAllocation.getCreatedAt()))
@@ -98,24 +118,21 @@ public class AllocationServiceImpl implements AllocationService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateAllocationResponseDto> updateAllocation(Long allocationId, UpdateAllocationRequestDto dto, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         Allocation allocation = allocationRepository.findById(allocationId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         List<AllocationUpdateLog> logs = new ArrayList<>();
 
         if(dto.getDeliveryId() != null && dto.getReturnDeliveryId() != null) {
-            throw new IllegalArgumentException("배차 하나에는 deliveryId, returnDeliveryId 중에 하나만 지정 가능.");
+            throw new IllegalArgumentException(ResponseMessage.DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED);
         }
 
         if(dto.getDeliveryId() == null && dto.getReturnDeliveryId() == null) {
-            throw new IllegalArgumentException("deliveryId, returnDeliveryId 중에 하나는 포함해야 함.");
+            throw new IllegalArgumentException(ResponseMessage.DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED);
         }
 
         if(dto.getDeliveryId() != null) {
@@ -182,15 +199,12 @@ public class AllocationServiceImpl implements AllocationService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateAllocationResponseDto> updateAllocationStatus(Long allocationId, UpdateAllocationStatusRequestDto dto, UserPrincipal userPrincipal) {
         Allocation allocation = allocationRepository.findById(allocationId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         AllocationStatus prevStatus = allocation.getStatus();
 

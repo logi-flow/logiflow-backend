@@ -14,6 +14,7 @@ import com.logi_flow.backend.dto.schedule.response.GetScheduleDetailResponseDto;
 import com.logi_flow.backend.dto.schedule.response.UpdateScheduleResponseDto;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.ScheduleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -31,16 +35,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final AllocationRepository allocationRepository;
     private final AllocationStatusLogRepository allocationStatusLogRepository;
     private final DriverRepository driverRepository;
-    // 스케쥴은 배차 만들면 자동생성
+
+    private final AlertService alertService;
 
     @Override
+    @Transactional
     public ResponseDto<UpdateScheduleResponseDto> updateSchedule(UserPrincipal userPrincipal, Long scheduleId, UpdateScheduleRequestDto dto) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.DRIVER)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         Allocation allocation = schedule.getAllocation();
@@ -86,6 +88,19 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .createdAt(DateUtils.format(schedule.getCreatedAt()))
                 .updatedAt(DateUtils.format(schedule.getUpdatedAt()))
                 .build();
+
+        String alertMessage = "배송 #" + allocation.getId() + " 상태가 " + updatedAllocation.getStatus() + "로 변경되었습니다.";
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.ALLOCATIONS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
+
+        alertService.sendToUser(allocation.getDelivery().getCustomer().getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -133,7 +148,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public Page<GetAllScheduleResponseDto> getMySchedules(UserPrincipal userPrincipal, int page, int size, String sort) {
-        // 기사 시점 본인 스케줄
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
         Driver driver = driverRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));

@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReturnDeliveryRepository extends JpaRepository<ReturnDelivery, Long> {
-    Page<ReturnDelivery> findByDeliveryCustomer(Customer customer, Pageable pageable);
-
     boolean existsByDeliveryId(Long id);
 
     @Query("""
@@ -21,4 +19,6 @@ public interface ReturnDeliveryRepository extends JpaRepository<ReturnDelivery, 
         WHERE a.id IS NULL AND r.status = "ASSIGNED"
         """)
     Page<ReturnDelivery> findAllWaitingReturnDelivery(Pageable pageable);
+
+    Page<ReturnDelivery> findByDeliveryCustomerAndIsHiddenFalse(Customer customer, Pageable pageable);
 }

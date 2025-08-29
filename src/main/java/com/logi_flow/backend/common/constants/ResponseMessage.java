@@ -27,6 +27,8 @@ public interface ResponseMessage {
     String MAIL_NOT_FOUND = "이메일을 찾을 수 없습니다.";
 
     String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
+    String INVALID_REQUESTED_STATE = "요청 상태가 아닙니다.";
+
 
     String EXISTS_PAYROLL = "해당 기간의 급여대장이 이미 존재합니다.";
     String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
@@ -39,4 +41,22 @@ public interface ResponseMessage {
 
     String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
     String INVALID_STATE = "잘못된 상태입니다.";
+    String ACTION_TOO_EARLY = "7일이 경과하지 않아 요청을 처리할 수 없습니다.";
+
+    String ACTION_TOO_LATE = "환불 신청 가능 기간이 지났습니다.";
+    String DELIVERY_NOT_COMPLETED = "배송이 완료되지 않은 상태에서는 반품 신청을 할 수 없습니다.";
+    String CONTRACT_EXPIRED = "계약이 종료되었습니다.";
+    String INVALID_DATE_RANGE = "조회 시작 일자는 종료 일자보다 이전이어야 합니다.";
+
+    String PRECONDITION_FAILED = "상태가 COMPLETED 이고 완료 후 7일 경과해야 숨김처리 가능합니다.";
+    String INVALID_STATUS_FOR_DELIVERY_UPDATE = "배송 요청 상태에만 배송 수정 가능합니다.";
+    String DELIVERY_UPDATE_ALLOWED_ONLY_IN_REQUESTED_STATUS = "REQUESTED 상태에서는 CANCELLED 또는 RECEIPTED 로만 변경 가능합니다.";
+    String DELIVERY_UPDATE_ALLOWED_ONLY_IN_RECEIPTED_STATUS = "RECEIPTED 상태에서는 ASSIGNED 또는 REJECTED 로만 변경 가능합니다.";
+    String DELIVERY_DELETE_ALLOWED_ONLY_IN_REQUESTED_STATUS = "상태가 요청 상태일 때만 취소 가능합니다.";
+    String CUSTOMER_CANCEL_ONLY = "고객사는 취소만 가능합니다.";
+    String INVALID_DELIVERY_OR_RETURN_DELIVERY_ID = "유효한 deliveryId 또는 returnDeliveryId가 필요합니다.";
+    String ALLOWED_ONLY_IN_APPROVED_STATUS = "승인된 배송에서만 배차 등록이 가능합니다.";
+    String DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED = "deliveryId 와 returnDeliveryId 둘 중 하나만 입력해야합니다.";
+    String CONTRACT_STATUS_NOT_APPROVED = "계약 상태가 승인이 아닙니다.";
+    String INVALID_DATE_FOR_CREATE_DELIVERY = "계약기간에 포함되지 않습니다.";
 }

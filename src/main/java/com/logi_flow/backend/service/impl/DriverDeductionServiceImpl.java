@@ -150,30 +150,36 @@ public class DriverDeductionServiceImpl implements DriverDeductionService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.RESOURCE_NOT_FOUND);
         }
 
+        List<DriverDeductionUpdateLog> logs = new ArrayList<>();
+
         for (UpdateDriverDeductionRequestDto.Item item : items) {
             DriverDeduction driverDeduction = byId.get(item.getId());
 
             if (item.getQuantity() != null && item.getQuantity().compareTo(driverDeduction.getQuantity()) != 0) {
                 String prevData = driverDeduction.getQuantity().toString();
                 driverDeduction.setQuantity(item.getQuantity());
-                createUpdateLog(user, driverDeduction, "quantity", prevData, item.getQuantity().toString());
+                logs.add(createUpdateLog(user, driverDeduction, "quantity", prevData, item.getQuantity().toString()));
             }
 
             if (item.getUnitPrice() != null && !Objects.equals(item.getUnitPrice(), driverDeduction.getUnitPrice())) {
                 String prevData = String.valueOf(driverDeduction.getUnitPrice());
                 driverDeduction.setUnitPrice(item.getUnitPrice());
-                createUpdateLog(user, driverDeduction, "unit_price", prevData, String.valueOf(item.getUnitPrice()));
+                logs.add(createUpdateLog(user, driverDeduction, "unit_price", prevData, String.valueOf(item.getUnitPrice())));
             }
 
             if (item.getMemo() != null && !Objects.equals(item.getMemo(), driverDeduction.getMemo())) {
                 String prevData = driverDeduction.getMemo();
                 driverDeduction.setMemo(item.getMemo());
-                createUpdateLog(user, driverDeduction, "memo", prevData, item.getMemo());
+                logs.add(createUpdateLog(user, driverDeduction, "memo", prevData, item.getMemo()));
             }
 
             driverDeduction.calculateAmount();
 
             DriverDeduction updatedDriverDeduction = driverDeductionRepository.save(driverDeduction);
+
+            if (!logs.isEmpty()) {
+                driverDeductionUpdateLogRepository.saveAll(logs);
+            }
 
             data.add(toUpdateDriverDeductionResponseDto(updatedDriverDeduction));
         }
@@ -264,8 +270,8 @@ public class DriverDeductionServiceImpl implements DriverDeductionService {
                 .build();
     }
 
-    private void createUpdateLog(User user, DriverDeduction updatedDriverDeduction, String type, String prevData, String newData) {
-        DriverDeductionUpdateLog driverDeductionUpdateLog = DriverDeductionUpdateLog.builder()
+    private DriverDeductionUpdateLog createUpdateLog(User user, DriverDeduction updatedDriverDeduction, String type, String prevData, String newData) {
+        return DriverDeductionUpdateLog.builder()
                 .driverDeduction(updatedDriverDeduction)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -273,7 +279,5 @@ public class DriverDeductionServiceImpl implements DriverDeductionService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        driverDeductionUpdateLogRepository.save(driverDeductionUpdateLog);
     }
 }

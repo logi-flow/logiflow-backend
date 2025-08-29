@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,10 +48,6 @@ public class ContractServiceImpl implements ContractService {
     public ResponseDto<CreateContractResponseDto> createContract(UserPrincipal userPrincipal, Long customerId, CreateContractRequestDto dto) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -98,10 +95,6 @@ public class ContractServiceImpl implements ContractService {
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         List<ContractUpdateLog> logs = new ArrayList<>();
 
@@ -215,6 +208,18 @@ public class ContractServiceImpl implements ContractService {
                 .updatedAt(DateUtils.format(updatedContract.getUpdatedAt()))
                 .build();
 
+        String alertMessage = "계약 #" + contractId + " 의 상태가 " + updatedContract.getStatus() + "로 수정되었습니다.";
+
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.CONTRACTS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -232,17 +237,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public ResponseDto<GetContractDetailResponseDto> getContractDetail(UserPrincipal userPrincipal, Long contractId) {
-        String username = userPrincipal.getUsername();
-        User user =  userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-
-        boolean isAdmin = user.getRole().getName().equals(UserRole.ADMIN);
-        boolean isOwner = contract.getCustomer().getUser().getId().equals(user.getId());
-
-        if(!isAdmin && !isOwner) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         GetContractDetailResponseDto data = GetContractDetailResponseDto.builder()
                 .id(contract.getId())
@@ -270,10 +265,6 @@ public class ContractServiceImpl implements ContractService {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         if(contract.getStatus() == ContractStatus.DELETED) {
             return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);

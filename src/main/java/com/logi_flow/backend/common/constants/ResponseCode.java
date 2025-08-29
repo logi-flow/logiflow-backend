@@ -30,4 +30,9 @@ public interface ResponseCode {
 
     String FORBIDDEN = "FB";
     String INVALID_STATE = "IST";
+    String ACTION_TOO_EARLY = "ATE";
+    String ACTION_TOO_LATE = "ATL";
+    String DELIVERY_NOT_COMPLETED = "DNC";
+    String CONTRACT_EXPIRED = "CE";
+    String INVALID_REQUESTED_STATE = "IRS";
 }

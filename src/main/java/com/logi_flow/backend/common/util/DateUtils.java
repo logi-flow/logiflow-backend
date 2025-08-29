@@ -1,6 +1,7 @@
 package com.logi_flow.backend.common.util;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class DateUtils {
@@ -25,4 +26,9 @@ public class DateUtils {
         String fixed = dateString + "-01T00:00:00";
         return LocalDateTime.parse(fixed);
     }
+
+    public static String yearMonthFormat(YearMonth date) {
+        return (date != null) ? date.format(YEAR_MONTH_FORMATTER) : null;
+    }
+
 }

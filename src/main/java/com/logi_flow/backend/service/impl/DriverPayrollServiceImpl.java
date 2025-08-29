@@ -30,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -183,10 +185,10 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
 
         createStatusLog(user, updatedDriverPayroll, dto.getChangeReason(), prevStatus);
 
-        String alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정되었습니다. 확인해 주세요.";
+        String alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정되었습니다.";
 
         if (updatedDriverPayroll.getStatus().equals(DriverPayrollStatus.CREATED)) {
-            alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정 취소되었습니다. 잠시 후 확인해 주세요.";
+            alertMessage = updatedDriverPayroll.getDriver().getName() + " 기사님의 급여대장이 확정 취소되었습니다.";
         }
 
         alertService.sendToUser(updatedDriverPayroll.getDriver().getUser().getId(), alertMessage);
@@ -225,25 +227,31 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
             return ResponseDto.fail(ResponseCode.ALREADY_DELETED,ResponseMessage.ALREADY_DELETED);
         }
 
+        List<DriverPayrollUpdateLog> logs = new ArrayList<>();
+
         if (!Objects.equals(dto.getTitle(), savedDriverPayroll.getTitle())) {
             String prevData = savedDriverPayroll.getTitle();
             savedDriverPayroll.setTitle(dto.getTitle());
-            createUpdateLog(user, savedDriverPayroll, "title", prevData, savedDriverPayroll.getTitle());
+            logs.add(createUpdateLog(user, savedDriverPayroll, "title", prevData, savedDriverPayroll.getTitle()));
         }
 
         if (!dto.getPeriodStartDate().equals(savedDriverPayroll.getPeriodStartDate())) {
             String prevData = savedDriverPayroll.getPeriodStartDate().toString();
             savedDriverPayroll.setPeriodStartDate(dto.getPeriodStartDate());
-            createUpdateLog(user, savedDriverPayroll, "period_start_date", prevData, savedDriverPayroll.getPeriodStartDate().toString());
+            logs.add(createUpdateLog(user, savedDriverPayroll, "period_start_date", prevData, savedDriverPayroll.getPeriodStartDate().toString()));
         }
 
         if (!dto.getPeriodEndDate().equals(savedDriverPayroll.getPeriodEndDate())) {
             String prevData = savedDriverPayroll.getPeriodEndDate().toString();
             savedDriverPayroll.setPeriodEndDate(dto.getPeriodEndDate());
-            createUpdateLog(user, savedDriverPayroll, "period_end_date", prevData, savedDriverPayroll.getPeriodEndDate().toString());
+            logs.add(createUpdateLog(user, savedDriverPayroll, "period_end_date", prevData, savedDriverPayroll.getPeriodEndDate().toString()));
         }
 
         DriverPayroll updatedDriverPayroll = driverPayrollRepository.save(savedDriverPayroll);
+
+        if (!logs.isEmpty()) {
+            driverPayrollUpdateLogRepository.saveAll(logs);
+        }
 
         data = UpdateDriverPayrollResponseDto.builder()
                 .id(updatedDriverPayroll.getId())
@@ -338,8 +346,8 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
         driverPayrollStatusLogRepository.save(driverPayrollStatusLog);
     }
 
-    private void createUpdateLog(User user, DriverPayroll updatedDriverPayroll, String type, String prevData, String newData) {
-        DriverPayrollUpdateLog driverPayrollUpdateLog = DriverPayrollUpdateLog.builder()
+    private DriverPayrollUpdateLog createUpdateLog(User user, DriverPayroll updatedDriverPayroll, String type, String prevData, String newData) {
+        return DriverPayrollUpdateLog.builder()
                 .driverPayroll(updatedDriverPayroll)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -347,7 +355,5 @@ public class DriverPayrollServiceImpl implements DriverPayrollService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        driverPayrollUpdateLogRepository.save(driverPayrollUpdateLog);
     }
 }
