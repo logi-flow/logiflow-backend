@@ -6,6 +6,8 @@ import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driverDeductionLog.response.GetDriverDeductionUpdateLogResponseDto;
 import com.logi_flow.backend.service.DriverDeductionLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "DriverDeductionUpdateLog", description = "공제 내역 변경 이력 조회 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.PAYROLL_API)
@@ -24,6 +27,7 @@ public class DriverDeductionLogController {
 
     private static final String UPDATE_API = "/deductions/logs/update";
 
+    @Operation(summary = "공제 내역 변경 이력 조회", description = "공제 내역의 변경 이력 조회합니다.")
     @GetMapping(UPDATE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetDriverDeductionUpdateLogResponseDto>>> getDriverDeductionUpdateLogs(

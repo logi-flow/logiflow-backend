@@ -12,6 +12,8 @@ import com.logi_flow.backend.dto.deductionType.response.GetAllDeductionTypeRespo
 import com.logi_flow.backend.dto.deductionType.response.GetDeductionTypeDetailResponseDto;
 import com.logi_flow.backend.dto.deductionType.response.UpdateDeductionTypeResponseDto;
 import com.logi_flow.backend.service.DeductionTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "공제 항목 관리", description = "공제 항목 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.DEDUCTION_API)
@@ -29,6 +32,7 @@ public class DeductionTypeController {
 
     private static final String DEDUCTION_TYPE_ID_API = "/{deductionTypeId}";
 
+    @Operation(summary = "공제 항목 생성", description = "공제 항목 등록")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDeductionTypeResponseDto>> createDeductionType(
@@ -38,6 +42,7 @@ public class DeductionTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "공제 항목 전체 조회", description = "전체 공제 항목 목록 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeductionTypeResponseDto>>> getAllDeductionType(
@@ -50,6 +55,7 @@ public class DeductionTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "공제 항목 상세 조회", description = "특정 공제 항목의 상세 정보 조회")
     @GetMapping(DEDUCTION_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetDeductionTypeDetailResponseDto>> getDeductionTypeDetail(
@@ -59,6 +65,7 @@ public class DeductionTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "공제 항목 수정", description = "특정 공제 항목의 정보 수정")
     @PutMapping(DEDUCTION_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDeductionTypeResponseDto>> updateDeductionType(
@@ -70,6 +77,7 @@ public class DeductionTypeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "공제 항목 삭제", description = "특정 공제 항목의 상태를 삭제로 변경")
     @DeleteMapping(DEDUCTION_TYPE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDeductionType(

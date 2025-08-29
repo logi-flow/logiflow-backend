@@ -177,11 +177,11 @@ public class DriverDeductionServiceImpl implements DriverDeductionService {
 
             DriverDeduction updatedDriverDeduction = driverDeductionRepository.save(driverDeduction);
 
-            if (!logs.isEmpty()) {
-                driverDeductionUpdateLogRepository.saveAll(logs);
-            }
-
             data.add(toUpdateDriverDeductionResponseDto(updatedDriverDeduction));
+        }
+
+        if (!logs.isEmpty()) {
+            driverDeductionUpdateLogRepository.saveAll(logs);
         }
 
         int totalAllowance = driverAllowanceRepository.sumAmountByDriverPayrollId(payrollId);
