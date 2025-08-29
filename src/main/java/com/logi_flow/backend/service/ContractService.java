@@ -1,7 +1,6 @@
 package com.logi_flow.backend.service;
 
 import com.logi_flow.backend.config.security.UserPrincipal;
-import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.contract.request.CreateContractRequestDto;
 import com.logi_flow.backend.dto.contract.request.UpdateContractRequestDto;

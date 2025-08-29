@@ -30,14 +30,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +61,20 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
     @Override
     @Transactional
     public ResponseDto<CreateReturnDeliveryResponseDto> createReturnDelivery(Long deliveryId, CreateReturnDeliveryRequestDto dto, UserPrincipal userPrincipal) {
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (!customer.getId().equals(delivery.getCustomer().getId())) {
+            return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
+        }
+
+        if (returnDeliveryRepository.existsByDeliveryId(delivery.getId())) {
+            return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
+        }
 
         Allocation allocation = allocationRepository.findByDeliveryId(delivery.getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -71,17 +82,12 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
         }
 
-        if (returnDeliveryRepository.existsByDeliveryId(delivery.getId())) {
-            throw new IllegalArgumentException("이미 반품 신청이 되어있습니다.");
+        if (!allocation.getStatus().equals(AllocationStatus.COMPLETED)) {
+            return ResponseDto.fail(ResponseCode.DELIVERY_NOT_COMPLETED, ResponseMessage.DELIVERY_NOT_COMPLETED);
         }
 
-        String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if (!customer.getId().equals(delivery.getCustomer().getId())) {
-            throw new AccessDeniedException("해당 배송에 대한 접근 권한이 없습니다.");
+        if (LocalDateTime.now().isEqual(allocation.getUpdatedAt().plusDays(7))) {
+            return ResponseDto.fail(ResponseCode.ACTION_TOO_LATE, ResponseMessage.ACTION_TOO_LATE);
         }
 
         Contract contract = contractRepository.findById(delivery.getContract().getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
@@ -90,11 +96,11 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         LocalDate today = LocalDate.now();
 
         if (contractEndDate.isBefore(today)) {
-            throw new IllegalArgumentException("계약 종료일이 지남");
+            return ResponseDto.fail(ResponseCode.CONTRACT_EXPIRED, ResponseMessage.CONTRACT_EXPIRED);
         }
 
         if (!contract.getStatus().equals(ContractStatus.APPROVED)) {
-            throw new IllegalArgumentException("계약 상태가 승인이 아님");
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
         }
 
         DestinationSite destinationSite = destinationSiteRepository.findById(dto.getDestinationSiteId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
@@ -120,12 +126,13 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         returnDeliveryRepository.save(newReturnDelivery);
 
-        String alertMessage = "새로운 반품 배송이 동록되었습니다.";
+        String alertMessage = "새로운 반품 배송이 등록되었습니다.";
+
         Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         List<User> allocationManagers = userRepository.findByRoleId(role.getId());
 
         if (allocationManagers.isEmpty()) {
-            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
         }
 
         allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
@@ -215,7 +222,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         }
 
         if (!returnDelivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
-            return ResponseDto.fail(ResponseCode.FAILED, "배송 요청 상태에만 수정 가능");
+            return ResponseDto.fail(ResponseCode.INVALID_REQUESTED_STATE, ResponseMessage.INVALID_REQUESTED_STATE);
         }
 
         List<ReturnDeliveryUpdateLog> logs = new ArrayList<>();
@@ -227,6 +234,17 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         if (!logs.isEmpty()) {
             returnDeliveryUpdateLogRepository.saveAll(logs);
         }
+
+        String alertMessage = "반품 배송 번호 " + returnDelivery.getId() + "가 수정되었습니다.";
+
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+        if (allocationManagers.isEmpty()) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
+        }
+
+        allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
 
         UpdateReturnDeliveryResponseDto responseDto = toUpdateReturnDeliveryResponseDto(updateReturnDelivery);
 
@@ -244,30 +262,40 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         DeliveryStatus prevStatus = returnDelivery.getStatus();
-        if (prevStatus == DeliveryStatus.DELETED || dto.getStatus() == DeliveryStatus.DELETED) {
+        DeliveryStatus newStatus = dto.getStatus();
+
+        if (prevStatus == DeliveryStatus.DELETED || newStatus == DeliveryStatus.DELETED) {
             return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
         }
 
-        if (dto.getStatus() != returnDelivery.getStatus()) {
-            if (dto.getStatus() == DeliveryStatus.CANCELLED) {
-                return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
-            }
+        if (prevStatus == DeliveryStatus.CANCELLED || newStatus == DeliveryStatus.CANCELLED) {
+            return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
+        }
 
-            if (returnDelivery.getStatus() == DeliveryStatus.REJECTED || returnDelivery.getStatus() == DeliveryStatus.ASSIGNED) {
-                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
-            }
-
-            if (dto.getStatus() == DeliveryStatus.ASSIGNED) {
-                if (returnDelivery.getStatus() != DeliveryStatus.RECEIPTED) {
-                    return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
-                }
-
-            }
-
-            returnDelivery.setStatus(dto.getStatus());
-        } else {
+        if (prevStatus == newStatus) {
             return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
         }
+
+        switch (prevStatus) {
+            case REQUESTED -> {
+                if (newStatus == DeliveryStatus.RECEIPTED || newStatus == DeliveryStatus.REJECTED) {
+                    returnDelivery.setStatus(newStatus);
+                } else {
+                    return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+                }
+            }
+            case RECEIPTED -> {
+                if (newStatus == DeliveryStatus.ASSIGNED) {
+                    returnDelivery.setStatus(newStatus);
+                } else {
+                    return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+                }
+            }
+            default -> {
+                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
+            }
+        }
+
 
         if (returnDelivery.getStatus().equals(DeliveryStatus.RECEIPTED)) {
             int prevOverWeightFee = returnDelivery.getOverWeightFee();
@@ -292,18 +320,17 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             }
 
             int parcelLimit = contract.getParcelLimit();
-            int parcelCount = returnDelivery.getDelivery().getCustomer().getParcelCount();
-
+            int parcelCount = customer.getParcelCount();
 
             if (parcelCount >= parcelLimit) {
                 returnDelivery.setOverParcelFee(contract.getOverParcelFee());
                 returnDelivery.setOverParcel(true);
-                customer.setParcelCount(parcelCount + 1);
             } else {
                 returnDelivery.setOverParcelFee(0);
                 returnDelivery.setOverParcel(false);
-                customer.setParcelCount(parcelCount + 1);
             }
+
+            customer.setParcelCount(parcelCount + 1);
 
             int finalFee = contract.getBaseFee() + returnDelivery.getOverWeightFee() + returnDelivery.getOverParcelFee();
             returnDelivery.setFinalFee(finalFee);
@@ -329,7 +356,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
                     .changedByUsername(username)
                     .type("is_over_weight")
                     .prevData(String.valueOf(prevIsOverWeight))
-                    .newData(String.valueOf(!prevIsOverWeight))
+                    .newData(String.valueOf(returnDelivery.isOverWeight()))
                     .build());
             }
 
@@ -351,7 +378,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
                     .changedByUsername(username)
                     .type("is_over_parcel")
                     .prevData(String.valueOf(prevIsOverParcel))
-                    .newData(String.valueOf(!prevIsOverParcel))
+                    .newData(String.valueOf(returnDelivery.isOverParcel()))
                     .build());
             }
 
@@ -378,7 +405,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             case REJECTED -> "거절";
             case ASSIGNED -> "승인";
             case RECEIPTED -> "접수";
-            default -> "변경";
+            default -> "상태 변경";
         };
 
         String alertMessage = "반품 배송 번호 " + updatedReturnDelivery.getId() + "가 " + statusText + "되었습니다.";
@@ -409,7 +436,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         Customer customer = customerRepository.findById(returnDelivery.getDelivery().getCustomer().getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if(!returnDelivery.isHidden()) {
+        if (!returnDelivery.isHidden()) {
             return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
         }
 
@@ -420,7 +447,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         returnDelivery.setStatus(DeliveryStatus.DELETED);
         returnDeliveryRepository.save(returnDelivery);
 
-        String alertMessage = "반품 배송 " + returnDelivery.getId() + "이 삭제되었습니다.";
+        String alertMessage = "반품 배송 번호 " + returnDelivery.getId() + "가 삭제되었습니다.";
         alertService.sendToUser(customer.getUser().getId(), alertMessage);
 
         deleteLogService.createLog(TableRef.RETURN_DELIVERY, returnDeliveryId, user);
@@ -453,7 +480,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         }
 
         DeliveryStatus prevStatus = returnDelivery.getStatus();
-        System.out.println(prevStatus);
+
         if (prevStatus.equals(DeliveryStatus.REQUESTED)) {
             if (dto.getStatus() == DeliveryStatus.CANCELLED) {
                 returnDelivery.setStatus(dto.getStatus());
@@ -471,7 +498,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         List<User> allocationManagers = userRepository.findByRoleId(role.getId());
 
         if (allocationManagers.isEmpty()) {
-            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
         }
 
         allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
@@ -502,11 +529,15 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!returnDelivery.getDelivery().getCustomer().getId().equals(customer.getId())) {
+        if (!returnDelivery.getDelivery().getCustomer().getId().equals(customer.getId())) {
             return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
         }
 
         Allocation allocation = allocationRepository.findByReturnDeliveryId(returnDelivery.getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        if (allocation.getStatus().equals(AllocationStatus.COMPLETED)) {
+            return ResponseDto.fail(ResponseCode.DELIVERY_NOT_COMPLETED, ResponseMessage.DELIVERY_NOT_COMPLETED);
+        }
 
         if (!LocalDateTime.now().isAfter(allocation.getUpdatedAt().plusDays(7))) {
             return ResponseDto.fail(ResponseCode.ACTION_TOO_EARLY, ResponseMessage.ACTION_TOO_EARLY);
@@ -514,7 +545,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
 
         boolean prevIsHidden = returnDelivery.isHidden();
 
-        if (dto.getIsHidden() != null && !dto.getIsHidden().equals(returnDelivery.isHidden())) {
+        if (dto.getIsHidden() != null && dto.getIsHidden() != returnDelivery.isHidden()) {
             returnDelivery.setHidden(dto.getIsHidden());
         }
 
@@ -525,20 +556,20 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
             .user(user)
             .changedByUsername(username)
             .type("is_hidden")
-            .prevData(prevIsHidden ? "true" : "false")
-            .newData(updatedReturnDelivery.isHidden() ? "true" : "false")
+            .prevData(String.valueOf(prevIsHidden))
+            .newData(String.valueOf(returnDelivery.isHidden()))
             .build();
 
         returnDeliveryUpdateLogRepository.save(returnDeliveryUpdateLog);
 
-        Role role = roleRepository.findByName(UserRole.ADMIN).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-        List<User> adminUser = userRepository.findByRoleId(role.getId());
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationsManager = userRepository.findByRoleId(role.getId());
         String alertMessage = "반품 번호 " + returnDelivery.getId() + "가 숨김 처리되었습니다.";
-        if (adminUser.isEmpty()) {
-            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        if (allocationsManager.isEmpty()) {
+            return ResponseDto.fail(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
         }
 
-        adminUser.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+        allocationsManager.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
 
         UpdateReturnDeliveryResponseDto data = toUpdateReturnDeliveryResponseDto(updatedReturnDelivery);
 

@@ -9,10 +9,7 @@ import com.logi_flow.backend.dto.driver.request.CreateDriverLicenseRequestDto;
 import com.logi_flow.backend.dto.driver.request.UpdateDriverLicenseRequestDto;
 import com.logi_flow.backend.dto.driver.response.CreateDriverLicenseResponseDto;
 import com.logi_flow.backend.dto.driver.response.UpdateDriverLicenseResponseDto;
-import com.logi_flow.backend.entity.Driver;
-import com.logi_flow.backend.entity.DriverLicense;
-import com.logi_flow.backend.entity.DriverLicenseLog;
-import com.logi_flow.backend.entity.User;
+import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.repository.DriverLicenseLogRepository;
 import com.logi_flow.backend.repository.DriverLicenseRepository;
 import com.logi_flow.backend.repository.DriverRepository;
@@ -25,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -41,6 +39,13 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
     @Override
     public ResponseDto<CreateDriverLicenseResponseDto> createDriverLicense(Long driverId, CreateDriverLicenseRequestDto dto) {
         CreateDriverLicenseResponseDto data = null;
+
+        LocalDate expiredDate = dto.getExpiredDate();
+        LocalDate today = LocalDate.now();
+
+        if (expiredDate.isBefore(today)) {
+            throw new IllegalArgumentException(ResponseMessage.OUT_OF_TIME);
+        }
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
@@ -70,6 +75,13 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
     public ResponseDto<UpdateDriverLicenseResponseDto> updateDriverLicense(UserPrincipal userPrincipal, Long driverId, Long licenseId, UpdateDriverLicenseRequestDto dto) {
         UpdateDriverLicenseResponseDto data = null;
 
+        LocalDate expiredDate = dto.getExpiredDate();
+        LocalDate today = LocalDate.now();
+
+        if (expiredDate.isBefore(today)) {
+            throw new IllegalArgumentException(ResponseMessage.OUT_OF_TIME);
+        }
+
         User user = userRepository.findByUsername(userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
@@ -80,22 +92,23 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         if (!driverLicense.getDriver().getId().equals(driver.getId())) {
-            return ResponseDto.fail(ResponseCode.FAILED, ResponseMessage.FAILED);
+            return ResponseDto.fail(ResponseCode.NOT_MATCH, ResponseMessage.FAILED);
         }
 
+        List<DriverLicenseLog> logs = new ArrayList<>();
+
         if (dto.getType() != null && !driverLicense.getType().equals(dto.getType())) {
-            String prevData = String.valueOf(driverLicense.getType());
+            logs.add(buildUpdateLog(driverLicense, user, "license_type", String.valueOf(driverLicense.getType()), String.valueOf(driverLicense.getType())));
             driverLicense.setType(dto.getType());
-            createUpdateLog(driverLicense, user, "license_type", prevData, String.valueOf(driverLicense.getType()));
         }
 
         if(dto.getExpiredDate() != null && !driverLicense.getExpiredDate().equals(dto.getExpiredDate())) {
-            String prevData = String.valueOf(driverLicense.getExpiredDate());
+            logs.add(buildUpdateLog(driverLicense, user, "expiredDate", String.valueOf(driverLicense.getExpiredDate()), String.valueOf(driverLicense.getExpiredDate())));
             driverLicense.setExpiredDate(dto.getExpiredDate());
-            createUpdateLog(driverLicense, user, "expiredDate", prevData, String.valueOf(driverLicense.getExpiredDate()));
         }
 
         driverLicenseRepository.save(driverLicense);
+        driverLicenseLogRepository.saveAll(logs);
 
         data = UpdateDriverLicenseResponseDto.builder()
                 .driverLicenseId(driverLicense.getId())
@@ -125,8 +138,8 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
         }
     }
 
-    private void createUpdateLog(DriverLicense driverLicense, User user, String type, String prevData, String newData) {
-        DriverLicenseLog driverLicenseLog = DriverLicenseLog.builder()
+    private DriverLicenseLog buildUpdateLog(DriverLicense driverLicense, User user, String type, String prevData, String newData) {
+        return DriverLicenseLog.builder()
                 .driverLicense(driverLicense)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -134,7 +147,5 @@ public class DriverLicenseServiceImpl implements DriverLicenseService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        driverLicenseLogRepository.save(driverLicenseLog);
     }
 }

@@ -4,6 +4,7 @@ import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
 import com.logi_flow.backend.dto.allocationLog.response.GetAllocationStatusLogResponseDto;
 import com.logi_flow.backend.dto.allocationLog.response.GetAllocationUpdateLogResponseDto;
+import com.logi_flow.backend.entity.Allocation;
 import com.logi_flow.backend.entity.AllocationStatusLog;
 import com.logi_flow.backend.entity.AllocationUpdateLog;
 import com.logi_flow.backend.repository.AllocationStatusLogRepository;
@@ -47,9 +48,22 @@ public class AllocationLogServiceImpl implements AllocationLogService {
     }
 
     private GetAllocationUpdateLogResponseDto toGetAllocationUpdateLogResponseDto(AllocationUpdateLog allocationUpdateLog) {
+
+        Allocation allocation = allocationUpdateLog.getAllocation();
+        Long deliveryId = null;
+        Long returnDeliveryId = null;
+
+        if(allocation.getDelivery() != null) {
+            deliveryId = allocation.getDelivery().getId();
+        }
+
+        if(allocation.getReturnDelivery() != null) {
+            returnDeliveryId = allocation.getReturnDelivery().getId();
+        }
+
         return GetAllocationUpdateLogResponseDto.builder()
-                .deliveryId(allocationUpdateLog.getAllocation().getDelivery().getId())
-                .returnDeliveryId(allocationUpdateLog.getAllocation().getReturnDelivery().getId())
+                .deliveryId(deliveryId)
+                .returnDeliveryId(returnDeliveryId)
                 .driverName(allocationUpdateLog.getAllocation().getAssignment().getDriver().getName())
                 .vehicleNumber(allocationUpdateLog.getAllocation().getAssignment().getVehicle().getVehicleNumber())
                 .changedByUsername(allocationUpdateLog.getChangedByUsername())
@@ -61,9 +75,22 @@ public class AllocationLogServiceImpl implements AllocationLogService {
     }
 
     private GetAllocationStatusLogResponseDto toGetAllocationStatusLogResponseDto(AllocationStatusLog allocationStatusLog) {
+
+        Allocation allocation = allocationStatusLog.getAllocation();
+        Long deliveryId = null;
+        Long returnDeliveryId = null;
+
+        if(allocation.getDelivery() != null) {
+            deliveryId = allocation.getDelivery().getId();
+        }
+
+        if(allocation.getReturnDelivery() != null) {
+            returnDeliveryId = allocation.getReturnDelivery().getId();
+        }
+
         return GetAllocationStatusLogResponseDto.builder()
-                .deliveryId(allocationStatusLog.getAllocation().getDelivery().getId())
-                .returnDeliveryId(allocationStatusLog.getAllocation().getReturnDelivery().getId())
+                .deliveryId(deliveryId)
+                .returnDeliveryId(returnDeliveryId)
                 .driverName(allocationStatusLog.getAllocation().getAssignment().getDriver().getName())
                 .vehicleNumber(allocationStatusLog.getAllocation().getAssignment().getVehicle().getVehicleNumber())
                 .changedByUsername(allocationStatusLog.getChangedByUsername())

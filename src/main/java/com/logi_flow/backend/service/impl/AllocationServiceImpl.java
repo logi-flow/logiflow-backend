@@ -4,7 +4,6 @@ import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.AllocationStatus;
 import com.logi_flow.backend.common.enums.DeliveryStatus;
-import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
@@ -47,10 +46,6 @@ public class AllocationServiceImpl implements AllocationService {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)){
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         Delivery delivery = null;
         ReturnDelivery returnDelivery = null;
 
@@ -61,18 +56,18 @@ public class AllocationServiceImpl implements AllocationService {
         }
 
         if(delivery == null && returnDelivery == null){
-            throw new IllegalArgumentException("유효한 deliveryId 또는 returnDeliveryId가 필요함.");
+            throw new IllegalArgumentException(ResponseMessage.INVALID_DELIVERY_OR_RETURN_DELIVERY_ID);
         }
 
         if(delivery != null) {
             if(!delivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
-                throw new IllegalArgumentException("승인 상태인 배송만 배차 가능.");
+                throw new IllegalArgumentException(ResponseMessage.ALLOWED_ONLY_IN_APPROVED_STATUS);
             }
         }
 
         if(returnDelivery != null) {
             if(!returnDelivery.getStatus().equals(DeliveryStatus.ASSIGNED)) {
-                throw new IllegalArgumentException("승인 상태인 반품 배송만 배차 가능.");
+                throw new IllegalArgumentException(ResponseMessage.ALLOWED_ONLY_IN_APPROVED_STATUS);
             }
         }
 
@@ -128,20 +123,16 @@ public class AllocationServiceImpl implements AllocationService {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         Allocation allocation = allocationRepository.findById(allocationId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         List<AllocationUpdateLog> logs = new ArrayList<>();
 
         if(dto.getDeliveryId() != null && dto.getReturnDeliveryId() != null) {
-            throw new IllegalArgumentException("배차 하나에는 deliveryId, returnDeliveryId 중에 하나만 지정 가능.");
+            throw new IllegalArgumentException(ResponseMessage.DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED);
         }
 
         if(dto.getDeliveryId() == null && dto.getReturnDeliveryId() == null) {
-            throw new IllegalArgumentException("deliveryId, returnDeliveryId 중에 하나는 포함해야 함.");
+            throw new IllegalArgumentException(ResponseMessage.DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED);
         }
 
         if(dto.getDeliveryId() != null) {
@@ -214,10 +205,6 @@ public class AllocationServiceImpl implements AllocationService {
 
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ALLOCATIONS_MANAGER)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         AllocationStatus prevStatus = allocation.getStatus();
 

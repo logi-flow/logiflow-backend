@@ -7,6 +7,8 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.retunDeliveryLog.response.GetAllReturnDeliveryStatusLogResponseDto;
 import com.logi_flow.backend.dto.retunDeliveryLog.response.GetAllReturnDeliveryUpdateLogResponseDto;
 import com.logi_flow.backend.service.ReturnDeliveryLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "반품 배송 로그 관리", description = "반품 배송 로그(Return-Delivery-log) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.RETURN_DELIVERY_LOG_API)
 public class ReturnDeliveryLogController {
     private final ReturnDeliveryLogService returnDeliveryLogService;
 
+    @Operation(summary = "반품 배송 정보 수정 로그 조회", description = "반품 배송 정보 수정 내역 로그 조회")
     @GetMapping("/update")
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryUpdateLogResponseDto>>> getAllReturnDeliveryUpdateLogs(
@@ -35,6 +39,7 @@ public class ReturnDeliveryLogController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "반품 배송 상태 변경 로그 조회", description = "반품 배송 상태 변경 내역 로그 조회")
     @GetMapping("/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllReturnDeliveryStatusLogResponseDto>>> getAllReturnDeliveryStatusLogs(

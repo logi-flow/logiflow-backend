@@ -17,6 +17,7 @@ import com.logi_flow.backend.repository.CustomerRepository;
 import com.logi_flow.backend.repository.CustomerStatusLogRepository;
 import com.logi_flow.backend.repository.CustomerUpdateLogRepository;
 import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +39,10 @@ public class CustomerServiceImpl implements CustomerService {
     private final UserRepository userRepository;
     private final CustomerUpdateLogRepository customerUpdateLogRepository;
     private final CustomerStatusLogRepository customerStatusLogRepository;
+    private final AlertService alertService;
 
     @Override
+    @Transactional
     public ResponseDto<UpdateCustomerResponseDto> updateCustomer(UserPrincipal userPrincipal, UpdateCustomerRequestDto dto) {
         UpdateCustomerResponseDto data = null;
 
@@ -110,6 +114,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetail(UserPrincipal userPrincipal) {
         GetCustomerDetailResponseDto data = null;
 
@@ -147,6 +152,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateCustomerResponseDto> updateCustomerAdmin(UserPrincipal userPrincipal, Long customerId, UpdateCustomerAdminRequestDto dto) {
         UpdateCustomerResponseDto data = null;
 
@@ -241,6 +247,11 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.save(customer);
         customerUpdateLogRepository.saveAll(logs);
 
+        if (!logs.isEmpty()) {
+            String alertMessage = "[관리자 수정] 정보가" + logs.size() + "건 변경되었습니다.";
+            alertService.sendToUser(customer.getUser().getId(), alertMessage);
+        }
+
         data = UpdateCustomerResponseDto.builder()
                 .id(customer.getId())
                 .name(customer.getName())
@@ -252,6 +263,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public ResponseDto<UpdateCustomerStatusResponseDto> updateCustomerStatus(UserPrincipal userPrincipal, Long customerId, UpdateCustomerStatusRequestDto dto) {
         UpdateCustomerStatusResponseDto data = null;
 
@@ -285,6 +297,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerStatusLogRepository.save(customerStatusLog);
 
+        String alertMessage = "[승인상태 변경] " + prevStatus + " → " + updatedCustomer.getStatus() +
+                (dto.getChangedReason() != null ? (" (사유: " + dto.getChangedReason() + ")") : "");
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
+
         data = UpdateCustomerStatusResponseDto.builder()
                 .id(updatedCustomer.getId())
                 .status(updatedCustomer.getStatus())
@@ -301,6 +317,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<GetAllCustomerResponseDto> getAllCustomer(UserPrincipal userPrincipal, int page, int size, String sort) {
         Page<GetAllCustomerResponseDto> data = null;
 
@@ -313,6 +330,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseDto<GetCustomerDetailResponseDto> getCustomerDetailAdmin(UserPrincipal userPrincipal, Long customerId) {
         GetCustomerDetailResponseDto data = null;
 

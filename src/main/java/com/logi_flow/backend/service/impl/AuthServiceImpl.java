@@ -13,6 +13,7 @@ import com.logi_flow.backend.dto.auth.response.*;
 import com.logi_flow.backend.entity.*;
 import com.logi_flow.backend.provider.JwtProvider;
 import com.logi_flow.backend.repository.*;
+import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.AuthService;
 import com.logi_flow.backend.service.MailService;
 import com.logi_flow.backend.service.UploadFileService;
@@ -51,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final UploadFileService uploadFileService;
+    private final AlertService alertService;
 
     @Override
     @Transactional
@@ -124,6 +126,12 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         customerRepository.save(customer);
+
+        String alertMessage = "[가입 신청] 가입 신청이 완료되었습니다. 관리자 승인 대기 중입니다.";
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
+
+        String alertMessageToAdmin = "[신규 가입 신청] " + customer.getName() + "님의 가입신청이 있습니다.";
+        alertService.sendToManager(alertMessageToAdmin);
 
         data = CustomerSignUpResponseDto.builder()
                 .id(customer.getId())
@@ -343,6 +351,9 @@ public class AuthServiceImpl implements AuthService {
             return ResponseDto.fail(ResponseCode.MAIL_SEND_FAIL, ResponseMessage.MAIL_SEND_FAIL);
         }
 
+        String alertMessage = "[비밀번호 재설정] 비밀번호 재설정 메일을 전송했습니다. 메일함을 확인해주세요.";
+        alertService.sendToUser(customer.getUser().getId(), alertMessage);
+
         data = CustomerPasswordResetResponseDto.builder()
                 .userId(customer.getUser().getId())
                 .email(customer.getUser().getEmail())
@@ -405,6 +416,9 @@ public class AuthServiceImpl implements AuthService {
             return ResponseDto.fail(ResponseCode.MAIL_SEND_FAIL, ResponseMessage.MAIL_SEND_FAIL);
         }
 
+        String alertMessage = "[비밀번호 재설정] 비밀번호 재설정 메일을 전송했습니다. 메일함을 확인해주세요.";
+        alertService.sendToUser(user.getId(), alertMessage);
+
         data = UserPasswordResetResponseDto.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
@@ -436,6 +450,9 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
+
+        String alertMessage = "[비밀번호 변경] 비밀번호가 성공적으로 변경되었습니다.";
+        alertService.sendToUser(user.getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
@@ -479,6 +496,9 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         user.setMustChangePassword(false);
         userRepository.save(user);
+
+        String alertMessage = "[초기 비밀번호 변경] 변경이 완료되었습니다. 이제 정상적으로 로그인할 수 있습니다.";
+        alertService.sendToUser(user.getId(), alertMessage);
 
         data = FirstPasswordChangeResponseDto.builder()
                 .username(user.getUsername())
