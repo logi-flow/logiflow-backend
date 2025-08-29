@@ -27,6 +27,8 @@ public interface ResponseMessage {
     String MAIL_NOT_FOUND = "이메일을 찾을 수 없습니다.";
 
     String NO_OPEN_ATTENDANCE = "미퇴근 기록이 존재하지 않습니다.";
+    String INVALID_REQUESTED_STATE = "요청 상태가 아닙니다.";
+
 
     String EXISTS_PAYROLL = "해당 기간의 급여대장이 이미 존재합니다.";
     String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
@@ -40,4 +42,7 @@ public interface ResponseMessage {
     String CHECK_LICENSE = "라이센스는 배정 시 필수 입니다.";
     String INVALID_STATE = "잘못된 상태입니다.";
     String ACTION_TOO_EARLY = "7일이 경과하지 않아 요청을 처리할 수 없습니다.";
+    String ACTION_TOO_LATE = "환불 신청 가능 기간이 지났습니다.";
+    String DELIVERY_NOT_COMPLETED = "배송이 완료되지 않은 상태에서는 반품 신청을 할 수 없습니다.";
+    String CONTRACT_EXPIRED = "계약이 종료되었습니다.";
 }
