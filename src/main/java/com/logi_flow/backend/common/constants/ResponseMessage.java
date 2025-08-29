@@ -4,7 +4,10 @@ public interface ResponseMessage {
     String SUCCESS = "성공";
     String FAILED = "실패";
 
+    String INVALID_INPUT = "잘못된 입력값입니다.";
+    String VALIDATION_FAIL = "입력값이 유효하지 않습니다.";
     String NO_PERMISSION = "접근 권한 없음";
+    String DATA_INTEGRITY_VIOLATION = "데이터 무결성 오류가 발생했습니다.";
 
     String USER_ALREADY_EXISTS = "이미 존재하는 유저";
     String USER_NOT_FOUND = "유저를 찾을 수 없음";
