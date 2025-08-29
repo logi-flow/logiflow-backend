@@ -235,11 +235,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseDto<LogoutResponseDto> logout(HttpServletResponse response) {
-        return null;
-    }
-
-    @Override
     public ResponseDto<CustomerLoginIdFindResponseDto> findCustomerLoginId(CustomerLoginIdFindRequestDto dto) {
         CustomerLoginIdFindResponseDto data = null;
 

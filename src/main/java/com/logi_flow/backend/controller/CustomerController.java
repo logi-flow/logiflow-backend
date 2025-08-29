@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class CustomerController {
     private static final String CUSTOMER_STATUS_API = "/{customerId}/status";
 
     @PutMapping(CUSTOMER_MY_INFO_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomer(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateCustomerRequestDto dto
@@ -40,6 +42,7 @@ public class CustomerController {
     }
 
     @GetMapping(CUSTOMER_MY_INFO_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -48,6 +51,7 @@ public class CustomerController {
     }
 
     @PutMapping(CUSTOMER_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomerAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId,
@@ -58,6 +62,7 @@ public class CustomerController {
     }
 
     @PutMapping(CUSTOMER_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateCustomerStatusResponseDto>> updateCustomerStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId,
@@ -68,6 +73,7 @@ public class CustomerController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllCustomerResponseDto>>> getAllCustomer(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -80,11 +86,21 @@ public class CustomerController {
     }
 
     @GetMapping(CUSTOMER_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetailAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long customerId
     ) {
         ResponseDto<GetCustomerDetailResponseDto> response = customerService.getCustomerDetailAdmin(userPrincipal, customerId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @DeleteMapping(CUSTOMER_MY_INFO_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
+    public ResponseEntity<ResponseDto<Void>> deleteCustomer(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        ResponseDto<Void> response = customerService.deleteCustomer(userPrincipal);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

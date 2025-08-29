@@ -13,11 +13,13 @@ import com.logi_flow.backend.dto.employee.request.UpdateEmployeeRequestDto;
 import com.logi_flow.backend.dto.employee.request.UpdateEmployeeStatusRequestDto;
 import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.service.EmployeeService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +35,9 @@ public class EmployeeController {
     private static final String EMPLOYEE_ID_API = "/{employeeId}";
     private static final String EMPLOYEE_STATUS_API = "/{employeeId}/status";
 
+    @Operation(summary = "신규 직원 생성", description = "직원 정보를 입력하여 ID / PW를 생성함")
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<CreateEmployeeResponseDto>> createEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestPart(value = "dto") CreateEmployeeRequestDto dto,
@@ -44,6 +48,7 @@ public class EmployeeController {
     }
 
     @PutMapping(EMPLOYEE_MY_INFO_API)
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateEmployeeRequestDto dto
@@ -53,6 +58,7 @@ public class EmployeeController {
     }
 
     @GetMapping(EMPLOYEE_MY_INFO_API)
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
     public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetail(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -61,6 +67,7 @@ public class EmployeeController {
     }
 
     @PutMapping(EMPLOYEE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployeeAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId,
@@ -72,6 +79,7 @@ public class EmployeeController {
     }
 
     @PutMapping(EMPLOYEE_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateEmployeeStatusResponseDto>> updateEmployeeStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId,
@@ -83,6 +91,7 @@ public class EmployeeController {
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllEmployeeResponseDto>>> getAllEmployee(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -95,20 +104,12 @@ public class EmployeeController {
     }
 
     @GetMapping(EMPLOYEE_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetEmployeeDetailAdminResponseDto>> getEmployeeDetailAdmin(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long employeeId
     ) {
         ResponseDto<GetEmployeeDetailAdminResponseDto> response = employeeService.getEmployeeDetailAdmin(userPrincipal, employeeId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
-    @DeleteMapping(EMPLOYEE_ID_API)
-    public ResponseEntity<ResponseDto<?>> deleteEmployee(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long employeeId
-    ) {
-        ResponseDto<?> response = employeeService.deleteEmployee(userPrincipal, employeeId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

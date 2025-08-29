@@ -25,6 +25,4 @@ public interface EmployeeService {
     Page<GetAllEmployeeResponseDto> getAllEmployee(UserPrincipal userPrincipal, int page, int size, String sort);
 
     ResponseDto<GetEmployeeDetailAdminResponseDto> getEmployeeDetailAdmin(UserPrincipal userPrincipal, Long employeeId);
-
-    ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long employeeId);
 }

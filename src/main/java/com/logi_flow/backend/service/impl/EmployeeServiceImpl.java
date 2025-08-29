@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -365,6 +366,12 @@ public class EmployeeServiceImpl implements EmployeeService {
                 (dto.getChangedReason() != null ? (" (사유: " + dto.getChangedReason() + ")") : "");
         alertService.sendToUser(employee.getUser().getId(), alertMessage);
 
+        if (updatedEmployee.getStatus() == EmployeeStatus.RETIRED) {
+            deleteLogService.createLog(TableRef.EMPLOYEE, employeeId, user);
+            String alertMessage2 = "[퇴사 처리] 계정 상태가 RETIRED로 변경되었습니다.";
+            alertService.sendToUser(employee.getUser().getId(), alertMessage2);
+        }
+
         data = UpdateEmployeeStatusResponseDto.builder()
                 .id(updatedEmployee.getId())
                 .status(updatedEmployee.getStatus())
@@ -402,10 +409,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
@@ -428,30 +431,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
-    }
-
-    @Override
-    @Transactional
-    public ResponseDto<?> deleteEmployee(UserPrincipal userPrincipal, Long employeeId) {
-        User user = userRepository.findByUsername(userPrincipal.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-
-        if (employee.getStatus() == EmployeeStatus.RETIRED) {
-            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        }
-
-        employee.setStatus(EmployeeStatus.RETIRED);
-        employeeRepository.save(employee);
-
-        deleteLogService.createLog(TableRef.EMPLOYEE, employeeId, user);
-
-        String alertMessage = "[퇴사 처리] 계정 상태가 RETIRED로 변경되었습니다.";
-        alertService.sendToUser(employee.getUser().getId(), alertMessage);
-
-        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private String toInitials(String name) {

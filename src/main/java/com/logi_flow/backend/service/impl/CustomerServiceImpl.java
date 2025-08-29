@@ -2,7 +2,9 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.ContractStatus;
 import com.logi_flow.backend.common.enums.CustomerStatus;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.user.UserRole;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.common.util.SortUtils;
@@ -13,12 +15,10 @@ import com.logi_flow.backend.dto.customer.request.UpdateCustomerRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
 import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.entity.*;
-import com.logi_flow.backend.repository.CustomerRepository;
-import com.logi_flow.backend.repository.CustomerStatusLogRepository;
-import com.logi_flow.backend.repository.CustomerUpdateLogRepository;
-import com.logi_flow.backend.repository.UserRepository;
+import com.logi_flow.backend.repository.*;
 import com.logi_flow.backend.service.AlertService;
 import com.logi_flow.backend.service.CustomerService;
+import com.logi_flow.backend.service.DeleteLogService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,8 +37,10 @@ import java.util.Objects;
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
+    private final ContractRepository contractRepository;
     private final CustomerUpdateLogRepository customerUpdateLogRepository;
     private final CustomerStatusLogRepository customerStatusLogRepository;
+    private final DeleteLogService deleteLogService;
     private final AlertService alertService;
 
     @Override
@@ -338,10 +340,6 @@ public class CustomerServiceImpl implements CustomerService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
@@ -370,6 +368,32 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
+    }
+
+    @Override
+    public ResponseDto<Void> deleteCustomer(UserPrincipal userPrincipal) {
+        String username = userPrincipal.getUsername();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Customer customer = customerRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        if (contractRepository.existsByCustomerAndStatus(customer, ContractStatus.APPROVED)) {
+            return ResponseDto.success(ResponseCode.FAILED, "계약이 진행중인 고객입니다.");
+        }
+
+        if (customer.getStatus() == CustomerStatus.DELETED) {
+            return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+        }
+
+        customer.setStatus(CustomerStatus.DELETED);
+        customerRepository.save(customer);
+
+        deleteLogService.createLog(TableRef.CUSTOMER, customer.getId(), user);
+
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }
 
     private CustomerUpdateLog buildUpdateLog(Customer customer, User user, String username, String type, String prevData, String newData) {
