@@ -32,6 +32,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -131,6 +133,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         AllowanceType savedAllowanceType = getAllowanceType(allowanceTypeId);
+        List<AllowanceTypeUpdateLog> logs = new ArrayList<>();
 
         if (savedAllowanceType.getCode().equals("BASE")) {
             return ResponseDto.fail(ResponseCode.SYSTEM_ITEM_IMMUTABLE, ResponseMessage.SYSTEM_ITEM_IMMUTABLE);
@@ -143,22 +146,26 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
         if (!dto.getName().equals(savedAllowanceType.getName())) {
             String prevData = savedAllowanceType.getName();
             savedAllowanceType.setName(dto.getName());
-            createUpdateLog(user, savedAllowanceType, "name", prevData, savedAllowanceType.getName());
+            logs.add(createUpdateLog(user, savedAllowanceType, "name", prevData, savedAllowanceType.getName()));
         }
 
         if (!Objects.equals(dto.getDescription(), savedAllowanceType.getDescription())) {
             String prevData = savedAllowanceType.getDescription();
             savedAllowanceType.setDescription(dto.getDescription());
-            createUpdateLog(user, savedAllowanceType, "description", prevData, savedAllowanceType.getDescription());
+            logs.add(createUpdateLog(user, savedAllowanceType, "description", prevData, savedAllowanceType.getDescription()));
         }
 
         if (dto.isActive() != savedAllowanceType.isActive()) {
             String prevData = String.valueOf(savedAllowanceType.isActive());
             savedAllowanceType.setActive(dto.isActive());
-            createUpdateLog(user, savedAllowanceType, "is_active", prevData, String.valueOf(savedAllowanceType.isActive()));
+            logs.add(createUpdateLog(user, savedAllowanceType, "is_active", prevData, String.valueOf(savedAllowanceType.isActive())));
         }
 
         AllowanceType updatedAllowanceType = allowanceTypeRepository.save(savedAllowanceType);
+
+        if (!logs.isEmpty()) {
+            allowanceTypeUpdateLogRepository.saveAll(logs);
+        }
 
         data = UpdateAllowanceTypeResponseDto.builder()
                 .id(updatedAllowanceType.getId())
@@ -235,8 +242,8 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
                 .build();
     }
 
-    private void createUpdateLog(User user, AllowanceType savedAllowanceType, String type, String prevData, String newData) {
-        AllowanceTypeUpdateLog allowanceTypeUpdateLog = AllowanceTypeUpdateLog.builder()
+    private AllowanceTypeUpdateLog createUpdateLog(User user, AllowanceType savedAllowanceType, String type, String prevData, String newData) {
+        return AllowanceTypeUpdateLog.builder()
                 .allowanceType(savedAllowanceType)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -244,7 +251,5 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        allowanceTypeUpdateLogRepository.save(allowanceTypeUpdateLog);
     }
 }
