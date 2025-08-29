@@ -75,15 +75,15 @@ public class DeliveryServiceImpl implements DeliveryService {
         LocalDate today = LocalDate.now();
 
         if(contractStartDate.isAfter(today)) {
-            throw new IllegalArgumentException("계약 시작일 이전임");
+            throw new IllegalArgumentException(ResponseMessage.INVALID_DATE_FOR_CREATE_DELIVERY);
         }
 
         if(contractEndDate.isBefore(today)) {
-            throw new IllegalArgumentException("계약 종료일이 지남");
+            throw new IllegalArgumentException(ResponseMessage.INVALID_DATE_FOR_CREATE_DELIVERY);
         }
 
         if(!contract.getStatus().equals(ContractStatus.APPROVED)) {
-            throw new IllegalArgumentException("계약 상태가 승인이 아님");
+            throw new IllegalArgumentException(ResponseMessage.CONTRACT_STATUS_NOT_APPROVED);
         }
 
         CollectionSite collectionSite = collectionSiteRepository.findById(dto.getCollectionSiteId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
@@ -140,6 +140,17 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .createdAt(DateUtils.format(newDelivery.getCreatedAt()))
                 .updatedAt(DateUtils.format(newDelivery.getUpdatedAt()))
                 .build();
+
+        String alertMessage = "새로운 배송 신청이 생성되었습니다.";
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.ALLOCATIONS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -231,7 +242,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         AllocationStatus status = allocationStatusLog.getNewStatus();
 
         if(status != AllocationStatus.COMPLETED || !now.isAfter(allocationStatusLog.getCreatedAt().plusDays(7))) {
-            return ResponseDto.fail(ResponseCode.FAILED, "상태가 COMPLETED 이고 완료 후 7일 경과해야 숨김처리 가능");
+            return ResponseDto.fail(ResponseCode.FAILED, ResponseMessage.PRECONDITION_FAILED);
         }
 
         boolean prevIsHidden = delivery.isHidden();
@@ -283,6 +294,19 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
+
+        String alertMessage = "배송 #" + deliveryId + "이 숨김 처리되었습니다.";
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.ALLOCATIONS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
+
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -303,7 +327,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         }
 
         if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
-            return ResponseDto.fail(ResponseCode.FAILED, "배송 요청 상태에만 수정 가능");
+            return ResponseDto.fail(ResponseCode.FAILED, ResponseMessage.INVALID_STATUS_FOR_DELIVERY_UPDATE);
         }
 
         List<DeliveryUpdateLog> logs = new ArrayList<>();
@@ -395,6 +419,17 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
+        String alertMessage = "배송 #" + deliveryId + "이 수정되었습니다.";
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.ALLOCATIONS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -407,20 +442,17 @@ public class DeliveryServiceImpl implements DeliveryService {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         DeliveryStatus prevStatus = delivery.getStatus();
         DeliveryStatus newStatus = dto.getStatus();
 
         if(prevStatus.equals(DeliveryStatus.REQUESTED)){
             if(!(newStatus.equals(DeliveryStatus.CANCELLED) || newStatus.equals(DeliveryStatus.RECEIPTED))) {
-                return ResponseDto.fail("INVALID_STATUS_TRANSITION", "REQUESTED 상태에서는 CANCELLED 또는 RECEIPTED 로만 변경 가능");
+                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.DELIVERY_UPDATE_ALLOWED_ONLY_IN_REQUESTED_STATUS);
             }
         } else if (prevStatus.equals(DeliveryStatus.RECEIPTED)) {
             if(!(newStatus.equals(DeliveryStatus.ASSIGNED) || newStatus.equals(DeliveryStatus.REJECTED))) {
-                return ResponseDto.fail("INVALID_STATUS_TRANSITION", "RECEIPTED 상태에서는 ASSIGNED 또는 REJECTED 로만 변경 가능");            }
+                return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.DELIVERY_UPDATE_ALLOWED_ONLY_IN_RECEIPTED_STATUS);
+            }
         }
 
         if(dto.getStatus() != delivery.getStatus()) {
@@ -544,7 +576,6 @@ public class DeliveryServiceImpl implements DeliveryService {
         String alertMessage = "배송 # " + deliveryId + " 상태가 '" + deliveryStatusLog.getNewStatus() + "'로 변경되었습니다.";
         alertService.sendToUser(delivery.getCustomer().getUser().getId(), alertMessage);
 
-
         UpdateDeliveryResponseDto data = UpdateDeliveryResponseDto.builder()
                 .id(updatedDelivery.getId())
                 .contractId(updatedDelivery.getContract().getId())
@@ -599,17 +630,17 @@ public class DeliveryServiceImpl implements DeliveryService {
         Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
         if(!delivery.getCustomer().getId().equals(customer.getId())) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
+            return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.NO_PERMISSION);
         }
 
         DeliveryStatus prevStatus = delivery.getStatus();
 
         if(!prevStatus.equals(DeliveryStatus.REQUESTED)) {
-            return ResponseDto.fail(ResponseCode.FAILED, "상태가 요청 상태일 때만 취소 가능");
+            return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.DELIVERY_DELETE_ALLOWED_ONLY_IN_REQUESTED_STATUS);
         }
 
         if(!dto.getStatus().equals(DeliveryStatus.CANCELLED)) {
-            return ResponseDto.fail(ResponseCode.FAILED, "고객사는 취소만 가능");
+            return ResponseDto.fail(ResponseCode.FORBIDDEN, ResponseMessage.CUSTOMER_CANCEL_ONLY);
         }
 
         delivery.setStatus(dto.getStatus());
@@ -656,6 +687,17 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .updatedAt(DateUtils.format(updatedDelivery.getUpdatedAt()))
                 .build();
 
+        String alertMessage = "배송 #" + deliveryId + "이 취소 되었습니다.";
+        List<User> contractManagerList = userRepository.findByRoleName(UserRole.ALLOCATIONS_MANAGER);
+
+        if(contractManagerList != null && !contractManagerList.isEmpty()) {
+            for(User manager : contractManagerList) {
+                alertService.sendToUser(manager.getId(), alertMessage);
+            }
+        } else {
+            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+        }
+
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
@@ -664,10 +706,6 @@ public class DeliveryServiceImpl implements DeliveryService {
     public ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId) {
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
 
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
@@ -679,6 +717,9 @@ public class DeliveryServiceImpl implements DeliveryService {
         deliveryRepository.save(delivery);
 
         deleteLogService.createLog(TableRef.DELIVERY, deliveryId, user);
+
+        String alertMessage = "배송 #" + deliveryId + "이 삭제 되었습니다.";
+        alertService.sendToUser(delivery.getCustomer().getUser().getId(), alertMessage);
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
     }

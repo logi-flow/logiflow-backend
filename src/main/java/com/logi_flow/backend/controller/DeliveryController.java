@@ -32,8 +32,16 @@ import java.util.List;
 public class DeliveryController {
     private final DeliveryService deliveryService;
 
+    private static final String DELIVERY_ID_API = "/{deliveryId}";
+    private static final String MY_DELIVERY_API = "/me";
+    private static final String IS_HIDDEN_API = DELIVERY_ID_API + "/isHidden";
+    private static final String DELIVERY_STATUS_API = DELIVERY_ID_API + "/status";
+    private static final String DELIVERY_CANCEL_API = DELIVERY_ID_API + "/cancel";
+    private static final String WAITING_DELIVERY_API = "/waiting";
+
     @Operation(summary = "신규 배송 생성", description = "새로운 배송 정보를 입력하면 배송 생성")
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<CreateDeliveryResponseDto>> createDelivery(@Valid @RequestBody CreateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<CreateDeliveryResponseDto> response = deliveryService.createDelivery(dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
@@ -41,6 +49,7 @@ public class DeliveryController {
 
     @Operation(summary = "배송 전체 조회", description = "배송 정보를 전부 조회")
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getAllDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -52,14 +61,16 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 단건 조회", description = "배송 단건에 대한 상세 조회")
-    @GetMapping("/{deliveryId}")
+    @GetMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'CUSTOMER')")
     public ResponseEntity<ResponseDto<GetDeliveryDetailResponseDto>> getDelivery(@PathVariable Long deliveryId) {
         ResponseDto<GetDeliveryDetailResponseDto> response = deliveryService.getDelivery(deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "고객사 배송 조회", description = "고객사의 배송 정보를 전부 조회")
-    @GetMapping("/me")
+    @GetMapping(MY_DELIVERY_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDeliveryResponseDto>>> getMyDeliveries(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
@@ -72,42 +83,48 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 정보 숨김", description = "배송 정보를 숨김 처리")
-    @PutMapping("/{deliveryId}/is-hidden")
+    @PutMapping(IS_HIDDEN_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryIsHidden(@PathVariable Long deliveryId, @Valid @RequestBody UpdateIsHiddenRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryIsHidden(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "배송 정보 수정", description = "배송 정보를 수정")
-    @PutMapping("/{deliveryId}")
+    @PutMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "배송 상태 수정", description = "배송 상태를 수정")
-    @PutMapping("/{deliveryId}/status")
+    @PutMapping(DELIVERY_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> updateDeliveryStatus(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.updateDeliveryStatus(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "배송 취소", description = "배송 상태를 취소로 수정")
-    @PutMapping("/{deliveryId}/cancel")
+    @PutMapping(DELIVERY_CANCEL_API)
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateDeliveryResponseDto>> cancelDelivery(@PathVariable Long deliveryId, @Valid @RequestBody UpdateDeliveryStatusRequestDto dto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<UpdateDeliveryResponseDto> response = deliveryService.cancelDelivery(deliveryId, dto, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "배송 삭제", description = "배송 정보를 삭제")
-    @DeleteMapping("/{deliveryId}")
+    @DeleteMapping(DELIVERY_ID_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteDelivery(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long deliveryId) {
          ResponseDto<Void> response = deliveryService.deleteDelivery(userPrincipal, deliveryId);
         return ResponseDto.toResponseEntity(HttpStatus.NO_CONTENT, response);
     }
 
     @Operation(summary = "배차 가능 배송 조회", description = "배차 가능한 배송 정보를 조회")
-    @GetMapping("/waiting")
+    @GetMapping(WAITING_DELIVERY_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllWaitingDeliveryResponseDto>>> getAllWaitingDelivery(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
