@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "기사 관리", description = "기사(Driver) 관련 API")
 @RestController
@@ -36,12 +37,14 @@ public class DriverController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateDriverResponseDto>> createDriver(
-            @Valid @RequestBody CreateDriverRequestDto dto
-    ) {
-        ResponseDto<CreateDriverResponseDto> response = driverService.createDriver(dto);
+            @Valid @RequestPart(value = "dto") CreateDriverRequestDto dto,
+            @RequestPart(value = "profileImage", required = false)MultipartFile profileImage
+            ) {
+        ResponseDto<CreateDriverResponseDto> response = driverService.createDriver(dto, profileImage);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "내 정보 수정", description = "나의 정보를 수정")
     @PutMapping(MY_INFO_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriver(
@@ -52,6 +55,7 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "기사 정보 수정", description = "관리자, 담당자에 의한 정보 수정")
     @PutMapping(DRIVER_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriverByAdmin(
@@ -63,6 +67,7 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "기사 급여 수정", description = "관리자, 담당자에 의한 급여 수정")
     @PutMapping(UPDATE_PAY_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGE')")
     public ResponseEntity<ResponseDto<UpdateDriverPayResponseDto>> updateDriverPay(
@@ -74,6 +79,7 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "기사 상태 수정", description = "기사의 상태를 수정")
     @PutMapping(UPDATE_STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateDriverResponseDto>> updateDriverStatus(
@@ -85,6 +91,7 @@ public class DriverController {
         return  ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "모든 기사 조회", description = "기사를 모두 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllDriverResponseDto>>> getAllDriver(
@@ -97,6 +104,7 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "기사 세부정보 조회", description = "기사의 세부정보를 조회")
     @GetMapping(DRIVER_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetDriverDetailResponseDto>> getDriverDetail(
@@ -106,6 +114,7 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "내 정보 조회", description = "로그인 한 기사의 정보 조회")
     @GetMapping(MY_INFO_API)
     public ResponseEntity<ResponseDto<GetDriverDetailResponseDto>> getMyInfo(
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -114,12 +123,13 @@ public class DriverController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "퇴사 로직", description = "퇴사한 기사를 처리하는 메서드")
     @DeleteMapping(DRIVER_ID_API)
-    public ResponseEntity<ResponseDto<Void>> deleteDriver(
+    public ResponseEntity<ResponseDto<Void>> retiredDriver(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long driverId
     ) {
-        ResponseDto<Void> response = driverService.deleteDriver(userPrincipal, driverId);
+        ResponseDto<Void> response = driverService.retiredDriver(userPrincipal, driverId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

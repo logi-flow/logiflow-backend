@@ -6,6 +6,8 @@ import com.logi_flow.backend.dto.PageDto;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.driver.response.DriverLicenseLogResponseDto;
 import com.logi_flow.backend.service.DriverLicenseLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "운전면허증 로그 관리", description = "운전면허증(DriverLicense) 관련 로그 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.DRIVER_API + "/licenses/logs")
@@ -25,6 +28,7 @@ public class DriverLicenseLogController {
 
     private static final String UPDATE_API = "/update";
 
+    @Operation(summary = "운전면허증 정보 변경 조회", description = "로그 조회")
     @GetMapping(UPDATE_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<DriverLicenseLogResponseDto>>> getUpdateLog(

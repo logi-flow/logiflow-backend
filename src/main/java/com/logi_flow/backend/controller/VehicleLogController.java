@@ -7,6 +7,8 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.VehicleStatusLogResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.VehicleUpdateLogResponseDto;
 import com.logi_flow.backend.service.VehicleLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "차량 로그 관리", description = "차량(Vehicle) 관련 로그 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.VEHICLE_API + "/logs")
@@ -27,6 +30,7 @@ public class VehicleLogController {
     private static final String STATUS_API = "/status";
     private static final String UPDATE_API = "/update";
 
+    @Operation(summary = "차량 정보 변경 조회", description = "로그 조회")
     @GetMapping(STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<VehicleStatusLogResponseDto>>> getStatusLog(

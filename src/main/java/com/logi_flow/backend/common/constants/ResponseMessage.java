@@ -59,4 +59,6 @@ public interface ResponseMessage {
     String DELIVERY_OR_RETURN_DELIVERY_ID_REQUESTED = "deliveryId 와 returnDeliveryId 둘 중 하나만 입력해야합니다.";
     String CONTRACT_STATUS_NOT_APPROVED = "계약 상태가 승인이 아닙니다.";
     String INVALID_DATE_FOR_CREATE_DELIVERY = "계약기간에 포함되지 않습니다.";
+
+    String OUT_OF_TIME = "만료일 기간이 맞지 않습니다.";
 }
