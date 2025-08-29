@@ -30,4 +30,5 @@ public interface AssignmentService {
 
     void removeAssignmentByVehicle(Vehicle vehicle);
 
+    ResponseDto<GetAssignmentDetailResponseDto> getMyAssignment(UserPrincipal userPrincipal);
 }

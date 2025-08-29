@@ -13,6 +13,8 @@ import com.logi_flow.backend.dto.assignment.response.GetAllAssignmentResponseDto
 import com.logi_flow.backend.dto.assignment.response.GetAssignmentDetailResponseDto;
 import com.logi_flow.backend.dto.assignment.response.UpdateAssignmentResponseDto;
 import com.logi_flow.backend.service.AssignmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "배정 관리", description = "배정(Assignment) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.ASSIGNMENT_API)
@@ -31,7 +34,9 @@ public class AssignmentController {
 
     private static final String ASSIGNMENT_ID_API = "/{assignmentId}";
     private static final String ASSIGNMENT_STATUS_API = "/{assignmentId}/status";
+    private static final String MY_ASSIGNMENT_INFO_API = "/me";
 
+    @Operation(summary = "신규 배정 생성", description = "기사와 차량을 연결하면 배정 생성")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<CreateAssignmentResponseDto>> createAssignment(
@@ -41,6 +46,7 @@ public class AssignmentController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "배정 수정", description = "주 차량 배정 정보를 수정")
     @PutMapping(ASSIGNMENT_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignment(
@@ -52,6 +58,7 @@ public class AssignmentController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배정 상태 변경", description = "배정 상태를 수동으로 수정")
     @PutMapping(ASSIGNMENT_STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateAssignmentResponseDto>> updateAssignmentStatus(
@@ -63,6 +70,17 @@ public class AssignmentController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "내 배정 조회", description = "내가 배정된 정보 조회")
+    @GetMapping(MY_ASSIGNMENT_INFO_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
+    public ResponseEntity<ResponseDto<GetAssignmentDetailResponseDto>> getMyAssignment(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        ResponseDto<GetAssignmentDetailResponseDto> response = assignmentService.getMyAssignment(userPrincipal);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "모든 배정 조회", description = "모든 배정 정보를 리스트로 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllAssignmentResponseDto>>> getAllAssignment(
@@ -75,6 +93,7 @@ public class AssignmentController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배정 세부 정보 조회", description = "배정 세부 정보를 조회")
     @GetMapping(ASSIGNMENT_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetAssignmentDetailResponseDto>> getAssignmentDetail(
@@ -84,6 +103,7 @@ public class AssignmentController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "배정 삭제", description = "배정 상태를 삭제로 변경")
     @DeleteMapping(ASSIGNMENT_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
     public ResponseEntity<ResponseDto<Void>> deleteAssignment(

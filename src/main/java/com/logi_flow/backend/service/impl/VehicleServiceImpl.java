@@ -15,7 +15,10 @@ import com.logi_flow.backend.dto.vehicle.response.CreateVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetAllVehicleResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.GetVehicleDetailResponseDto;
 import com.logi_flow.backend.dto.vehicle.response.UpdateVehicleResponseDto;
-import com.logi_flow.backend.entity.*;
+import com.logi_flow.backend.entity.User;
+import com.logi_flow.backend.entity.Vehicle;
+import com.logi_flow.backend.entity.VehicleStatusLog;
+import com.logi_flow.backend.entity.VehicleUpdateLog;
 import com.logi_flow.backend.repository.UserRepository;
 import com.logi_flow.backend.repository.VehicleRepository;
 import com.logi_flow.backend.repository.VehicleStatusLogRepository;
@@ -32,6 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -82,39 +87,41 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        List<VehicleUpdateLog> logs = new ArrayList<>();
 
         if (dto.getVehicleNumber() != null && !vehicle.getVehicleNumber().equals(dto.getVehicleNumber())) {
             String prevData = vehicle.getVehicleNumber();
+            logs.add(buildUpdateLog(vehicle, user, "vehicle_number", prevData, dto.getVehicleNumber()));
             vehicle.setVehicleNumber(dto.getVehicleNumber());
-            createUpdateLog(vehicle, user, "vehicle_number", prevData, vehicle.getVehicleNumber());
         }
         if (dto.getCapacity() != null && !dto.getCapacity().equals(vehicle.getCapacity())) {
             String prevData = String.valueOf(vehicle.getCapacity());
+            logs.add(buildUpdateLog(vehicle, user, "capacity", prevData, String.valueOf(dto.getCapacity())));
             vehicle.setCapacity(dto.getCapacity());
-            createUpdateLog(vehicle, user, "capacity", prevData, String.valueOf(vehicle.getCapacity()));
         }
         if (dto.getFuel() != null && !vehicle.getFuel().equals(dto.getFuel())) {
             String prevData = String.valueOf(vehicle.getFuel());
+            logs.add(buildUpdateLog(vehicle, user, "fuel", prevData, String.valueOf(dto.getFuel())));
             vehicle.setFuel(dto.getFuel());
-            createUpdateLog(vehicle, user, "fuel", prevData, String.valueOf(vehicle.getFuel()));
         }
         if (dto.getMileage() != null && !vehicle.getMileage().equals(dto.getMileage())) {
             String prevData = String.valueOf(vehicle.getMileage());
+            logs.add(buildUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(dto.getMileage())));
             vehicle.setMileage(dto.getMileage());
-            createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
         if (dto.getModelName() != null && !vehicle.getModelName().equals(dto.getModelName())) {
             String prevData = vehicle.getModelName();
+            logs.add(buildUpdateLog(vehicle, user, "model_name", prevData, dto.getModelName()));
             vehicle.setModelName(dto.getModelName());
-            createUpdateLog(vehicle, user, "model_name", prevData, String.valueOf(vehicle.getModelName()));
         }
         if (dto.getModelYear() != null && !vehicle.getModelYear().equals(dto.getModelYear())) {
             String prevData = String.valueOf(vehicle.getModelYear());
+            logs.add(buildUpdateLog(vehicle, user, "model_year", prevData, String.valueOf(dto.getModelYear())));
             vehicle.setModelYear(dto.getModelYear());
-            createUpdateLog(vehicle, user, "model_year", prevData, String.valueOf(vehicle.getModelYear()));
         }
 
         Vehicle updateVehicle = vehicleRepository.save(vehicle);
+        vehicleUpdateLogRepository.saveAll(logs);
 
         data = UpdateVehicleResponseDto.builder()
                 .vehicleId(updateVehicle.getId())
@@ -186,14 +193,18 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        VehicleUpdateLog log = null;
+
         if (mileage != null && !vehicle.getMileage().equals(mileage)) {
-            String prevData = String.valueOf(vehicle.getMileage());
+            log = buildUpdateLog(vehicle, user, "mileage", String.valueOf(vehicle.getMileage()), String.valueOf(mileage));
             vehicle.setMileage(mileage);
-            createUpdateLog(vehicle, user, "mileage", prevData, String.valueOf(vehicle.getMileage()));
         }
 
         vehicleRepository.save(vehicle);
 
+        if (log != null) {
+            vehicleUpdateLogRepository.save(log);
+        }
         return vehicle.getMileage();
     }
 
@@ -265,8 +276,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .build();
     }
 
-    private void createUpdateLog(Vehicle vehicle, User user, String type, String prevData, String newData) {
-        VehicleUpdateLog vehicleUpdateLog = VehicleUpdateLog.builder()
+    private VehicleUpdateLog buildUpdateLog(Vehicle vehicle, User user, String type, String prevData, String newData) {
+        return VehicleUpdateLog.builder()
                 .vehicle(vehicle)
                 .user(user)
                 .changedByUsername(user.getUsername())
@@ -274,7 +285,5 @@ public class VehicleServiceImpl implements VehicleService {
                 .prevData(prevData)
                 .newData(newData)
                 .build();
-
-        vehicleUpdateLogRepository.save(vehicleUpdateLog);
     }
 }
