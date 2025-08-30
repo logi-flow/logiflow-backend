@@ -7,6 +7,7 @@ import com.logi_flow.backend.dto.admin.response.AdminResetPasswordResponseDto;
 import com.logi_flow.backend.dto.auth.request.CustomerPasswordResetRequestDto;
 import com.logi_flow.backend.dto.auth.response.CustomerPasswordResetResponseDto;
 import com.logi_flow.backend.service.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
     private final AdminService adminService;
 
+    @Operation(summary = "고객사 비밀번호 초기화", description = "관리자의 고객사 비밀번호 초기화")
     @PostMapping()
     public ResponseEntity<ResponseDto<AdminResetPasswordResponseDto>> adminPasswordResetCustomer(
             @Valid @RequestBody AdminResetPasswordRequestDto dto

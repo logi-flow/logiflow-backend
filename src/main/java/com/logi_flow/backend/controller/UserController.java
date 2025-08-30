@@ -12,6 +12,8 @@ import com.logi_flow.backend.dto.user.response.GetUserDetailResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserRoleResponseDto;
 import com.logi_flow.backend.dto.user.response.UpdateUserStatusResponseDto;
 import com.logi_flow.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "사용자 관리", description = "사용자(User) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.USER_API)
@@ -31,6 +34,8 @@ public class UserController {
     private static final String USER_STATUS_API = "/{userId}/status";
     private static final String USER_ROLE_API = "/{userId}/roles";
 
+
+    @Operation(summary = "전체 사용자 목록 조회", description = "전체 사용자 목록 조회함")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<PageDto<GetAllUserResponseDto>>> getAllUser(
@@ -44,6 +49,7 @@ public class UserController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "사용자 세부 정보 조회", description = "사용자 세부 정보 조회")
     @GetMapping(USER_ID_API)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<GetUserDetailResponseDto>> getUserDetail(
@@ -54,6 +60,8 @@ public class UserController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+
+    @Operation(summary = "사용자 상태 수정", description = "사용자의 상태를 수정")
     @PutMapping(USER_STATUS_API)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<UpdateUserStatusResponseDto>> updateUserStatus(
@@ -65,6 +73,7 @@ public class UserController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "사용자 역할 수정", description = "사용자의 역할을 수정")
     @PutMapping(USER_ROLE_API)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<UpdateUserRoleResponseDto>> updateUserRole(
@@ -76,6 +85,7 @@ public class UserController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "사용자 삭제", description = "사용자 상태를 삭제로 변경")
     @DeleteMapping(USER_ID_API)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseDto<?>> deleteUser(

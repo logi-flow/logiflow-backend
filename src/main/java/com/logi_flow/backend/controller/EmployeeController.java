@@ -14,6 +14,7 @@ import com.logi_flow.backend.dto.employee.request.UpdateEmployeeStatusRequestDto
 import com.logi_flow.backend.dto.employee.response.*;
 import com.logi_flow.backend.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "직원 관리", description = "직원(Employee) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.EMPLOYEE_API)
@@ -47,6 +49,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
+    @Operation(summary = "직원 내 정보 수정", description = "직원 본인의 정보를 수정")
     @PutMapping(EMPLOYEE_MY_INFO_API)
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployee(
@@ -57,6 +60,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 내 정보 조회", description = "직원 본인의 정보 조회")
     @GetMapping(EMPLOYEE_MY_INFO_API)
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     public ResponseEntity<ResponseDto<GetEmployeeDetailResponseDto>> getEmployeeDetail(
@@ -66,6 +70,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 정보 수정", description = "관리자, 담당자에 의한 직원 정보 수정")
     @PutMapping(EMPLOYEE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateEmployeeResponseDto>> updateEmployeeAdmin(
@@ -78,6 +83,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 상태 수정", description = "직원의 상태를 수정")
     @PutMapping(EMPLOYEE_STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateEmployeeStatusResponseDto>> updateEmployeeStatus(
@@ -89,7 +95,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-
+    @Operation(summary = "모든 직원 조회", description = "직원을 모두 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllEmployeeResponseDto>>> getAllEmployee(
@@ -103,6 +109,7 @@ public class EmployeeController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 세부정보 조회", description = "관리자, 담당자의 직원 세부정보 조회")
     @GetMapping(EMPLOYEE_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
     public ResponseEntity<ResponseDto<GetEmployeeDetailAdminResponseDto>> getEmployeeDetailAdmin(
