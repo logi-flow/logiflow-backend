@@ -11,6 +11,8 @@ import com.logi_flow.backend.dto.customer.request.UpdateCustomerRequestDto;
 import com.logi_flow.backend.dto.customer.request.UpdateCustomerStatusRequestDto;
 import com.logi_flow.backend.dto.customer.response.*;
 import com.logi_flow.backend.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "고객사 관리", description = "고객사(Customer) 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.CUSTOMER_API)
@@ -31,6 +34,7 @@ public class CustomerController {
     private static final String CUSTOMER_ID_API = "/{customerId}";
     private static final String CUSTOMER_STATUS_API = "/{customerId}/status";
 
+    @Operation(summary = "고객사 내 정보 수정", description = "고객사 본인의 정보를 수정")
     @PutMapping(CUSTOMER_MY_INFO_API)
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomer(
@@ -41,6 +45,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "고객사 내 정보 조회", description = "고객사 본인의 정보 조회")
     @GetMapping(CUSTOMER_MY_INFO_API)
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetail(
@@ -50,6 +55,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "고객사 정보 수정", description = "관리자, 담당자에 의한 고객사 정보 수정")
     @PutMapping(CUSTOMER_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateCustomerResponseDto>> updateCustomerAdmin(
@@ -61,6 +67,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "고객사 상태 수정", description = "고객사의 상태를 수정")
     @PutMapping(CUSTOMER_STATUS_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<UpdateCustomerStatusResponseDto>> updateCustomerStatus(
@@ -72,6 +79,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "모든 고객사 조회", description = "고객사를 모두 조회")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllCustomerResponseDto>>> getAllCustomer(
@@ -85,6 +93,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 세부정보 조회", description = "관리자, 담당자의 직원 세부정보 조회")
     @GetMapping(CUSTOMER_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'CONTRACTS_MANAGER')")
     public ResponseEntity<ResponseDto<GetCustomerDetailResponseDto>> getCustomerDetailAdmin(
@@ -95,6 +104,7 @@ public class CustomerController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "고객사 회원 탈퇴", description = "고객사 본인의 자발적 회원 탈퇴")
     @DeleteMapping(CUSTOMER_MY_INFO_API)
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<ResponseDto<Void>> deleteCustomer(

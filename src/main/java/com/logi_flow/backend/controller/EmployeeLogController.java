@@ -7,6 +7,8 @@ import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.employeeLog.response.GetEmployeeStatusLogResponseDto;
 import com.logi_flow.backend.dto.employeeLog.response.GetEmployeeUpdateLogResponseDto;
 import com.logi_flow.backend.service.EmployeeLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "직원 로그 관리", description = "직원(Employee) 관련 로그 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiMappingPattern.EMPLOYEE_API)
@@ -25,6 +28,7 @@ public class EmployeeLogController {
     private static final String UPDATE_LOG = "/logs/update";
     private static final String STATUS_LOG = "/logs/status";
 
+    @Operation(summary = "직원 정보 변경 조회", description = "로그 조회")
     @GetMapping(UPDATE_LOG)
     public ResponseEntity<ResponseDto<PageDto<GetEmployeeUpdateLogResponseDto>>> getEmployeeUpdateLogs(
             @RequestParam(defaultValue = "0") int page,
@@ -36,6 +40,7 @@ public class EmployeeLogController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "직원 상태 변경 조회", description = "로그 조회")
     @GetMapping(STATUS_LOG)
     public ResponseEntity<ResponseDto<PageDto<GetEmployeeStatusLogResponseDto>>> getEmployeeStatusLogs(
             @RequestParam(defaultValue = "0") int page,

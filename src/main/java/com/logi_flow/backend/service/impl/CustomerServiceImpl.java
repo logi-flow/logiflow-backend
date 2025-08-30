@@ -276,10 +276,6 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        if(!user.getRole().getName().equals(UserRole.ADMIN)) {
-            return ResponseDto.fail("FORBIDDEN", ResponseMessage.NO_PERMISSION);
-        }
-
         CustomerStatus prevStatus = customer.getStatus();
 
         if (dto.getStatus() != prevStatus) {

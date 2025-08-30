@@ -40,7 +40,7 @@ public class AlertService {
 
     // 계약 관리자한테 알림 보내기
     public void sendToManager(String message) {
-        List<User> managers = userRepository.findAllByRole_Name(UserRole.ALLOCATIONS_MANAGER);
+        List<User> managers = userRepository.findAllByRole_Name(UserRole.CONTRACTS_MANAGER);
 
         for (User m : managers) {
             alertRepository.save(Alert.builder()
