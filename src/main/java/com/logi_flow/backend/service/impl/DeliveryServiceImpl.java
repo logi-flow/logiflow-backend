@@ -772,11 +772,27 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal) {
-        List<Delivery> deliveries = parseAndSaveExcel(file, userPrincipal);
+        String username = userPrincipal.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+        Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        List<Delivery> deliveries = parseAndSaveExcel(file, user, customer, contract);
+        List<Delivery> savedDeliveries = deliveryRepository.saveAll(deliveries);
+
+        String alertMessage = "새로운 대량의 배송이 동록되었습니다.";
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+        if (allocationManagers.isEmpty()) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
 
         List<CreateDeliveryResponseDto> responseDtos = null;
 
-        responseDtos = deliveries.stream()
+        responseDtos = savedDeliveries.stream()
             .map(delivery -> CreateDeliveryResponseDto.builder()
                 .id(delivery.getId())
                 .contractId(delivery.getContract().getId())
@@ -810,7 +826,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDtos);
     }
 
-    private List<Delivery> parseAndSaveExcel(MultipartFile file, UserPrincipal userPrincipal) {
+    private List<Delivery> parseAndSaveExcel(MultipartFile file, User user, Customer customer, Contract contract) {
         List<Delivery> savedDeliveries = new ArrayList<>();
 
         try (InputStream is = file.getInputStream()) {
@@ -820,11 +836,6 @@ public class DeliveryServiceImpl implements DeliveryService {
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
-
-                String username = userPrincipal.getUsername();
-                User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-                Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-                Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
                 String phoneNumber = getStringCellValue(row.getCell(5));
                 CollectionSite collectionSite = collectionSiteRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
@@ -851,21 +862,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                     .isOverParcel(false)
                     .build();
 
-                deliveryRepository.save(delivery);
-
                 savedDeliveries.add(delivery);
             }
-
-            String alertMessage = "새로운 대량의 배송이 동록되었습니다.";
-            Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-            List<User> allocationManagers = userRepository.findByRoleId(role.getId());
-
-            if (allocationManagers.isEmpty()) {
-                throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
-            }
-
-            allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
-
         } catch (Exception e) {
             throw new RuntimeException("엑셀 처리 실패: " + e.getMessage(), e);
         }
