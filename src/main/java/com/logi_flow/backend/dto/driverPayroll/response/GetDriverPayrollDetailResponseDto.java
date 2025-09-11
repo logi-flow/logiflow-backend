@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.driverPayroll.response;
 
+import com.logi_flow.backend.common.enums.DriverPayrollStatus;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public class GetDriverPayrollDetailResponseDto {
     private int totalAllowance;
     private int totalDeduction;
     private int finalAmount;
-    private String status;
+    private DriverPayrollStatus status;
 
     private String createdAt;
     private String updatedAt;

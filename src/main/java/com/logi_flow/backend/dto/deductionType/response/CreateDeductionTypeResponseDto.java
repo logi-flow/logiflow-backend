@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.deductionType.response;
 
+import com.logi_flow.backend.common.enums.DeductionTypeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class CreateDeductionTypeResponseDto {
     private String name;
     private String description;
     private boolean isActive;
-    private String status;
+    private DeductionTypeStatus status;
 
     private String createdAt;
     private String updatedAt;

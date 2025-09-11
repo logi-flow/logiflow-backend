@@ -1,5 +1,6 @@
 package com.logi_flow.backend.dto.allowanceType.response;
 
+import com.logi_flow.backend.common.enums.AllowanceTypeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class CreateAllowanceTypeResponseDto {
     private String name;
     private String description;
     private boolean isActive;
-    private String status;
+    private AllowanceTypeStatus status;
 
     private String createdAt;
     private String updatedAt;

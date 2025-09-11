@@ -50,8 +50,6 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
     public ResponseDto<CreateDriverAllowanceResponseDto> createDriverAllowance(Long payrollId, CreateDriverAllowanceRequestDto dto) {
         CreateDriverAllowanceResponseDto data = null;
 
-        int unitPrice = dto.getUnitPrice() == null ? 0 : dto.getUnitPrice();
-
         DriverPayroll payroll = driverPayrollService.getDriverPayrollForUpdate(payrollId);
 
         if (payroll.getStatus() == DriverPayrollStatus.CONFIRMED) {
@@ -75,7 +73,7 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
         if (deletedDriverAllowance.isPresent()) {
             DriverAllowance restoreDriverAllowance = deletedDriverAllowance.get();
             restoreDriverAllowance.setQuantity(dto.getQuantity());
-            restoreDriverAllowance.setUnitPrice(unitPrice);
+            restoreDriverAllowance.setUnitPrice(dto.getUnitPrice());
             restoreDriverAllowance.setMemo(dto.getMemo());
             restoreDriverAllowance.setStatus(DriverAllowanceStatus.ACTIVE);
             DriverAllowance savedDriverAllowance = driverAllowanceRepository.save(restoreDriverAllowance);
@@ -96,7 +94,7 @@ public class DriverAllowanceServiceImpl implements DriverAllowanceService {
                 .driverPayroll(payroll)
                 .allowanceType(allowanceType)
                 .quantity(dto.getQuantity())
-                .unitPrice(unitPrice)
+                .unitPrice(dto.getUnitPrice())
                 .memo(dto.getMemo())
                 .status(DriverAllowanceStatus.ACTIVE)
                 .build();
