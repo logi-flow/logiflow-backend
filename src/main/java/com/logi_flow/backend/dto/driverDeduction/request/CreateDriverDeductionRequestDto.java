@@ -16,6 +16,7 @@ public class CreateDriverDeductionRequestDto {
     @NotNull(message = "수량(일수)은 필수 항목입니다.")
     private BigDecimal quantity;
 
+    @NotNull(message = "단가는 필수 항목입니다.")
     @PositiveOrZero(message = "단가는 0 이상이어야 합니다.")
     private Integer unitPrice;
 

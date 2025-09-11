@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetDeductionTypeDetailResponseDto {
+    private Long id;
     private String code;
     private String name;
     private String description;
