@@ -30,7 +30,7 @@ public class AttendanceController {
     private static final String CHECK_OUT_API = "/check-out";
     private static final String GET_DETAILS_API = "/{attendanceId}";
     private static final String MY_ATTENDANCE_API = "/me";
-    private static final String MY_ATTENDANCE_LIST_API = "/me/list";
+    private static final String ALL_MY_ATTENDANCE_API = "/me/list";
 
     @Operation(summary = "출근 등록", description = "출근 시간 등록")
     @PostMapping(CHECK_IN_API)
@@ -50,7 +50,7 @@ public class AttendanceController {
             @Valid @RequestBody UpdateAttendanceRequestDto dto
     ) {
         ResponseDto<UpdateAttendanceResponseDto> response = attendanceService.checkOutAttendance(userPrincipal, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
     @Operation(summary = "출근부 전체 조회", description = "전체 출근부 목록 조회")
@@ -87,7 +87,7 @@ public class AttendanceController {
     }
 
     @Operation(summary = "본인 출근부 전체 조회", description = "기사 본인의 출근부 목록 조회")
-    @GetMapping(MY_ATTENDANCE_LIST_API)
+    @GetMapping(ALL_MY_ATTENDANCE_API)
     @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<ResponseDto<PageDto<GetAllMyAttendanceResponseDto>>> getAllMyAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
