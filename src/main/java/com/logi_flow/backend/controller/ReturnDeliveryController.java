@@ -103,7 +103,7 @@ public class ReturnDeliveryController {
     @Operation(summary = "배차 가능 반품 배송 조회", description = "배차 가능한 반품 배송 정보를 조회")
     @GetMapping("/waiting")
     @PreAuthorize("hasAnyRole('ADMIN', 'ALLOCATIONS_MANAGER')")
-    public ResponseEntity<ResponseDto<PageDto<GetAllWaitingReturnDeliveryResponseDto>>> getAllWaitingDelivery(
+    public ResponseEntity<ResponseDto<PageDto<GetAllWaitingReturnDeliveryResponseDto>>> getAllWaitingReturnDelivery(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @RequestParam(defaultValue = "desc") String sort
