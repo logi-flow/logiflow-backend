@@ -1,4 +1,4 @@
-package com.logi_flow.backend.dto.delivery.response;
+package com.logi_flow.backend.dto.returnDelivery.response;
 
 import com.logi_flow.backend.common.enums.DeliveryStatus;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,6 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter

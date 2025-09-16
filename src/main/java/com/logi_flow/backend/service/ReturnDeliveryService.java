@@ -3,7 +3,7 @@ package com.logi_flow.backend.service;
 import com.logi_flow.backend.config.security.UserPrincipal;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.delivery.request.UpdateIsHiddenRequestDto;
-import com.logi_flow.backend.dto.delivery.response.GetAllWaitingReturnDeliveryResponseDto;
+import com.logi_flow.backend.dto.returnDelivery.response.GetAllWaitingReturnDeliveryResponseDto;
 import com.logi_flow.backend.dto.returnDelivery.request.CreateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryRequestDto;
 import com.logi_flow.backend.dto.returnDelivery.request.UpdateReturnDeliveryStatusRequestDto;
