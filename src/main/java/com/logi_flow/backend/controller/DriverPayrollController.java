@@ -71,7 +71,7 @@ public class DriverPayrollController {
     @Operation(summary = "본인 급여대장 전체 조회", description = "기사 본인의 전체 급여대장 목록 조회")
     @GetMapping(MY_PAYROLL_API)
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getMyPayrolls(
+    public ResponseEntity<ResponseDto<PageDto<GetAllDriverPayrollResponseDto>>> getAllMyPayroll(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -93,18 +93,6 @@ public class DriverPayrollController {
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
-    @Operation(summary = "급여대장 상태 수정", description = "특정 급여대장의 상태 수정")
-    @PutMapping(UPDATE_STATUS_API)
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
-    public ResponseEntity<ResponseDto<UpdateDriverPayrollStatusResponseDto>> updateDriverPayrollStatus(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long payrollId,
-            @Valid @RequestBody UpdateDriverPayrollStatusRequestDto dto
-    ) {
-        ResponseDto<UpdateDriverPayrollStatusResponseDto> response = driverPayrollService.updateDriverPayrollStatus(userPrincipal, payrollId, dto);
-        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
-    }
-
     @Operation(summary = "급여대장 수정", description = "특정 급여대장의 정보 수정")
     @PutMapping(PAYROLL_ID_API)
     @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
@@ -114,6 +102,18 @@ public class DriverPayrollController {
             @Valid @RequestBody UpdateDriverPayrollRequestDto dto
     ) {
         ResponseDto<UpdateDriverPayrollResponseDto> response = driverPayrollService.updateDriverPayroll(userPrincipal, payrollId, dto);
+        return ResponseDto.toResponseEntity(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "급여대장 상태 수정", description = "특정 급여대장의 상태 수정")
+    @PutMapping(UPDATE_STATUS_API)
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    public ResponseEntity<ResponseDto<UpdateDriverPayrollStatusResponseDto>> updateDriverPayrollStatus(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long payrollId,
+            @Valid @RequestBody UpdateDriverPayrollStatusRequestDto dto
+    ) {
+        ResponseDto<UpdateDriverPayrollStatusResponseDto> response = driverPayrollService.updateDriverPayrollStatus(userPrincipal, payrollId, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
