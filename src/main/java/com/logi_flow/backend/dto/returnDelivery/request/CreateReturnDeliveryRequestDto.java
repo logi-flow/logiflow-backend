@@ -26,5 +26,6 @@ public class CreateReturnDeliveryRequestDto {
     private String pickupAddress;
     private String pickupAddressDetail;
 
+    @NotNull(message = "도착지 아이디는 필수 항목입니다.")
     private Long destinationSiteId;
 }
