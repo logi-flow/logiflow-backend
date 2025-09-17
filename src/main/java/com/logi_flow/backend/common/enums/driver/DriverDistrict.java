@@ -16,5 +16,5 @@ public enum DriverDistrict {
     YEONJE,
     SUYEONG,
     SASANG,
-    GIAJNG
+    GIJANG
 }
