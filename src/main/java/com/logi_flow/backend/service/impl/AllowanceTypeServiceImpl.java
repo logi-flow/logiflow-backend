@@ -225,7 +225,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
                 .name(allowanceType.getName())
                 .description(allowanceType.getDescription())
                 .isActive(allowanceType.isActive())
-                .status(allowanceType.getStatus().name())
+                .status(allowanceType.getStatus())
                 .createdAt(DateUtils.format(allowanceType.getCreatedAt()))
                 .updatedAt(DateUtils.format(allowanceType.getUpdatedAt()))
                 .build();

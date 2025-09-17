@@ -211,7 +211,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
                 .name(deductionType.getName())
                 .description(deductionType.getDescription())
                 .isActive(deductionType.isActive())
-                .status(deductionType.getStatus().name())
+                .status(deductionType.getStatus())
                 .createdAt(DateUtils.format(deductionType.getCreatedAt()))
                 .updatedAt(DateUtils.format(deductionType.getUpdatedAt()))
                 .build();
