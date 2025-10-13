@@ -25,7 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -40,8 +39,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     @Transactional
-    public ResponseDto<CreateAttendanceResponseDto> checkInAttendance(UserPrincipal userPrincipal) {
-        CreateAttendanceResponseDto data = null;
+    public ResponseDto<GetMyAttendanceDetailResponseDto> checkInAttendance(UserPrincipal userPrincipal) {
+        GetMyAttendanceDetailResponseDto data = null;
 
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
@@ -53,11 +52,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Attendance savedAttendance = attendanceRepository.save(newAttendance);
 
-        data = CreateAttendanceResponseDto.builder()
-                .id(savedAttendance.getId())
-                .driverId(savedAttendance.getDriver().getId())
+        data = GetMyAttendanceDetailResponseDto.builder()
+                .isOpen(true)
                 .workStart(DateUtils.format(savedAttendance.getWorkStart()))
-                .openFlag(savedAttendance.getOpenFlag())
+                .workEnd(savedAttendance.getWorkEnd() == null ? null : DateUtils.format(savedAttendance.getWorkEnd()))
                 .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
                 .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();
@@ -67,8 +65,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     @Transactional
-    public ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal, UpdateAttendanceRequestDto dto) {
-        UpdateAttendanceResponseDto data = null;
+    public ResponseDto<GetMyAttendanceDetailResponseDto> checkOutAttendance(UserPrincipal userPrincipal, UpdateAttendanceRequestDto dto) {
+        GetMyAttendanceDetailResponseDto data = null;
 
         Driver driver = driverRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
@@ -76,7 +74,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         Assignment assignment = assignmentRepository.findByDriverIdAndStatus(driver.getId(), AssignmentStatus.ACTIVE)
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        BigDecimal updatedVehicleMileageMileage = vehicleService.updateVehicleMileage(userPrincipal, assignment.getVehicle().getId(), dto.getVehicleMileage());
+        vehicleService.updateVehicleMileage(userPrincipal, assignment.getVehicle().getId(), dto.getVehicleMileage());
 
         Attendance attendance = attendanceRepository.findOpenAttendanceForUpdate(driver.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.NO_OPEN_ATTENDANCE));
@@ -84,13 +82,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         attendance.setWorkEnd(LocalDateTime.now());
         Attendance savedAttendance = attendanceRepository.save(attendance);
 
-        data = UpdateAttendanceResponseDto.builder()
-                .id(savedAttendance.getId())
-                .driverId(savedAttendance.getDriver().getId())
+        data = GetMyAttendanceDetailResponseDto.builder()
+                .isOpen(false)
                 .workStart(DateUtils.format(savedAttendance.getWorkStart()))
                 .workEnd(DateUtils.format(savedAttendance.getWorkEnd()))
-                .openFlag(savedAttendance.getOpenFlag())
-                .vehicleMileage(updatedVehicleMileageMileage)
                 .createdAt(DateUtils.format(savedAttendance.getCreatedAt()))
                 .updatedAt(DateUtils.format(savedAttendance.getUpdatedAt()))
                 .build();
@@ -182,6 +177,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private GetAllAttendanceResponseDto toGetAllAttendanceResponseDto(Attendance attendance) {
         return GetAllAttendanceResponseDto.builder()
+                .id(attendance.getId())
                 .driverId(attendance.getDriver().getId())
                 .driverName(attendance.getDriver().getName())
                 .workStart(DateUtils.format(attendance.getWorkStart()))
@@ -193,6 +189,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private GetAllMyAttendanceResponseDto toGetMyAttendanceResponseDto(Attendance attendance) {
         return GetAllMyAttendanceResponseDto.builder()
+                .id(attendance.getId())
                 .workStart(DateUtils.format(attendance.getWorkStart()))
                 .workEnd(DateUtils.format(attendance.getWorkEnd()))
                 .createdAt(DateUtils.format(attendance.getCreatedAt()))

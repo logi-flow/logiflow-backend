@@ -8,8 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 public interface AttendanceService {
-    ResponseDto<CreateAttendanceResponseDto> checkInAttendance(UserPrincipal userPrincipal);
-    ResponseDto<UpdateAttendanceResponseDto> checkOutAttendance(UserPrincipal userPrincipal, @Valid UpdateAttendanceRequestDto dto);
+    ResponseDto<GetMyAttendanceDetailResponseDto> checkInAttendance(UserPrincipal userPrincipal);
+    ResponseDto<GetMyAttendanceDetailResponseDto> checkOutAttendance(UserPrincipal userPrincipal, @Valid UpdateAttendanceRequestDto dto);
     Page<GetAllAttendanceResponseDto> getAllAttendance(int page, int size, String sort);
     ResponseDto<GetAttendanceDetailResponseDto> getAttendanceDetails(Long attendanceId);
     ResponseDto<GetMyAttendanceDetailResponseDto> getMyAttendance(UserPrincipal userPrincipal);
