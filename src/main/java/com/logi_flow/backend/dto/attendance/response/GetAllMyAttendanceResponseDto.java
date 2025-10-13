@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetAllMyAttendanceResponseDto {
+    private Long id;
     private String workStart;
     private String workEnd;
 

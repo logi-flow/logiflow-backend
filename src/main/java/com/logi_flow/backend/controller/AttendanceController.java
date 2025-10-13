@@ -35,21 +35,21 @@ public class AttendanceController {
     @Operation(summary = "출근 등록", description = "출근 시간 등록")
     @PostMapping(CHECK_IN_API)
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<ResponseDto<CreateAttendanceResponseDto>> checkInAttendance(
+    public ResponseEntity<ResponseDto<GetMyAttendanceDetailResponseDto>> checkInAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        ResponseDto<CreateAttendanceResponseDto> response = attendanceService.checkInAttendance(userPrincipal);
+        ResponseDto<GetMyAttendanceDetailResponseDto> response = attendanceService.checkInAttendance(userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 
     @Operation(summary = "퇴근 등록", description = "퇴근 시간 등록")
     @PutMapping(CHECK_OUT_API)
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<ResponseDto<UpdateAttendanceResponseDto>> checkOutAttendance(
+    public ResponseEntity<ResponseDto<GetMyAttendanceDetailResponseDto>> checkOutAttendance(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdateAttendanceRequestDto dto
     ) {
-        ResponseDto<UpdateAttendanceResponseDto> response = attendanceService.checkOutAttendance(userPrincipal, dto);
+        ResponseDto<GetMyAttendanceDetailResponseDto> response = attendanceService.checkOutAttendance(userPrincipal, dto);
         return ResponseDto.toResponseEntity(HttpStatus.OK, response);
     }
 
@@ -68,7 +68,7 @@ public class AttendanceController {
 
     @Operation(summary = "출근부 상세 조회", description = "특정 출근 기록의 상세 정보 조회")
     @GetMapping(GET_DETAILS_API)
-    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HUMAN_RESOURCES_MANAGER', 'DRIVER')")
     public ResponseEntity<ResponseDto<GetAttendanceDetailResponseDto>> getAttendanceDetail(
             @PathVariable Long attendanceId
     ) {
