@@ -112,6 +112,7 @@ public class DeductionTypeServiceImpl implements DeductionTypeService {
         }
 
         data = GetDeductionTypeDetailResponseDto.builder()
+                .id(deductionType.getId())
                 .code(deductionType.getCode())
                 .name(deductionType.getName())
                 .description(deductionType.getDescription())
