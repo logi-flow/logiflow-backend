@@ -113,6 +113,7 @@ public class AllowanceTypeServiceImpl implements AllowanceTypeService {
         }
 
         data = GetAllowanceTypeDetailResponseDto.builder()
+                .id(allowanceType.getId())
                 .code(allowanceType.getCode())
                 .name(allowanceType.getName())
                 .description(allowanceType.getDescription())
