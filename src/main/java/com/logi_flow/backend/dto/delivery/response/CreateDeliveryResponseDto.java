@@ -28,6 +28,7 @@ public class CreateDeliveryResponseDto {
     private String pickupAddress;
     private String pickupAddressDetail;
 
+
     private String recipientName;
     private String recipientPhone;
     private String recipientZipcode;
