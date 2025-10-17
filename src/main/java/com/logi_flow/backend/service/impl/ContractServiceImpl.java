@@ -93,6 +93,10 @@ public class ContractServiceImpl implements ContractService {
     public ResponseDto<UpdateContractResponseDto> updateContract(UserPrincipal userPrincipal, Long contractId, UpdateContractRequestDto dto) {
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
+        if(contract.getStatus() != ContractStatus.PENDING){
+            return ResponseDto.fail(ResponseCode.VALIDATION_FAIL, "PENDING 상태의 계약만 수정 가능");
+        }
+
         String username = userPrincipal.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 

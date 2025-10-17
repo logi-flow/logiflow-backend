@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface AllocationStatusLogRepository extends JpaRepository<AllocationStatusLog, Long> {
 
-    Optional<AllocationStatusLog> findByAllocation(Allocation allocation);
+    Optional<AllocationStatusLog> findFirstByAllocationOrderByCreatedAtDesc(Allocation allocation);
+
 }

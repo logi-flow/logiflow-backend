@@ -187,6 +187,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .pickupZipcode(delivery.getCollectionSite().getZipCode())
                 .pickupAddress(delivery.getCollectionSite().getAddress())
                 .pickupAddressDetail(delivery.getCollectionSite().getAddressDetail())
+                .collectionSiteId(delivery.getCollectionSite().getId())
                 .recipientName(delivery.getRecipientName())
                 .recipientPhone(delivery.getRecipientPhone())
                 .recipientZipcode(delivery.getRecipientZipcode())
@@ -236,7 +237,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         }
 
         Allocation allocation = allocationRepository.findByDelivery(delivery).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-        AllocationStatusLog allocationStatusLog = allocationStatusLogRepository.findByAllocation(allocation).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        AllocationStatusLog allocationStatusLog = allocationStatusLogRepository.findFirstByAllocationOrderByCreatedAtDesc(allocation).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
         LocalDateTime now = LocalDateTime.now();
         AllocationStatus status = allocationStatusLog.getNewStatus();

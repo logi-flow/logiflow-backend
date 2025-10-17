@@ -27,6 +27,7 @@ public class GetDeliveryDetailResponseDto {
     private String pickupZipcode;
     private String pickupAddress;
     private String pickupAddressDetail;
+    private Long collectionSiteId;
 
     private String recipientName;
     private String recipientPhone;
