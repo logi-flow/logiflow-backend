@@ -1,6 +1,7 @@
 package com.logi_flow.backend.dto.driverPayroll.response;
 
 import com.logi_flow.backend.common.enums.DriverPayrollStatus;
+import com.logi_flow.backend.common.enums.driver.DriverDistrict;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,6 +16,12 @@ public class GetDriverPayrollDetailResponseDto {
     private Long id;
     private Long driverId;
     private String driverName;
+    private String driverUsername;
+    private String driverPhoneNumber;
+    private String driverEmail;
+    private DriverDistrict driverDistrict;
+    private Integer driverPay;
+    private String driverCompanyJoin;
     private String title;
     private LocalDate periodStartDate;
     private LocalDate periodEndDate;

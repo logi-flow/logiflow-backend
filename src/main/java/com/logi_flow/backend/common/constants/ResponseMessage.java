@@ -33,7 +33,7 @@ public interface ResponseMessage {
     String INVALID_REQUESTED_STATE = "요청 상태가 아닙니다.";
 
 
-    String EXISTS_PAYROLL = "해당 기간의 급여대장이 이미 존재합니다.";
+    String EXISTS_PAYROLL = "해당 기사의 동일한 기간의 급여대장이 이미 존재합니다.";
     String EXISTS_TYPE_CODE = "이미 존재하는 항목 코드입니다.";
     String NOT_USED_INACTIVE_TYPE = "비활성화된 타입은 사용할 수 없습니다.";
     String SYSTEM_ITEM_IMMUTABLE = "시스템에서 자동 생성한 항목은 수정 및 삭제할 수 없습니다.";
