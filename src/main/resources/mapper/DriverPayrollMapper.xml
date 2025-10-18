@@ -8,6 +8,12 @@
         <id property="id" column="id"/>
         <result property="driverId" column="driver_id"/>
         <result property="driverName" column="driver_name"/>
+        <result property="driverUsername" column="driver_username"/>
+        <result property="driverPhoneNumber" column="driver_phone_number"/>
+        <result property="driverEmail" column="driver_email"/>
+        <result property="driverDistrict" column="driver_district"/>
+        <result property="driverPay" column="driver_pay"/>
+        <result property="driverCompanyJoin" column="driver_company_join"/>
         <result property="title" column="title"/>
         <result property="periodStartDate" column="period_start_date"/>
         <result property="periodEndDate" column="period_end_date"/>
@@ -33,6 +39,12 @@
             dp.id AS id,
             dp.driver_id AS driver_id,
             d.name AS driver_name,
+            u.username AS driver_username,
+            d.phone_number AS driver_phone_number,
+            u.email AS driver_email,
+            d.district AS driver_district,
+            d.pay AS driver_pay,
+            d.company_join AS driver_company_join,
             dp.title AS title,
             dp.period_start_date AS period_start_date,
             dp.period_end_date AS period_end_date,
@@ -44,6 +56,7 @@
             DATE_FORMAT(dp.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
         FROM driver_payrolls dp
         JOIN drivers d ON d.id = dp.driver_id
+        JOIN users u ON u.id = d.user_id
         WHERE dp.id = #{payrollId}
             AND dp.status != 'DELETED'
     </select>
