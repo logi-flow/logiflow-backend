@@ -2,6 +2,9 @@ package com.logi_flow.backend.service;
 
 import com.logi_flow.backend.common.constants.ResponseMessage;
 import com.logi_flow.backend.common.enums.user.UserRole;
+import com.logi_flow.backend.common.util.SortUtils;
+import com.logi_flow.backend.config.security.UserPrincipal;
+import com.logi_flow.backend.dto.alert.response.AlertResponseDto;
 import com.logi_flow.backend.entity.Alert;
 import com.logi_flow.backend.entity.Role;
 import com.logi_flow.backend.entity.User;
@@ -10,6 +13,10 @@ import com.logi_flow.backend.repository.RoleRepository;
 import com.logi_flow.backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -50,4 +57,28 @@ public class AlertService {
             simpMessagingTemplate.convertAndSend("/queue/user-" + m.getId(), message);
         }
     }
+
+    public Page<AlertResponseDto> getMyAlerts(UserPrincipal userPrincipal, int page, int size, String sort) {
+        String username = userPrincipal.getUsername();
+        User user =  userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
+
+        Page<AlertResponseDto> data = null;
+
+        Pageable pageable = PageRequest.of(page, size, SortUtils.parseCreatedAtSort(sort));
+        Page<Alert> alerts = alertRepository.findAllByUserId(user.getId(), pageable);
+
+        data = alerts.map(this::toGetAllAlertResponseDto);
+        return data;
+    }
+
+    private AlertResponseDto toGetAllAlertResponseDto(Alert alert) {
+        return AlertResponseDto.builder()
+                .id(alert.getId())
+                .message(alert.getMessage())
+                .createdAt(alert.getCreatedAt())
+                .isRead(alert.isRead())
+                .build();
+    }
+
+
 }

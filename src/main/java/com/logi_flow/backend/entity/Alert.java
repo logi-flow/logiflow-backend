@@ -20,4 +20,7 @@ public class Alert extends BaseTimeLog {
 
     @Column(name = "message", nullable = false)
     private String message;
+
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead = false;
 }

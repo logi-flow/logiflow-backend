@@ -30,5 +30,7 @@ public interface ApiMappingPattern {
 
     String ALLOCATION_LOG_API =  "/api/v1/allocations/logs";
     String CONTRACT_LOG_API =  "/api/v1/contracts/logs";
+
+    String ALERT_API = "/api/v1/alerts";
 }
 

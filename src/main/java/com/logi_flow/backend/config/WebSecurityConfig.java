@@ -68,6 +68,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers("/api/v1/**").permitAll()
+                        .requestMatchers("/ws-stomp/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
