@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DeliveryService {
     ResponseDto<CreateDeliveryResponseDto> createDelivery(@Valid CreateDeliveryRequestDto dto, UserPrincipal userPrincipal);
@@ -32,7 +33,7 @@ public interface DeliveryService {
 
     ResponseDto<Void> deleteDelivery(UserPrincipal userPrincipal, Long deliveryId);
 
-    ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal);
+    ResponseDto<Map<String, Object>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal);
 
     ResponseDto<UpdateDeliveryResponseDto> cancelDelivery(Long deliveryId, UpdateDeliveryStatusRequestDto dto, UserPrincipal userPrincipal);
 }

@@ -28,16 +28,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -770,65 +770,80 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .build();
     }
 
-    @Override
     @Transactional
-    public ResponseDto<List<CreateDeliveryResponseDto>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal) {
+    public ResponseDto<Map<String, Object>> uploadDelivery(MultipartFile file, UserPrincipal userPrincipal) {
         String username = userPrincipal.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-        Customer customer = customerRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
-        Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        List<Delivery> deliveries = parseAndSaveExcel(file, user, customer, contract);
-        List<Delivery> savedDeliveries = deliveryRepository.saveAll(deliveries);
+        Customer customer = customerRepository.findByUser(user)
+            .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.USER_NOT_FOUND));
 
-        String alertMessage = "새로운 대량의 배송이 동록되었습니다.";
-        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
-        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+        Contract contract = contractRepository.findByCustomerAndStatus(customer, ContractStatus.APPROVED)
+            .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if (allocationManagers.isEmpty()) {
-            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        ExcelResult excelResult = parseExcel(file, user, customer, contract);
+
+        List<CreateDeliveryResponseDto> successList = new ArrayList<>();
+        List<Delivery> allDeliveries = excelResult.deliveries;
+        List<String> failedRows = excelResult.failedRows;
+
+        int batchSize = 100;
+        for (int i = 0; i < allDeliveries.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, allDeliveries.size());
+            List<Delivery> batch = allDeliveries.subList(i, end);
+
+            try {
+                saveBatch(batch);
+                successList.addAll(convertToResponse(batch));
+            } catch (Exception e) {
+                String failMsg = "Batch " + i + "~" + end + " 실패: " + e.getMessage();
+                failedRows.add(failMsg);
+            }
         }
 
-        allocationManagers.forEach(allocationManager -> alertService.sendToUser(allocationManager.getId(), alertMessage));
+        sendAlertToAllocationManagers();
 
-        List<CreateDeliveryResponseDto> responseDtos = null;
+        Map<String, Object> result = new HashMap<>();
+        result.put("successCount", successList.size());
+        result.put("failedCount", failedRows.size());
+        result.put("failedDetails", failedRows);
+        result.put("data", successList);
 
-        responseDtos = savedDeliveries.stream()
+        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, result);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveBatch(List<Delivery> deliveries) {
+        deliveryRepository.saveAll(deliveries);
+    }
+
+    private List<CreateDeliveryResponseDto> convertToResponse(List<Delivery> deliveries) {
+        return deliveries.stream()
             .map(delivery -> CreateDeliveryResponseDto.builder()
                 .id(delivery.getId())
                 .contractId(delivery.getContract().getId())
                 .customerId(delivery.getCustomer().getId())
-                .requestDate(delivery.getRequestDate())
                 .item(delivery.getItem())
                 .weight(delivery.getWeight())
-                .message(delivery.getMessage())
-                .isHidden(delivery.isHidden())
-                .status(delivery.getStatus())
-                .pickupName(delivery.getCollectionSite().getName())
-                .pickupPhone(delivery.getCollectionSite().getPhoneNumber())
-                .pickupZipcode(delivery.getCollectionSite().getZipCode())
-                .pickupAddress(delivery.getCollectionSite().getAddress())
-                .pickupAddressDetail(delivery.getCollectionSite().getAddressDetail())
                 .recipientName(delivery.getRecipientName())
                 .recipientPhone(delivery.getRecipientPhone())
-                .recipientZipcode(delivery.getRecipientZipcode())
                 .recipientAddress(delivery.getRecipientAddress())
-                .recipientAddressDetail(delivery.getRecipientAddressDetail())
-                .finalFee(delivery.getFinalFee())
-                .overWeightFee(delivery.getOverWeightFee())
-                .overParcelFee(delivery.getOverParcelFee())
-                .isOverWeight(delivery.isOverWeight())
-                .isOverParcel(delivery.isOverParcel())
                 .createdAt(DateUtils.format(delivery.getCreatedAt()))
-                .updatedAt(DateUtils.format(delivery.getUpdatedAt()))
                 .build())
             .collect(Collectors.toList());
-
-        return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDtos);
     }
 
-    private List<Delivery> parseAndSaveExcel(MultipartFile file, User user, Customer customer, Contract contract) {
-        List<Delivery> savedDeliveries = new ArrayList<>();
+    private static class ExcelResult {
+        List<Delivery> deliveries;
+        List<String> failedRows;
+    }
+
+
+    private ExcelResult parseExcel(MultipartFile file, User user, Customer customer, Contract contract) {
+        ExcelResult result = new ExcelResult();
+        result.deliveries = new ArrayList<>();
+        result.failedRows = new ArrayList<>();
 
         try (InputStream is = file.getInputStream()) {
             Workbook workbook = WorkbookFactory.create(is);
@@ -838,38 +853,45 @@ public class DeliveryServiceImpl implements DeliveryService {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String phoneNumber = getStringCellValue(row.getCell(5));
-                CollectionSite collectionSite = collectionSiteRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+                try {
+                    String phoneNumber = getStringCellValue(row.getCell(5));
+                    CollectionSite collectionSite = collectionSiteRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-                Delivery delivery = Delivery.builder()
-                    .contract(contract)
-                    .customer(customer)
-                    .requestDate(getDateTimeCellValue(row.getCell(0)))
-                    .item(getStringCellValue(row.getCell(1)))
-                    .weight(BigDecimal.valueOf(getNumericCellValue(row.getCell(2))))
-                    .message(getStringCellValue(row.getCell(3)))
-                    .isHidden(getBooleanCellValue(row, 4))
-                    .status(DeliveryStatus.REQUESTED)
-                    .collectionSite(collectionSite)
-                    .recipientName(getStringCellValue(row.getCell(6)))
-                    .recipientPhone(getStringCellValue(row.getCell(7)))
-                    .recipientZipcode(getStringCellValue(row.getCell(8)))
-                    .recipientAddress(getStringCellValue(row.getCell(9)))
-                    .recipientAddressDetail(getStringCellValue(row.getCell(10)))
-                    .finalFee(0)
-                    .overWeightFee(0)
-                    .overParcelFee(0)
-                    .isOverWeight(false)
-                    .isOverParcel(false)
-                    .build();
+                    Delivery delivery = Delivery.builder()
+                        .contract(contract)
+                        .customer(customer)
+                        .requestDate(getDateTimeCellValue(row.getCell(0)))
+                        .item(getStringCellValue(row.getCell(1)))
+                        .weight(BigDecimal.valueOf(getNumericCellValue(row.getCell(2))))
+                        .message(getStringCellValue(row.getCell(3)))
+                        .isHidden(getBooleanCellValue(row, 4))
+                        .status(DeliveryStatus.REQUESTED)
+                        .collectionSite(collectionSite)
+                        .recipientName(getStringCellValue(row.getCell(6)))
+                        .recipientPhone(getStringCellValue(row.getCell(7)))
+                        .recipientZipcode(getStringCellValue(row.getCell(8)))
+                        .recipientAddress(getStringCellValue(row.getCell(9)))
+                        .recipientAddressDetail(getStringCellValue(row.getCell(10)))
+                        .finalFee(0)
+                        .overWeightFee(0)
+                        .overParcelFee(0)
+                        .isOverWeight(false)
+                        .isOverParcel(false)
+                        .build();
 
-                savedDeliveries.add(delivery);
+                    result.deliveries.add(delivery);
+
+                } catch (Exception e) {
+                    String failMsg = "Row " + i + " 처리 실패: " + e.getMessage();
+                    System.out.println(failMsg);
+                    result.failedRows.add(failMsg);
+                }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("엑셀 처리 실패: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException("엑셀 파일 읽기 실패", e);
         }
 
-        return savedDeliveries;
+        return result;
     }
 
     private String getStringCellValue(Cell cell) {
@@ -917,5 +939,20 @@ public class DeliveryServiceImpl implements DeliveryService {
             System.err.println("Excel 날짜 변환 실패: " + e.getMessage());
         }
         return null;
+    }
+
+    private void sendAlertToAllocationManagers() {
+        String alertMessage = "새로운 대량 배송이 등록되었습니다.";
+        Role role = roleRepository.findByName(UserRole.ALLOCATIONS_MANAGER)
+            .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        List<User> allocationManagers = userRepository.findByRoleId(role.getId());
+
+        if (allocationManagers.isEmpty()) {
+            throw new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND);
+        }
+
+        allocationManagers.forEach(manager ->
+            alertService.sendToUser(manager.getId(), alertMessage)
+        );
     }
 }
