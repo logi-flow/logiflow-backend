@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "배송 관리", description = "배송(Delivery) 관련 API")
 @RestController
@@ -139,8 +140,8 @@ public class DeliveryController {
     @Operation(summary = "신규 대용량 배송 생성", description = "엑셀에 새로운 배송 정보들을 입력하고 업로드하면 새로운 배송 등록")
     @PostMapping("/upload")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
-    public ResponseEntity<ResponseDto<List<CreateDeliveryResponseDto>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        ResponseDto<List<CreateDeliveryResponseDto>> response = deliveryService.uploadDelivery(file, userPrincipal);
+    public ResponseEntity<ResponseDto<Map<String, Object>>> uploadDelivery(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponseDto<Map<String, Object>>response = deliveryService.uploadDelivery(file, userPrincipal);
         return ResponseDto.toResponseEntity(HttpStatus.CREATED, response);
     }
 

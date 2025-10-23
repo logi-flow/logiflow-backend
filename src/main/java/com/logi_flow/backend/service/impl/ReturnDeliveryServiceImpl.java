@@ -436,7 +436,7 @@ public class ReturnDeliveryServiceImpl implements ReturnDeliveryService {
         ReturnDelivery returnDelivery = returnDeliveryRepository.findById(returnDeliveryId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
         Customer customer = customerRepository.findById(returnDelivery.getDelivery().getCustomer().getId()).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
 
-        if (!returnDelivery.isHidden()) {
+        if (returnDelivery.isHidden()) {
             return ResponseDto.fail(ResponseCode.INVALID_STATE, ResponseMessage.INVALID_STATE);
         }
 
