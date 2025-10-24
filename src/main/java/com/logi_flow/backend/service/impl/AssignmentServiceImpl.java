@@ -372,6 +372,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         return GetAllAssignmentResponseDto.builder()
                 .id(assignment.getId())
                 .driverId(assignment.getDriver().getId())
+                .driverName(assignment.getDriver().getName())
                 .vehicleId(assignment.getVehicle().getId())
                 .isPrimary(assignment.isPrimary())
                 .status(assignment.getStatus())
