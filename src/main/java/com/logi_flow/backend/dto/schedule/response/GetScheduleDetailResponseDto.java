@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -14,6 +13,9 @@ public class GetScheduleDetailResponseDto {
     private Long id;
     private Long allocationId;
 
+    private String status;
+
+    private String deliveryType;
     private Long deliveryId;
     private String collectionSitePhoneNumber;
     private String collectionSiteZipcode;

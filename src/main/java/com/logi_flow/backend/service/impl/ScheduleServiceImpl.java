@@ -97,10 +97,20 @@ public class ScheduleServiceImpl implements ScheduleService {
                 alertService.sendToUser(manager.getId(), alertMessage);
             }
         } else {
-            throw new IllegalArgumentException(ResponseMessage.USER_NOT_FOUND);
+            System.out.println("알림을 보낼 계약 관리자가 없음.");
         }
 
-        alertService.sendToUser(allocation.getDelivery().getCustomer().getUser().getId(), alertMessage);
+        // 여기를 수정합니다.
+        User customerUser = null;
+        if (allocation.getDelivery() != null) {
+            customerUser = allocation.getDelivery().getCustomer().getUser();
+        } else if (allocation.getReturnDelivery() != null) {
+            customerUser = allocation.getReturnDelivery().getDelivery().getCustomer().getUser();
+        }
+
+        if (customerUser != null) {
+            alertService.sendToUser(customerUser.getId(), alertMessage);
+        }
 
         return ResponseDto.success(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
@@ -120,26 +130,61 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public ResponseDto<GetScheduleDetailResponseDto> getSchedule(Long scheduleId) {
 
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+        Schedule schedule = scheduleRepository.findByIdWithDetails(scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.RESOURCE_NOT_FOUND));
+
+        Allocation allocation = schedule.getAllocation();
+
+        Long deliveryId;
+        CollectionSite collectionSite;
+        String recipientName, recipientPhone, recipientAddress, recipientAddressDetail, recipientZipcode;
+        String deliveryType;
+
+        if (allocation.getDelivery() != null) {
+            deliveryType = "delivery";
+            Delivery delivery = allocation.getDelivery();
+            deliveryId = delivery.getId();
+            collectionSite = delivery.getCollectionSite();
+            recipientName = delivery.getRecipientName();
+            recipientPhone = delivery.getRecipientPhone();
+            recipientAddress = delivery.getRecipientAddress();
+            recipientAddressDetail = delivery.getRecipientAddressDetail();
+            recipientZipcode = delivery.getRecipientZipcode();
+        } else if (allocation.getReturnDelivery() != null) {
+            deliveryType = "returnDelivery";
+            ReturnDelivery returnDelivery = allocation.getReturnDelivery();
+            deliveryId = returnDelivery.getId();
+            collectionSite = returnDelivery.getDelivery().getCollectionSite();
+            recipientName = returnDelivery.getDelivery().getRecipientName();
+            recipientPhone = returnDelivery.getDelivery().getRecipientPhone();
+            recipientAddress = returnDelivery.getDelivery().getRecipientAddress();
+            recipientAddressDetail = returnDelivery.getDelivery().getRecipientAddressDetail();
+            recipientZipcode = returnDelivery.getDelivery().getRecipientZipcode();
+        } else {
+            throw new EntityNotFoundException("해당 배차에 연결된 배송 또는 반품 정보가 없음");
+        }
 
         GetScheduleDetailResponseDto data = GetScheduleDetailResponseDto.builder()
                 .id(schedule.getId())
-                .allocationId(schedule.getAllocation().getId())
-                .deliveryId(schedule.getAllocation().getDelivery().getId())
-                .collectionSitePhoneNumber(schedule.getAllocation().getDelivery().getCollectionSite().getPhoneNumber())
-                .collectionSiteAddress(schedule.getAllocation().getDelivery().getCollectionSite().getAddress())
-                .collectionSiteAddressDetail(schedule.getAllocation().getDelivery().getCollectionSite().getAddressDetail())
-                .collectionSiteZipcode(schedule.getAllocation().getDelivery().getCollectionSite().getZipCode())
-                .recipientName(schedule.getAllocation().getDelivery().getRecipientName())
-                .recipientAddress(schedule.getAllocation().getDelivery().getRecipientAddress())
-                .recipientAddressDetail(schedule.getAllocation().getDelivery().getRecipientAddressDetail())
-                .recipientZipcode(schedule.getAllocation().getDelivery().getRecipientZipcode())
+                .allocationId(allocation.getId())
+                .status(String.valueOf(allocation.getStatus()))
+                .deliveryType(deliveryType)
+                .deliveryId(deliveryId)
+                .collectionSitePhoneNumber(collectionSite.getPhoneNumber())
+                .collectionSiteAddress(collectionSite.getAddress())
+                .collectionSiteAddressDetail(collectionSite.getAddressDetail())
+                .collectionSiteZipcode(collectionSite.getZipCode())
+                .recipientName(recipientName)
+                .recipientPhoneNumber(recipientPhone)
+                .recipientAddress(recipientAddress)
+                .recipientAddressDetail(recipientAddressDetail)
+                .recipientZipcode(recipientZipcode)
                 .allocationDate(schedule.getAllocationDate())
                 .departureTime(DateUtils.format(schedule.getDepartureTime()))
                 .arrivalTime(DateUtils.format(schedule.getArrivalTime()))
-                .driverId(schedule.getAllocation().getAssignment().getDriver().getId())
-                .driverName(schedule.getAllocation().getAssignment().getDriver().getName())
-                .driverPhone(schedule.getAllocation().getAssignment().getDriver().getPhoneNumber())
+                .driverId(allocation.getAssignment().getDriver().getId())
+                .driverName(allocation.getAssignment().getDriver().getName())
+                .driverPhone(allocation.getAssignment().getDriver().getPhoneNumber())
                 .createdAt(DateUtils.format(schedule.getCreatedAt()))
                 .updatedAt(DateUtils.format(schedule.getUpdatedAt()))
                 .build();

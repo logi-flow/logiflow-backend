@@ -12,6 +12,7 @@ public class GetAllAssignmentResponseDto {
     private Long id;
     private Long driverId;
     private Long vehicleId;
+    private String driverName;
     private boolean isPrimary;
     private AssignmentStatus status;
     private String createdAt;
