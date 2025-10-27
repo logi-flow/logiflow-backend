@@ -2,13 +2,14 @@ package com.logi_flow.backend.service.impl;
 
 import com.logi_flow.backend.common.constants.ResponseCode;
 import com.logi_flow.backend.common.constants.ResponseMessage;
+import com.logi_flow.backend.common.enums.TableRef;
 import com.logi_flow.backend.common.enums.driver.DriverStatus;
 import com.logi_flow.backend.common.util.DateUtils;
 import com.logi_flow.backend.dto.ResponseDto;
 import com.logi_flow.backend.dto.stats.driverJoinLeave.response.DriverJoinLeavePoint;
 import com.logi_flow.backend.dto.stats.driverJoinLeave.response.GetDriverJoinLeaveResponseDto;
+import com.logi_flow.backend.repository.DeleteLogRepository;
 import com.logi_flow.backend.repository.DriverRepository;
-import com.logi_flow.backend.repository.DriverStatusLogRepository;
 import com.logi_flow.backend.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.List;
 public class StatsServiceImpl implements StatsService {
 
     private final DriverRepository driverRepository;
-    private final DriverStatusLogRepository driverStatusLogRepository;
+    private final DeleteLogRepository deleteLogRepository;
 
     @Override
     public ResponseDto<GetDriverJoinLeaveResponseDto> getDriverJoinLeave(YearMonth from, YearMonth to) {
@@ -49,7 +50,7 @@ public class StatsServiceImpl implements StatsService {
             );
 
             int leaves = Math.toIntExact(
-                    driverStatusLogRepository.countByNewStatusAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(DriverStatus.RETIRED, start.atStartOfDay(), end.atStartOfDay())
+                    deleteLogRepository.countByTableNameAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(TableRef.DRIVER.getValue(), start.atStartOfDay(), end.atStartOfDay())
             );
 
             points.add(DriverJoinLeavePoint.builder()
