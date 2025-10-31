@@ -49,6 +49,8 @@ public class ContractLogServiceImpl implements ContractLogService {
 
     private GetContractUpdateLogResponseDto toGetContractUpdateLogResponseDto(ContractUpdateLog contractUpdateLog) {
         return GetContractUpdateLogResponseDto.builder()
+                .id(contractUpdateLog.getId())
+                .contractId(contractUpdateLog.getContract().getId())
                 .customerName(contractUpdateLog.getContract().getCustomer().getName())
                 .businessNumber(contractUpdateLog.getContract().getCustomer().getBusinessNumber())
                 .representativeName(contractUpdateLog.getContract().getCustomer().getRepresentativeName())
@@ -62,6 +64,8 @@ public class ContractLogServiceImpl implements ContractLogService {
 
     private GetContractStatusLogResponseDto toGetContractStatusLogResponseDto(ContractStatusLog contractStatusLog) {
         return GetContractStatusLogResponseDto.builder()
+                .id(contractStatusLog.getId())
+                .contractId(contractStatusLog.getContract().getId())
                 .customerName(contractStatusLog.getContract().getCustomer().getName())
                 .businessNumber(contractStatusLog.getContract().getCustomer().getBusinessNumber())
                 .representativeName(contractStatusLog.getContract().getCustomer().getRepresentativeName())
