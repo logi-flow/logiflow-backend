@@ -62,6 +62,8 @@ public class AllocationLogServiceImpl implements AllocationLogService {
         }
 
         return GetAllocationUpdateLogResponseDto.builder()
+                .id(allocationUpdateLog.getId())
+                .allocationId(allocationUpdateLog.getAllocation().getId())
                 .deliveryId(deliveryId)
                 .returnDeliveryId(returnDeliveryId)
                 .driverName(allocationUpdateLog.getAllocation().getAssignment().getDriver().getName())
@@ -89,6 +91,8 @@ public class AllocationLogServiceImpl implements AllocationLogService {
         }
 
         return GetAllocationStatusLogResponseDto.builder()
+                .id(allocationStatusLog.getId())
+                .allocationId(allocationStatusLog.getAllocation().getId())
                 .deliveryId(deliveryId)
                 .returnDeliveryId(returnDeliveryId)
                 .driverName(allocationStatusLog.getAllocation().getAssignment().getDriver().getName())

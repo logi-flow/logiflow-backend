@@ -9,6 +9,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetContractStatusLogResponseDto {
+    private Long id;
+    private Long contractId;
     private String customerName;
     private String businessNumber;
     private String representativeName;

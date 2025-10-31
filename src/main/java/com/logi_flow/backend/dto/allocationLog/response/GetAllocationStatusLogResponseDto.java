@@ -9,6 +9,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetAllocationStatusLogResponseDto {
+    private Long id;
+    private Long allocationId;
     private Long deliveryId;
     private Long returnDeliveryId;
 
