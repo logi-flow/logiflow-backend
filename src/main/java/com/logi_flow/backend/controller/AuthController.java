@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,8 +38,8 @@ public class AuthController {
     private static final String MUST_CHANGE_PASSWORD_API = "/password/first-change";
     private static final String VERIFY_EMAIL_API = "/email/verify";
 
-    @Operation(summary = "회원 거압", description = "고객사의 회원 가입")
-    @PostMapping(SIGNUP_API)
+    @Operation(summary = "회원 가입", description = "고객사의 회원 가입")
+    @PostMapping(value = SIGNUP_API, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDto<CustomerSignUpResponseDto>> signup(
             @Valid @RequestPart(value = "dto") CustomerSignUpRequestDto dto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage

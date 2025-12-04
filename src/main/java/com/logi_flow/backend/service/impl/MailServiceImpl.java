@@ -49,15 +49,32 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendResetPasswordEmail(String email, String username, String token) throws MessagingException {
-        String resetLink = frontendUrl + "/password/reset?token=" + token;
+        String resetLink = frontendUrl + "/auth/password/reset?token=" + token;
         String title = "[logi-flow] 비밀번호 재설정 안내";
-        String content = String.format(
-                "안녕하세요. " + username + " 님, \n\n" +
-                        "비밀번호 재설정을 위해 아래 링크를 클릭해주세요. \n\n" +
-                        "링크: " + resetLink + "\n\n" +
-                        "이 링크는 30분 후 만료됩니다. \n\n" +
-                        "감사합니다."
-        );
+        String content = """
+                <html>
+                    <body style="font-family: 'Pretendard', sans-serif;">
+                        <h3>안녕하세요, %s 님</h3>
+                        <p>비밀번호 재설정을 위해 아래 버튼을 클릭해주세요.</p>
+                        <p>
+                            <a href="%s"
+                                style="display:inline-block;padding:10px 16px;background-color:#1976d2;color:#fff;text-decoration:none;border-radius:6px;">
+                                비밀번호 재설정하기
+                            </a>
+                        </p>
+                        <p>이 링크는 30분 후 만료됩니다.</p>
+                        <p style="color:#888;">감사합니다.<br>Logi-Flow 팀 드림</p>
+                    </body>
+                </html>
+                """.formatted(username, resetLink);
+
+//                String.format(
+//                "안녕하세요. " + username + " 님, \n\n" +
+//                        "비밀번호 재설정을 위해 아래 링크를 클릭해주세요. \n\n" +
+//                        "링크: " + resetLink + "\n\n" +
+//                        "이 링크는 30분 후 만료됩니다. \n\n" +
+//                        "감사합니다."
+//        );
         sendMail(email, title, content);
     }
 }

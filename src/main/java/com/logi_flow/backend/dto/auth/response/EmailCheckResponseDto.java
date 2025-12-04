@@ -9,4 +9,5 @@ import lombok.Getter;
 @Builder
 public class EmailCheckResponseDto {
     private String email;
+    private boolean exists;
 }

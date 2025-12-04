@@ -69,15 +69,11 @@ public class AuthServiceImpl implements AuthService {
             return ResponseDto.fail(ResponseCode.NOT_MATCH_PASSWORD, ResponseMessage.NOT_MATCH_PASSWORD);
         }
 
-        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+        if (userRepository.existsByUsername(username)) {
             return ResponseDto.fail(ResponseCode.USER_ALREADY_EXISTS, ResponseMessage.USER_ALREADY_EXISTS);
         }
 
         if (userRepository.existsByEmail(email)) {
-            return ResponseDto.fail(ResponseCode.USER_ALREADY_EXISTS, ResponseMessage.USER_ALREADY_EXISTS);
-        }
-
-        if (customerRepository.existsByBusinessNumber(businessNumber)) {
             return ResponseDto.fail(ResponseCode.USER_ALREADY_EXISTS, ResponseMessage.USER_ALREADY_EXISTS);
         }
 
@@ -212,26 +208,35 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseDto<UsernameCheckResponseDto> checkLoginIdDuplicate(String username) {
-        if (userRepository.existsByUsername(username)) {
-            return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
-        }
-        return ResponseDto.success(ResponseCode.SUCCESS, "사용 가능한 아이디입니다.");
+        String u = username == null ? "" : username.trim();
+        boolean exists = userRepository.existsByUsername(u);
+        UsernameCheckResponseDto data = UsernameCheckResponseDto.builder()
+                .username(u)
+                .exists(exists)
+                .build();
+        return ResponseDto.success(ResponseCode.SUCCESS, exists ? "이미 사용 중인 아이디입니다." : "사용 가능한 아이디입니다.", data);
     }
 
     @Override
     public ResponseDto<EmailCheckResponseDto> checkEmailDuplicate(String email) {
-        if (userRepository.existsByEmail(email)) {
-            return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
-        }
-        return ResponseDto.success(ResponseCode.SUCCESS, "사용 가능한 이메일입니다.");
+        String e = email == null ? "" : email.trim();
+        boolean exists = userRepository.existsByEmail(e);
+        EmailCheckResponseDto data = EmailCheckResponseDto.builder()
+                .email(e)
+                .exists(exists)
+                .build();
+        return ResponseDto.success(ResponseCode.SUCCESS, exists ? "이미 사용 중인 이메일입니다." : "사용 가능한 이메일입니다.", data);
     }
 
     @Override
     public ResponseDto<BusinessNumberCheckResponseDto> checkBusinessNumberDuplicate(String businessNumber) {
-        if (customerRepository.existsByBusinessNumber(businessNumber)) {
-            return ResponseDto.fail(ResponseCode.ALREADY_EXISTS, ResponseMessage.ALREADY_EXISTS);
-        }
-        return ResponseDto.success(ResponseCode.SUCCESS, "사용 가능한 사업자 번호입니다.");
+        String b = businessNumber == null ? "" : businessNumber.trim();
+        boolean exists = customerRepository.existsByBusinessNumber(b);
+        BusinessNumberCheckResponseDto data = BusinessNumberCheckResponseDto.builder()
+                .businessNumber(b)
+                .exists(exists)
+                .build();
+        return ResponseDto.success(ResponseCode.SUCCESS, exists ? "이미 사용 중인 사업자 번호입니다." : "사용 가능한 사업자 번호입니다.", data);
     }
 
     @Override
