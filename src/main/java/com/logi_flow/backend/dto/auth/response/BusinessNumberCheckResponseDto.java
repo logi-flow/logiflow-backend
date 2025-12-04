@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BusinessNumberCheckResponseDto {
     private String businessNumber;
+    private boolean exists;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

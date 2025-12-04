@@ -9,4 +9,5 @@ import lombok.Getter;
 @Builder
 public class UsernameCheckResponseDto {
     private String username;
+    private boolean exists;
 }
